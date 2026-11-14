@@ -55,6 +55,7 @@ export default function AboutPage() {
           <h2 className="label col-label about__contact-h">Contact</h2>
           <p className="about__contact">
             Tips, corrections and letters:{' '}
+            <a href="mailto:offlinetheory@proton.me">offlinetheory@proton.me</a>,{' '}
             <a href="https://www.linkedin.com/in/jamiahmcquiller" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             {' '}or{' '}
             <a href="https://jamiahmcquiller.github.io" target="_blank" rel="noopener noreferrer">jamiahmcquiller.github.io</a>.

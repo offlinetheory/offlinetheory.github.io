@@ -63,11 +63,11 @@ export default function PrivacyPage() {
 
         <h2 className="label col-label">Contact</h2>
         <p>
-          For questions about this policy, contact Jamiah McQuiller on{' '}
+          For questions about this policy, contact Jamiah McQuiller at{' '}
+          <a href="mailto:offlinetheory@proton.me">offlinetheory@proton.me</a>, on{' '}
           <a href="https://www.linkedin.com/in/jamiahmcquiller" target="_blank" rel="noopener noreferrer">LinkedIn</a>
           {' '}or at{' '}
           <a href="https://jamiahmcquiller.github.io" target="_blank" rel="noopener noreferrer">jamiahmcquiller.github.io</a>.
-          We do not currently publish a contact email address.
         </p>
 
         <h2 className="label col-label">Changes</h2>
