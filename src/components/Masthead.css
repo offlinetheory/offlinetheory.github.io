@@ -1,7 +1,7 @@
 .masthead {
   margin: 0 -12px;           /* the reference runs the masthead slightly past the page margins */
   padding-top: 18px;
-  padding-bottom: 3px;           /* restore the pre-typography masthead height so columns stay put */
+  padding-bottom: 4px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
   /* OFFLINE only: the reference grotesque is taller than Inter at this width. */
   --stretch: 1.105;
@@ -16,8 +16,8 @@
 .masthead__offline {
   position: relative;
   font-family: var(--font-display);
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  letter-spacing: -0.008em;
   line-height: 1;
   margin-right: 0.165em;
   font-optical-sizing: auto;
@@ -25,7 +25,7 @@
   transform-origin: 50% 100%;
 }
 /* Horizontal split: an ivory band cut through the letters.
-   Inter 900 cap-height is 0.728em. The cut is 43.4% down the cap and 11.2% of
+   Inter cap-height is 0.728em. The cut is 43.4% down the cap and 11.2% of
    cap high, matching the reference; `top` is calibrated to Inter in this line box. */
 .masthead__offline::after {
   content: '';
@@ -33,22 +33,22 @@
   top: 0.439em; height: 0.081em;
   background: var(--bg);
 }
-/* THEORY is not stretched (scaleY made it look tall and condensed). A low
-   optical size keeps Didone hairlines visible at display size; 1.12em and
-   tight tracking fill the masthead width and match OFFLINE's cap height
-   without shrinking the shared fitted size. line-height 0.7 keeps typo
+/* THEORY stays a high-contrast Didone, but weight 600 (not 800) so the
+   verticals are not chunky. opsz 12 keeps hairlines visible at display size.
+   1.12em and tracking fill the masthead width and match OFFLINE's cap height
+   without changing the shared fitted size. line-height 0.7 keeps typo
    ascent/descent from pushing the column row down. */
 .masthead__theory {
   font-family: var(--font-didone);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1.12em;
-  letter-spacing: -0.14em;
+  letter-spacing: -0.12em;
   line-height: 0.7;
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 18;
+  font-variation-settings: "opsz" 12;
 }
 
-/* 1440 was 2px short after unstretching THEORY; 1024 stays exact at 3px. */
+/* 1440/1536 keep the 5px pad that locks the column row. */
 @media (min-width: 1100px) {
   .masthead {
     padding-bottom: 5px;
