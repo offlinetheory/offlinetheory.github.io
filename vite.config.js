@@ -20,6 +20,39 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g
  * <title> and description baked in, which also helps crawlers), plus 404.html
  * as the fallback for anything else.
  */
+
+/**
+ * Preload the two masthead face files (Inter + Bodoni Moda, latin opsz)
+ * so the home-page wordmark paints with the display fonts instead of a fallback.
+ */
+function preloadMastheadFonts() {
+  return {
+    name: 'preload-masthead-fonts',
+    transformIndexHtml(html, ctx) {
+      if (!ctx.bundle) return html
+      const hrefs = []
+      for (const file of Object.keys(ctx.bundle)) {
+        if (
+          file.endsWith('.woff2') &&
+          /inter-latin-opsz-normal|bodoni-moda-latin-opsz-normal/.test(file) &&
+          !/italic|latin-ext/.test(file)
+        ) {
+          hrefs.push(file)
+        }
+      }
+      hrefs.sort()
+      const tags = hrefs
+        .map(
+          (file) =>
+            `    <link rel="preload" href="${base}${file}" as="font" type="font/woff2" crossorigin />`,
+        )
+        .join('\n')
+      if (!tags) return html
+      return html.replace('</head>', `${tags}\n  </head>`)
+    },
+  }
+}
+
 function staticRoutes() {
   return {
     name: 'offline-theory-static-routes',
@@ -68,5 +101,5 @@ function staticRoutes() {
 
 export default defineConfig({
   base,
-  plugins: [react(), staticRoutes()],
+  plugins: [react(), preloadMastheadFonts(), staticRoutes()],
 })

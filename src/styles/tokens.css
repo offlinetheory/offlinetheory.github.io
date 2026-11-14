@@ -7,10 +7,11 @@
   --beige-dark: #CFC6B7;
   --rule: #080808;
 
-  --font-display: 'Outfit', 'Futura', 'Century Gothic', sans-serif;
-  --font-didone: 'Playfair Display', 'Didot', 'Bodoni 72', Georgia, serif;
+  --font-display: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-didone: 'Bodoni Moda', Didot, 'Bodoni 72', Georgia, serif;
+  --font-headline: 'Newsreader', 'Bodoni Moda', Georgia, serif;
   --font-serif: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
-  --font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 
   --margin: 28px;

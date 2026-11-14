@@ -54,7 +54,7 @@ src/
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
 ```
 
-Typefaces: **Outfit 900** (OFFLINE masthead), **Playfair Display** (THEORY, book text, page titles), **Source Serif 4** (headlines, reading text), **Archivo** (navigation, metadata), **IBM Plex Mono** (code only).
+Typefaces: **Inter 900** (OFFLINE masthead), **Bodoni Moda** (THEORY, book text, page titles), **Newsreader** (article headlines), **Source Serif 4** (body and reading text), **Inter** (navigation, metadata), **IBM Plex Mono** (code only). All are self-hosted and licensed under the SIL Open Font License 1.1.
 
 ## Content
 

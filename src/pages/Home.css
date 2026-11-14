@@ -1,3 +1,6 @@
+/* Let typography wrap instead of stretching the fr tracks past the reference widths. */
+.home-grid > * { min-width: 0; }
+
 .home-grid {
   display: grid;
   /* Reference at 1024px: 196 | 23 | 554 | 24 | 171 (gutters as tracks so they scale with the columns) */

@@ -1,6 +1,7 @@
 .masthead {
   margin: 0 -12px;           /* the reference runs the masthead slightly past the page margins */
   padding-top: 18px;
+  padding-bottom: 3px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
   /* the reference letterforms are taller than any webfont at this width: stretch vertically */
   --stretch: 1.105;
@@ -18,20 +19,24 @@
   position: relative;
   font-family: var(--font-display);
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   line-height: 1;
   margin-right: 0.165em;
+  font-optical-sizing: auto;
 }
-/* Horizontal split: an ivory band cut through the letters (Outfit metrics: cap top at 0.158em, cap height 0.712em). */
+/* Horizontal split: an ivory band cut through the letters.
+   Inter 900 cap-height is 0.728em. The cut is 43.4% down the cap and 11.2% of
+   cap high, matching the reference; `top` is calibrated to Inter in this line box. */
 .masthead__offline::after {
   content: '';
   position: absolute; left: -0.05em; right: -0.05em;
-  top: 0.474em; height: 0.083em;
+  top: 0.439em; height: 0.081em;
   background: var(--bg);
 }
 .masthead__theory {
   font-family: var(--font-didone);
-  font-weight: 900;
-  letter-spacing: -0.042em;
+  font-weight: 800;
+  letter-spacing: -0.07em;
   line-height: 1;
+  font-optical-sizing: auto;
 }
