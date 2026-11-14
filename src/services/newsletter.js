@@ -14,3 +14,13 @@ export const BEEHIIV_LOADER_SRC = 'https://subscribe-forms.beehiiv.com/v3/loader
 export const BEEHIIV_FORM_ID = (
   import.meta.env.VITE_BEEHIIV_FORM_ID || BEEHIIV_FORM_ID_DEFAULT
 ).trim()
+
+// beehiiv publication id; the loader sets bhv_<id>_subscribed after a signup
+// and then hides its form in that browser for a year.
+export const BEEHIIV_PUBLICATION_ID = 'bc0634fe-2700-45f4-bb11-ccabad602e31'
+
+export function isBeehiivSubscribed() {
+  if (typeof document === 'undefined') return false
+  const name = `bhv_${BEEHIIV_PUBLICATION_ID}_subscribed=`
+  return document.cookie.split('; ').some((c) => c.startsWith(name))
+}
