@@ -1,19 +1,20 @@
 /**
  * Newsletter signup service.
  *
- * - If VITE_NEWSLETTER_ENDPOINT is set, the email is POSTed there.
- *   VITE_NEWSLETTER_FORMAT = "json" (default) sends {"email": "..."} as JSON,
- *   "form" sends `email=...` as application/x-www-form-urlencoded.
- * - If it is NOT set, the form runs in DEMO MODE: nothing leaves the browser.
- *   The address is kept in localStorage only so the UI can show a realistic state.
+ * By default the email is POSTed as FormData to Buttondown's public
+ * embed-subscribe endpoint (no API key). The request uses mode "no-cors",
+ * so a completed (opaque) response is treated as success; a network failure
+ * shows the existing reachability error.
  *
- * See README.md ("Connecting the newsletter") for Buttondown, Mailchimp and Kit (ConvertKit).
+ * Set VITE_NEWSLETTER_ENDPOINT to override the URL.
  */
 
-const ENDPOINT = (import.meta.env.VITE_NEWSLETTER_ENDPOINT || '').trim()
-const FORMAT = (import.meta.env.VITE_NEWSLETTER_FORMAT || 'json').trim().toLowerCase()
+export const BUTTONDOWN_EMBED_SUBSCRIBE =
+  'https://buttondown.com/api/emails/embed-subscribe/offlinetheory'
 
-export const isDemoMode = !ENDPOINT
+const ENDPOINT = (import.meta.env.VITE_NEWSLETTER_ENDPOINT || BUTTONDOWN_EMBED_SUBSCRIBE).trim()
+
+export const isDemoMode = false
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -25,46 +26,36 @@ export function validateEmail(value) {
 }
 
 /**
+ * Build the POST used by subscribe(). Exported so tests can inspect the shape
+ * without sending a real request.
+ * @param {string} email
+ * @param {string} [endpoint]
+ */
+export function buildSubscribeRequest(email, endpoint = ENDPOINT) {
+  const body = new FormData()
+  body.append('email', email)
+  return {
+    url: endpoint,
+    options: { method: 'POST', body, mode: 'no-cors' },
+  }
+}
+
+/**
  * @returns {Promise<{ ok: true, demo: boolean, message: string }>}
  * @throws {Error} with a user-facing message on failure
  */
-export async function subscribe(rawEmail, { signal } = {}) {
+export async function subscribe(rawEmail, { signal, fetch: fetchFn = globalThis.fetch } = {}) {
   const email = String(rawEmail || '').trim().toLowerCase()
   const invalid = validateEmail(email)
   if (invalid) throw new Error(invalid)
 
-  if (isDemoMode) {
-    await new Promise((r) => setTimeout(r, 450))
-    try {
-      const list = JSON.parse(localStorage.getItem('ot-demo-subscribers') || '[]')
-      if (!list.includes(email)) list.push(email)
-      localStorage.setItem('ot-demo-subscribers', JSON.stringify(list))
-    } catch { /* storage unavailable: fine in demo mode */ }
-    return {
-      ok: true,
-      demo: true,
-      message: 'Demo mode: your address was validated but not sent anywhere. Connect a newsletter service to go live.',
-    }
-  }
-
-  const isForm = FORMAT === 'form'
-  let res
+  const { url, options } = buildSubscribeRequest(email)
   try {
-    res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: isForm
-        ? { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' }
-        : { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: isForm ? new URLSearchParams({ email }).toString() : JSON.stringify({ email }),
-      signal,
-    })
+    await fetchFn(url, { ...options, signal })
   } catch {
     throw new Error('We could not reach the newsletter service. Please try again.')
   }
-  if (!res.ok) {
-    let detail = ''
-    try { detail = (await res.json())?.message || '' } catch { /* not JSON */ }
-    throw new Error(detail || `Subscription failed (${res.status}). Please try again.`)
-  }
+  // mode: 'no-cors' yields an opaque response (status 0, ok false) on success,
+  // so any completed fetch is treated as success.
   return { ok: true, demo: false, message: 'Thank you. Check your inbox to confirm your subscription.' }
 }

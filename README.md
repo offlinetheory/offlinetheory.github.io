@@ -49,7 +49,7 @@ src/
                              Newsletter, SearchDialog, ArticleRow, PageHeader, Footer, Icons (+ .css each)
   pages/                     Home, SectionPage, ArticlePage, AboutPage, SearchPage, NotFound
   data/                      articles.js (all content + search), sections.js, nav.js, images.js
-  services/newsletter.js     newsletter signup (demo mode or live endpoint)
+  services/newsletter.js     newsletter signup (Buttondown embed-subscribe by default)
   hooks/                     useMeta.js, useFitText.js
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
 ```
@@ -62,34 +62,15 @@ All articles, authors, the toolkit table and the About page are **fictional plac
 
 ## Connecting the newsletter
 
-`src/services/newsletter.js` validates the address client-side, then:
+`src/services/newsletter.js` validates the address client-side, then POSTs it as `FormData` (`email`) to Buttondown's public embed-subscribe endpoint:
 
-- **No `VITE_NEWSLETTER_ENDPOINT` set (default): DEMO MODE.** Nothing is sent anywhere. The success message says so explicitly, and the address is kept only in the browser's localStorage (`ot-demo-subscribers`).
-- **`VITE_NEWSLETTER_ENDPOINT` set:** the form POSTs `{"email": "..."}` (JSON) to that URL, or `email=...` form data if `VITE_NEWSLETTER_FORMAT=form`. Any 2xx response counts as success; otherwise the error message (`message` in a JSON body, if present) is shown.
+`POST https://buttondown.com/api/emails/embed-subscribe/offlinetheory`
 
-Buttondown, Mailchimp and Kit (ConvertKit) all require a **secret API key** for their subscriber APIs, and the key must **never** go in a `VITE_` variable (those get bundled into the public JavaScript). So point `VITE_NEWSLETTER_ENDPOINT` at a small server-side function you control (Netlify/Vercel/Cloudflare function, etc.) that receives `{ email }` and calls the provider with the key from a server-side env var:
+The request uses `mode: "no-cors"` so it works from GitHub Pages without an API key or a server-side proxy. A completed (opaque) response is treated as success; the subscriber gets Buttondown's confirmation email. A network failure shows the existing "could not reach the newsletter service" message. The form design and copy are unchanged; the success message asks the reader to check their inbox to confirm.
 
-```js
-// Example serverless handler. This is a sketch: it is not part of this build and has not been run against the live APIs.
-export default async function handler(req) {
-  const { email } = await req.json()
-  // Buttondown: https://docs.buttondown.com/api-subscribers-create
-  const r = await fetch('https://api.buttondown.com/v1/subscribers', {
-    method: 'POST',
-    headers: { Authorization: `Token ${process.env.BUTTONDOWN_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email_address: email }),
-  })
-  return new Response(null, { status: r.ok ? 200 : 400 })
-}
-```
+Set `VITE_NEWSLETTER_ENDPOINT` to override the URL (for a different username or your own endpoint). No `VITE_` variable should ever hold a secret API key, because those values are bundled into the public JavaScript.
 
-Provider calls for that function:
-
-- **Buttondown**: `POST https://api.buttondown.com/v1/subscribers`, header `Authorization: Token <API_KEY>`, body `{"email_address": "..."}` (double opt-in by default).
-- **Mailchimp**: `POST https://<dc>.api.mailchimp.com/3.0/lists/<AUDIENCE_ID>/members`, HTTP basic auth `anystring:<API_KEY>`, body `{"email_address": "...", "status": "pending"}` (`pending` sends a confirmation email). `<dc>` is the suffix of your API key, e.g. `us21`.
-- **Kit (ConvertKit)**: `POST https://api.kit.com/v4/forms/<FORM_ID>/subscribers`, header `X-Kit-Api-Key: <API_KEY>`, body `{"email_address": "..."}`.
-
-Then set `VITE_NEWSLETTER_ENDPOINT=https://your-site/api/subscribe` and rebuild. Also add spam protection there (the form already includes a hidden honeypot field named `company`).
+The form already includes a hidden honeypot field named `company`.
 
 ## Deploying
 
@@ -101,7 +82,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 - **Base path:** `BASE_PATH` (default `/`) sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images, fonts and the favicon are emitted under that path. To host under a subpath instead, build with e.g. `BASE_PATH=/some-path/`.
 - **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link and `og:url` baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy.
-- **Newsletter on Pages:** to go live, create a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
+- **Newsletter on Pages:** the signup form posts to Buttondown's public embed-subscribe endpoint by default. To point it somewhere else, set a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
 - **Test the production build locally:** `npm run build && npm run preview`, then open http://localhost:4173/.
 
 ### Other hosts
@@ -112,7 +93,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 | Feature | Status |
 | --- | --- |
-| Newsletter delivery | Demo mode until you deploy a proxy endpoint + provider API key (above) |
+| Newsletter delivery | Buttondown public embed-subscribe (no API key). Override with `VITE_NEWSLETTER_ENDPOINT`. |
 | Guides downloads / purchases | Not implemented (placeholders) |
 | CMS | Not implemented: content lives in `src/data/articles.js` |
 | Analytics, comments, accounts | Not implemented |

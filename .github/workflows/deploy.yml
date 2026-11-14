@@ -30,7 +30,7 @@ jobs:
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           VITE_SITE_URL: ${{ steps.pages.outputs.base_url }}
-          # VITE_NEWSLETTER_ENDPOINT: ${{ vars.NEWSLETTER_ENDPOINT }}   # set a repo variable to go live
+          # VITE_NEWSLETTER_ENDPOINT: ${{ vars.NEWSLETTER_ENDPOINT }}   # optional override; default is Buttondown embed-subscribe
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
