@@ -1,13 +1,15 @@
 .home-grid {
   display: grid;
-  grid-template-columns: 196fr 554fr 170fr;
-  column-gap: 2.43%;
+  /* Reference at 1024px: 196 | 23 | 554 | 24 | 171 (gutters as tracks so they scale with the columns) */
+  grid-template-columns: 196fr 23fr 554fr 24fr 171fr;
   align-items: start;
-  margin-top: 0;
+  margin-top: -1px;
   padding-bottom: 18px;
 }
-.home-grid__hero { padding-top: 0; }
-.home-grid .col-label { height: 42px; }
+.home-grid__journal { grid-column: 1; }
+.home-grid__hero { grid-column: 3; padding-top: 0; }
+.home-grid__latest { grid-column: 5; }
+.home-grid .col-label { height: 43px; }
 .home-grid .meta { font-size: 7.5px; line-height: 1.2; }
 
 /* Tablet: hero spans the top, journal and latest side by side beneath it */
@@ -15,6 +17,8 @@
   .home-grid {
     grid-template-columns: 1fr 1fr; column-gap: 32px; row-gap: 28px; margin-top: 16px;
   }
+  .home-grid__journal { grid-column: 1; }
+  .home-grid__latest { grid-column: 2; }
   .home-grid__hero { grid-column: 1 / -1; grid-row: 1; }
   .journal__title { max-width: none; font-size: 14px; line-height: 1.2; }
   .latest__title { max-width: none; font-size: 17px; line-height: 1.2; }
@@ -23,10 +27,10 @@
 /* Mobile: single column, hero → latest → journal */
 @media (max-width: 640px) {
   .home-grid { grid-template-columns: 1fr; row-gap: 32px; }
+  .home-grid__hero, .home-grid__latest, .home-grid__journal { grid-column: 1; }
   .home-grid__latest { grid-row: 2; }
   .home-grid__journal { grid-row: 3; }
-  .hero-book { aspect-ratio: 4 / 3.3; }
-  .hero-book__img { object-position: 46% 50%; }
+  /* keep the desktop crop so the whole book, hand and stone stay visible */
   .hero-book__text { width: 76%; font-size: 3.7cqw; top: 30%; }
   .hero-book__text hr { width: 30cqw; }
 }

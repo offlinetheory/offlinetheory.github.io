@@ -1,5 +1,5 @@
 .masthead {
-  margin: 0 -10px;           /* the reference runs the masthead slightly past the page margins */
+  margin: 0 -12px;           /* the reference runs the masthead slightly past the page margins */
   padding-top: 18px;
   overflow: hidden;
   /* the reference letterforms are taller than any webfont at this width: stretch vertically */
