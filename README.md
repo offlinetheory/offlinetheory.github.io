@@ -49,7 +49,7 @@ src/
                              Newsletter, SearchDialog, ArticleRow, PageHeader, Footer, Icons (+ .css each)
   pages/                     Home, SectionPage, ArticlePage, AboutPage, SearchPage, NotFound
   data/                      articles.js (all content + search), sections.js, nav.js, images.js
-  services/newsletter.js     newsletter signup (Buttondown embed-subscribe by default)
+  services/newsletter.js     newsletter signup (beehiiv Magic Link by default)
   hooks/                     useMeta.js, useFitText.js
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
 ```
@@ -62,13 +62,13 @@ All articles, authors, the toolkit table and the About page are **fictional plac
 
 ## Connecting the newsletter
 
-`src/services/newsletter.js` validates the address client-side, then POSTs it as `FormData` (`email`) to Buttondown's public embed-subscribe endpoint:
+`src/services/newsletter.js` validates the address client-side, then POSTs it to beehiiv's public Magic Link subscribe action. A GET to the Magic Link only opens a "Click to subscribe" page; the confirmation form POSTs `signup[email]` to complete the subscription:
 
-`POST https://buttondown.com/api/emails/embed-subscribe/offlinetheory`
+`POST https://magic.beehiiv.com/v1/bc0634fe-2700-45f4-bb11-ccabad602e31?email=<address>`
 
-The request uses `mode: "no-cors"` so it works from GitHub Pages without an API key or a server-side proxy. A completed (opaque) response is treated as success; the subscriber gets Buttondown's confirmation email. A network failure shows the existing "could not reach the newsletter service" message. The form design and copy are unchanged; the success message asks the reader to check their inbox to confirm.
+The request uses `mode: "no-cors"` so it works from GitHub Pages without an API key or a server-side proxy. A completed (opaque) response is treated as success; the subscriber gets beehiiv's welcome email. A network failure shows the existing "could not reach the newsletter service" message. If fetch is blocked, the request is retried as a hidden iframe form POST. The form design and remaining copy are unchanged; the success message tells the reader they are subscribed and to check their inbox for a welcome email.
 
-Set `VITE_NEWSLETTER_ENDPOINT` to override the URL (for a different username or your own endpoint). No `VITE_` variable should ever hold a secret API key, because those values are bundled into the public JavaScript.
+Set `VITE_NEWSLETTER_ENDPOINT` to override the Magic Link base URL (the `email` parameter is still appended, and the body still sends `signup[email]`). No `VITE_` variable should ever hold a secret API key, because those values are bundled into the public JavaScript.
 
 The form already includes a hidden honeypot field named `company`.
 
@@ -82,7 +82,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 - **Base path:** `BASE_PATH` (default `/`) sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images, fonts and the favicon are emitted under that path. To host under a subpath instead, build with e.g. `BASE_PATH=/some-path/`.
 - **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link and `og:url` baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy.
-- **Newsletter on Pages:** the signup form posts to Buttondown's public embed-subscribe endpoint by default. To point it somewhere else, set a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
+- **Newsletter on Pages:** the signup form uses beehiiv's public Magic Link by default. To point it somewhere else, set a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
 - **Test the production build locally:** `npm run build && npm run preview`, then open http://localhost:4173/.
 
 ### Other hosts
@@ -93,7 +93,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 | Feature | Status |
 | --- | --- |
-| Newsletter delivery | Buttondown public embed-subscribe (no API key). Override with `VITE_NEWSLETTER_ENDPOINT`. |
+| Newsletter delivery | beehiiv public Magic Link (no API key). Override with `VITE_NEWSLETTER_ENDPOINT`. |
 | Guides downloads / purchases | Not implemented (placeholders) |
 | CMS | Not implemented: content lives in `src/data/articles.js` |
 | Analytics, comments, accounts | Not implemented |
