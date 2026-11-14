@@ -1,5 +1,6 @@
 // Self-hosted fonts (no third-party font requests).
-// Inter — heavy grotesque for OFFLINE; clean sans for navigation and metadata.
+// Archivo — wide geometric grotesque for OFFLINE (wdth + wght).
+// Inter — clean sans for navigation and metadata.
 // Bodoni Moda — high-contrast Didone for THEORY, book text, and page titles.
 // Newsreader — editorial serif for article headlines.
 import './fonts.css'

@@ -34,7 +34,7 @@ function preloadMastheadFonts() {
       for (const file of Object.keys(ctx.bundle)) {
         if (
           file.endsWith('.woff2') &&
-          /inter-latin-opsz-normal|bodoni-moda-latin-opsz-normal/.test(file) &&
+          /inter-latin-opsz-normal|bodoni-moda-latin-opsz-normal|archivo-latin-wdth-normal/.test(file) &&
           !/italic|latin-ext/.test(file)
         ) {
           hrefs.push(file)

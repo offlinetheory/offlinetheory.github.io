@@ -3,7 +3,7 @@
   padding-top: 18px;
   padding-bottom: 4px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
-  /* OFFLINE only: the reference grotesque is taller than Inter at this width. */
+  /* OFFLINE only: the reference grotesque is taller than Archivo at this width. */
   --stretch: 1.105;
 }
 .masthead__title {
@@ -16,21 +16,23 @@
 .masthead__offline {
   position: relative;
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.008em;
+  font-weight: 700;
+  letter-spacing: -0.125em;
   line-height: 1;
   margin-right: 0.165em;
-  font-optical-sizing: auto;
+  font-stretch: 112%;
+  font-optical-sizing: none;
+  font-variation-settings: "wdth" 112, "wght" 700;
   transform: scaleY(var(--stretch));
   transform-origin: 50% 100%;
 }
 /* Horizontal split: an ivory band cut through the letters.
-   Inter cap-height is 0.728em. The cut is 43.4% down the cap and 11.2% of
-   cap high, matching the reference; `top` is calibrated to Inter in this line box. */
+   Archivo cap-height is 0.686em. The cut is 43.4% down the cap and 11.2% of
+   cap high, matching the reference; `top` is calibrated to Archivo in this line box. */
 .masthead__offline::after {
   content: '';
   position: absolute; left: -0.05em; right: -0.05em;
-  top: 0.439em; height: 0.081em;
+  top: 0.442em; height: 0.077em;
   background: var(--bg);
 }
 /* THEORY stays a high-contrast Didone, but weight 600 (not 800) so the
