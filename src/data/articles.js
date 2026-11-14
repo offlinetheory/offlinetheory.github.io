@@ -1,5 +1,5 @@
-// All editorial content is fictional placeholder copy written for this build.
-// Replace with real articles (or wire to a CMS) before launch.
+// Most editorial content is fictional placeholder copy written for this build.
+// Articles with placeholder: false are real editorial copy.
 
 export const ARTICLES = [
   // ── The Digital Security Journal (homepage left column) ──────────────
@@ -150,6 +150,105 @@ export const ARTICLES = [
     ],
   },
 
+
+  // ── Real editorial copy (Tools) ─────────────────────────────────────
+  // TODO-AFFILIATE: replace the official Proton Pass and NordPass hrefs
+  // below (https://proton.me/pass and https://nordpass.com/) with tracked
+  // affiliate links once those accounts are approved. Anchors use
+  // data-affiliate="TODO-AFFILIATE" and rel="sponsored noopener".
+  {
+    slug: 'password-managers-compared-2026',
+    title: 'Password Managers, Compared Without the Hype',
+    section: 'tools',
+    category: 'Tools',
+    placeholder: false,
+    author: 'Ines Okafor',
+    date: '2026-11-14',
+    readTime: 8,
+    dek: 'Four popular vaults, lined up on encryption, audits, price, and whether the free plan is actually usable. A researched comparison, not a lab test.',
+    tags: ['password manager', 'passkeys', 'tools', 'privacy', 'bitwarden', 'proton pass'],
+    body: [
+      { type: 'disclosure', text: 'OFFLINE THEORY may earn a commission if you buy through links in this article. It doesn’t affect our recommendations.' },
+      { type: 'p', text: 'Most people still reuse a handful of passwords, or keep them in a notes app. That habit is what credential stuffing actually feeds on. A password manager is the least dramatic fix in security, and the one that does the most work: one strong master password, a unique password for every site, and a place to keep passkeys when a site finally offers them.' },
+      { type: 'p', text: 'This comparison looks at four managers a beginner or a security-conscious reader is likely to consider in late 2026: Proton Pass and NordPass, which we may earn a commission on if you subscribe through our links, and Bitwarden and 1Password, which we do not. The order of appearance is not a ranking. None of these four has a LastPass-style vault-theft incident on the public record. We did not lab-test the apps ourselves. What follows is drawn from each company’s official pricing, security, and feature pages, and from published audit summaries, as of mid-November 2026. Prices, especially introductory ones, change. Check the live plans page before you pay.' },
+      { type: 'h2', text: 'What actually matters' },
+      { type: 'p', text: 'You are trusting a vault with the keys to the rest of your life. The boring questions are the right ones.' },
+      { type: 'list', items: [
+        'Can the vendor read your vault? You want end-to-end encryption, often called zero-knowledge: data is encrypted on your device before it is sent to the server.',
+        'Has anyone independent looked at the code? An audit is not a guarantee. It is better than a claim with no paperwork.',
+        'Is the source code public? Open source does not make software safe by itself. It does let other people check the claim.',
+        'Does the free plan work on a phone and a computer at the same time? If it does not, you will stop using it.',
+        'Can it store and use passkeys? Passwords are not gone, but they are no longer the only option.',
+      ] },
+      { type: 'h2', text: 'Bitwarden' },
+      { type: 'p', text: 'Bitwarden is the default I would hand most people. It is open source, end-to-end encrypted, and independently audited every year. Vault data is encrypted with AES-256; keys are derived with PBKDF2 or Argon2id on your device. Bitwarden cannot read your vault or reset your master password.' },
+      { type: 'p', text: 'The free plan is unusually complete: unlimited logins, notes, and cards, on unlimited devices, plus passkey storage and a two-person sharing organisation. Premium is $19.80 a year, about $1.65 a month when billed annually, and adds a built-in authenticator, emergency access, security reports, and file attachments. Families is $47.88 a year for up to six people. You can also self-host, which matters if you want the data on a machine you control.' },
+      { type: 'p', text: 'The trade-off is polish. The apps do the job, but they are plainer than 1Password’s. That is not a reason to skip it.' },
+      { type: 'h2', text: 'Proton Pass' },
+      { type: 'p', text: 'Proton Pass sits inside Proton’s Swiss privacy suite, next to Mail, Calendar, VPN, and Drive. It is end-to-end encrypted and open source. Recurity Labs audited it between January and April 2026 and reported no remote exploits and no encryption bypasses; Proton says the memory-handling issues found in that review were fixed on retest.' },
+      { type: 'p', text: 'The free plan is also generous: unlimited logins, notes, cards, and devices, passkeys, and alerts for weak or reused passwords, with ten hide-my-email aliases and a cap of three built-in two-factor items. Pass Plus is the paid tier. As of mid-November 2026, Proton listed it at $1.99 a month for the first year when billed annually, or $23.88, then $35.88 a year. Plus lifts the alias and two-factor limits, and adds vault sharing, dark web monitoring, file attachments, emergency access, and a command-line tool. A Family plan covers up to six people; an Unlimited bundle layers Pass on top of Proton’s other apps.' },
+      { type: 'p', text: [
+        'Passkeys work in the browser extension and on current Android and iOS apps. You still cannot sign into Proton’s own apps with a passkey. If you already live in Proton Mail, this is the vault that fits. You can start with ',
+        { href: 'https://proton.me/pass', text: 'Proton Pass', sponsored: true },
+        '. If you do not, Bitwarden’s free plan is the closer match for most people.',
+      ] },
+      { type: 'h2', text: 'NordPass' },
+      { type: 'p', text: 'NordPass is a product of Nord Security, the company behind NordVPN. It uses end-to-end, zero-knowledge encryption, with XChaCha20 and Argon2id, and has been independently audited by Cure53. It is not open source. That is the main caveat, and it is a real one if you want to verify the cryptography yourself rather than trust an audit report.' },
+      { type: 'p', text: 'The free plan stores an unlimited number of logins, but only one device can be active at a time. That is a hard limit for anyone who uses a phone and a laptop. Premium unlocks multiple devices, password health, a data-breach scanner, item sharing, file attachments, email masking, and emergency access. Family covers six separate Premium vaults. Paid plans carry a 30-day money-back guarantee. Introductory annual prices change often; as of mid-November 2026, NordPass advertised Premium at $1.99 a month for the first year when billed annually. Confirm the current figure on the official plans page.' },
+      { type: 'p', text: [
+        'NordPass also supports passkeys, and it is a reasonable paid choice if you already pay for NordVPN and want the vault in the same account. You can look at ',
+        { href: 'https://nordpass.com/', text: 'NordPass', sponsored: true },
+        ' if that is already your stack. It is not the free-plan winner.',
+      ] },
+      { type: 'h2', text: '1Password' },
+      { type: 'p', text: '1Password is the most finished of the four, and the only one here without a lasting free plan. New customers typically get a short trial, then pay. As of mid-November 2026, Individual was listed at $2.99 a month for the first year with annual billing, then $3.99 a month, or $47.88 a year. Families is $4.49 a month introductory, then $5.99, and includes five people plus guest accounts.' },
+      { type: 'p', text: 'The security model is well documented: end-to-end AES-256-GCM, PBKDF2 key derivation, and a 128-bit Secret Key that lives on your devices and is combined with your account password. That extra secret is a genuine advantage if someone later learns only your master password. The company publishes third-party assessments and holds ISO and SOC 2 certifications. The clients are not fully open source. 1Password has not disclosed a breach of customer vaults. In August 2024 it published fixes for local vulnerabilities that required an already-compromised device.' },
+      { type: 'p', text: 'Passkeys, Watchtower alerts, travel mode, and consistently good apps across macOS, Windows, Linux, iOS, and Android are the reasons people pay. If you will use those apps every day and can afford the subscription, 1Password is easy to recommend. It is not the value pick, and there is no free on-ramp once the trial ends.' },
+      { type: 'h2', text: 'Side by side' },
+      { type: 'p', text: 'Figures are from official pricing and security pages as of mid-November 2026. Introductory prices are for new annual subscriptions and expire; taxes vary by region.' },
+      {
+        type: 'table',
+        caption: 'Password manager comparison, mid-November 2026. Introductory prices change; confirm the live plans page before you buy.',
+        headers: ['', 'Bitwarden', 'Proton Pass', 'NordPass', '1Password'],
+        rows: [
+          ['Free plan', 'Unlimited logins and devices; two-person sharing', 'Unlimited logins and devices; 10 email aliases; three built-in 2FA items', 'Unlimited storage; one active device', 'No lasting free plan; short trial'],
+          ['Paid individual', '$19.80/year (Premium)', 'Pass Plus: $23.88 first year, then $35.88/year', 'Premium: advertised at $1.99/mo first year, billed annually; confirm live price', 'Individual: $2.99/mo first year, then $3.99/mo billed annually'],
+          ['Family', '$47.88/year, up to six people', 'Family plan, up to six people', 'Six separate Premium vaults', 'Families: $4.49/mo first year, then $5.99/mo; five people'],
+          ['Encryption', 'E2EE, AES-256, PBKDF2 or Argon2id', 'E2EE, open-source clients', 'E2EE, XChaCha20, Argon2id', 'E2EE, AES-256-GCM, PBKDF2, Secret Key'],
+          ['Open source', 'Yes', 'Yes', 'No', 'Not fully'],
+          ['Independent audit', 'Annual third-party audits', 'Recurity Labs, Jan–Apr 2026', 'Cure53', 'Periodic third-party assessments; ISO, SOC 2'],
+          ['Passkeys', 'Yes', 'Yes, in the extension and on Android and iOS; not for Proton app sign-in', 'Yes', 'Yes'],
+          ['Platforms', 'Windows, macOS, Linux, iOS, Android, browsers; self-host option', 'Windows, macOS, Linux, iOS, Android, browsers; CLI on Plus', 'Windows, macOS, Linux, iOS, Android, browsers', 'Windows, macOS, Linux, iOS, Android, browsers'],
+          ['Notable incidents', 'No public vault-theft incident comparable to LastPass 2022', 'No vault-theft incident; 2026 audit found no encryption bypass', 'No public vault-theft incident comparable to LastPass 2022', 'No disclosed vault breach; 2024 local-device fixes'],
+        ],
+      },
+      { type: 'h2', text: 'Who should pick which' },
+      { type: 'p', text: 'If you want the best free plan, or you want software you can inspect and, if you choose, host yourself: Bitwarden. Pay for Premium if you want a built-in authenticator and emergency access. At $19.80 a year, that upgrade is still the cheapest paid option in this group.' },
+      { type: 'p', text: [
+        'If you already use Proton Mail or Proton VPN, and you want the vault under the same account: ',
+        { href: 'https://proton.me/pass', text: 'Proton Pass', sponsored: true },
+        '. The free tier is strong enough to start. Plus is worth it when you need unlimited aliases, sharing, or emergency access.',
+      ] },
+      { type: 'p', text: [
+        'If you already subscribe to NordVPN and you are willing to pay for a simple, multi-device vault: ',
+        { href: 'https://nordpass.com/', text: 'NordPass', sponsored: true },
+        '. Skip the free plan if you need a phone and a computer at the same time.',
+      ] },
+      { type: 'p', text: 'If you want the most polished apps, a Secret Key on top of your master password, and you will pay for it: 1Password, especially on the Families plan.' },
+      { type: 'p', text: 'Commission does not change that list. Bitwarden is still the recommendation I would make first, and we do not earn anything if you choose it.' },
+      { type: 'p', text: 'If you already use one of these four and it is working, stay. Switching for a slightly nicer feature is rarely worth the risk of a sloppy export.' },
+      { type: 'h2', text: 'How to switch safely' },
+      { type: 'p', text: 'Moving a vault is a short, careful job, not an afternoon of heroics.' },
+      { type: 'list', items: [
+        'Create the new account and write down the master password, plus any recovery kit or Secret Key, on paper you actually keep.',
+        'Turn on two-factor authentication for the new manager itself, preferably a hardware key or an authenticator app, not SMS.',
+        'Export from the old manager in its official format. 1Password, Bitwarden, Proton Pass, and NordPass all document this. Prefer an encrypted export when the tool offers one. If you have to use a CSV, do it on a trusted computer, never email it, and delete the file after the import succeeds.',
+        'Import into the new vault and spot-check a dozen important logins, including email, banking, and your Apple or Google account.',
+        'Keep the old vault read-only for a few weeks. Sign into sites from the new manager as you go. When you are sure everything works, change the passwords that still feel important, then delete the old account and any leftover export files.',
+      ] },
+      { type: 'p', text: 'A password manager only works if you use it. Pick one, put your real logins in it, and stop repeating the same password.' },
+    ],
+  },
   // ── Section depth ───────────────────────────────────────────────────
   {
     slug: 'ransomware-groups-shift-to-data-extortion',
@@ -289,10 +388,24 @@ export const latestArticles = () =>
 export const articlesInSection = (section) =>
   ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
 
+function collectText(value) {
+  if (value == null) return ''
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value.map(collectText).join(' ')
+  if (value.text) return value.text
+  return ''
+}
+
 export function articleText(a) {
   return [
     a.title, a.dek, a.section, a.category, a.author, a.volume, ...(a.tags || []),
-    ...a.body.map((b) => b.text || (b.items || []).join(' ')),
+    ...(a.body || []).flatMap((b) => [
+      collectText(b.text),
+      collectText(b.items),
+      collectText(b.headers),
+      collectText(b.rows),
+      collectText(b.caption),
+    ]),
   ].filter(Boolean).join(' ')
 }
 

@@ -5,7 +5,7 @@ import './AboutPage.css'
 
 const PRINCIPLES = [
   ['Plain language', 'Security writing should be readable by the people it affects. We define our terms and skip the fear.'],
-  ['Independence', 'No sponsored articles, no affiliate links, no vendor-written copy. Reviews are paid for by readers.'],
+  ['Independence', 'We do not publish vendor-written copy. When an article includes affiliate links, we say so next to those links. Recommendations are made on the merits, not the commission.'],
   ['Verification', 'Claims about vulnerabilities and incidents are sourced to advisories, researchers or primary documents.'],
   ['Restraint', 'We publish less, on purpose. A weekly dispatch, a quarterly journal, and nothing that exists only to fill a feed.'],
 ]
@@ -60,6 +60,9 @@ export default function AboutPage() {
           </p>
           <p className="about__contact">
             For sensitive tips, we recommend an end-to-end encrypted channel. A secure-drop address will be published here once it exists.
+          </p>
+          <p className="about__contact">
+            OFFLINE THEORY may earn a commission if you buy through links we mark as sponsored. That does not change our recommendations.
           </p>
         </section>
       </div>

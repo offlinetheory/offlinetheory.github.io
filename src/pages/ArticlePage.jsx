@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getArticle, articlesInSection, formatDate, ARTICLES } from '../data/articles.js'
 import { getSection } from '../data/sections.js'
@@ -8,13 +9,53 @@ import NotFound from './NotFound.jsx'
 import { useMeta } from '../hooks/useMeta.js'
 import './ArticlePage.css'
 
+function inlineText(text) {
+  if (typeof text === 'string' || text == null) return text
+  return text.map((part, i) => {
+    if (typeof part === 'string') return <Fragment key={i}>{part}</Fragment>
+    return (
+      <a
+        key={i}
+        href={part.href}
+        target="_blank"
+        rel={part.sponsored ? 'sponsored noopener' : 'noopener noreferrer'}
+        {...(part.sponsored ? { 'data-affiliate': 'TODO-AFFILIATE' } : {})}
+      >
+        {part.text}
+      </a>
+    )
+  })
+}
+
 function Block({ block }) {
   switch (block.type) {
     case 'h2': return <h2>{block.text}</h2>
     case 'quote': return <blockquote><p>{block.text}</p></blockquote>
     case 'code': return <pre><code>{block.text}</code></pre>
-    case 'list': return <ul>{block.items.map((t) => <li key={t}>{t}</li>)}</ul>
-    default: return <p>{block.text}</p>
+    case 'list': return <ul>{block.items.map((item, i) => <li key={i}>{inlineText(item)}</li>)}</ul>
+    case 'disclosure': return <aside className="article__disclosure">{block.text}</aside>
+    case 'table': return (
+      <div className="article__table-wrap">
+        <table className="article__table">
+          {block.caption ? <caption>{block.caption}</caption> : null}
+          <thead>
+            <tr>{block.headers.map((h, i) => <th key={i} scope="col">{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  j === 0
+                    ? <th key={j} scope="row">{inlineText(cell)}</th>
+                    : <td key={j}>{inlineText(cell)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+    default: return <p>{inlineText(block.text)}</p>
   }
 }
 
@@ -54,7 +95,9 @@ export default function ArticlePage() {
 
       <div className="article__body">
         {a.body.map((b, i) => <Block key={i} block={b} />)}
-        <p className="article__fiction meta">Editorial placeholder: this article is sample copy for the Offline Theory site build.</p>
+        {a.placeholder !== false && (
+          <p className="article__fiction meta">Editorial placeholder: this article is sample copy for the Offline Theory site build.</p>
+        )}
         <ul className="article__tags" aria-label="Tags">
           {a.tags.map((t) => <li key={t}><Link to={`/search?q=${encodeURIComponent(t)}`} className="meta">{t}</Link></li>)}
         </ul>
