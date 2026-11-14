@@ -89,7 +89,7 @@ export default function ArticlePage() {
       {thumb && (
         <figure className="article__figure">
           <img src={thumb.src} srcSet={thumb.srcSet} sizes="(max-width: 760px) 100vw, 480px" width="480" height="480" alt={thumb.alt} />
-          <figcaption className="meta">{a.volume} / The Digital Security Journal</figcaption>
+          <figcaption className="meta">{a.caption || `${a.volume} / The Digital Security Journal`}</figcaption>
         </figure>
       )}
 
