@@ -58,7 +58,7 @@ Typefaces: **Archivo 700** (OFFLINE masthead, width 100), **Bodoni Moda** (THEOR
 
 ## Content
 
-All articles, authors, the toolkit table and the About page are **fictional placeholder copy**. The three Guides products are **placeholders**: they have no files, prices or checkout, and their buttons are disabled. `editors@offlinetheory.example` is a placeholder address. Replace these in `src/data/` and `src/pages/AboutPage.jsx` before launch.
+Most articles, the toolkit table, and the three Guides products are still **placeholder copy**. The Guides products have no files, prices or checkout, and their buttons are disabled. The About page lists Jamiah McQuiller as founder and editor. Replace remaining sample articles in `src/data/` before promoting those pages.
 
 ## Connecting the newsletter
 

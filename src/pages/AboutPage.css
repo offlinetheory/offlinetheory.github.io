@@ -10,6 +10,7 @@
 .about__staff dd { margin: 0; font-size: 16px; text-align: right; }
 .about__contact-h { margin-top: 32px; margin-bottom: 14px; }
 .about__contact { font: 400 15.5px/1.5 var(--font-serif); margin-top: 12px; }
+.about__contact a { text-decoration: underline; text-underline-offset: 0.15em; }
 .about__contact .mono { font-size: 13px; }
 @media (max-width: 1000px) { .about__grid { grid-template-columns: 1fr 1fr; } .about__mission { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .about__grid { grid-template-columns: 1fr; gap: 36px; } }

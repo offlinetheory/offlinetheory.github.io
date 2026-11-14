@@ -140,7 +140,7 @@ function staticRoutes() {
         return out
       }
 
-      const aboutDesc = 'The mission, principles and masthead of Offline Theory.'
+      const aboutDesc = 'The mission, principles and editor of Offline Theory, an independent publication on cybersecurity, technology and internet culture.'
       const searchDesc = 'Search every article in Offline Theory.'
 
       const routes = [
@@ -150,6 +150,7 @@ function staticRoutes() {
           desc: s.description,
         })),
         { route: 'about', title: 'About', desc: aboutDesc },
+        { route: 'privacy', title: 'Privacy policy', desc: 'How OFFLINE THEORY collects and uses information, including the newsletter, hosting, and affiliate links.' },
         { route: 'search', title: 'Search', desc: searchDesc },
         ...ARTICLES.map((a) => {
           const cover = getSeoCover(a.thumb)

@@ -10,15 +10,8 @@ const PRINCIPLES = [
   ['Restraint', 'We publish less, on purpose. A weekly dispatch, a quarterly journal, and nothing that exists only to fill a feed.'],
 ]
 
-const MASTHEAD = [
-  ['Editor', 'Mara Ellison'],
-  ['Security Editor', 'Theo Barrow'],
-  ['Privacy & Policy', 'Ines Okafor'],
-  ['Art Direction', 'Offline Theory Studio'],
-]
-
 export default function AboutPage() {
-  useMeta({ title: 'About', description: 'The mission, principles and masthead of Offline Theory, an independent publication on cybersecurity, technology and internet culture.' })
+  useMeta({ title: 'About', description: 'The mission, principles and editor of Offline Theory, an independent publication on cybersecurity, technology and internet culture.' })
   return (
     <div className="about">
       <PageHeader kicker="About / Est. 2026" title="About" />
@@ -51,12 +44,20 @@ export default function AboutPage() {
         <section aria-labelledby="masthead-h">
           <h2 id="masthead-h" className="label col-label">Masthead</h2>
           <dl className="about__staff">
-            {MASTHEAD.map(([r, n]) => <div key={r}><dt className="meta">{r}</dt><dd className="serif-head">{n}</dd></div>)}
+            <div>
+              <dt className="meta">Founder & Editor</dt>
+              <dd className="serif-head">Jamiah McQuiller</dd>
+            </div>
           </dl>
+          <p className="about__contact">
+            Jamiah is a Security+ certified IT End User Computing Technician (vulnerability and patch management) and an M.S. Cybersecurity student at the University of Michigan - Flint. She is based in Flint, Michigan.
+          </p>
           <h2 className="label col-label about__contact-h">Contact</h2>
           <p className="about__contact">
-            Tips, corrections and letters: <span className="mono">editors@offlinetheory.example</span>
-            <br /><span className="aside-note">Placeholder address. Replace before launch.</span>
+            Tips, corrections and letters:{' '}
+            <a href="https://www.linkedin.com/in/jamiahmcquiller" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            {' '}or{' '}
+            <a href="https://jamiahmcquiller.github.io" target="_blank" rel="noopener noreferrer">jamiahmcquiller.github.io</a>.
           </p>
           <p className="about__contact">
             For sensitive tips, we recommend an end-to-end encrypted channel. A secure-drop address will be published here once it exists.

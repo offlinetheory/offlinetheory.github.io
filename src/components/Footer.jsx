@@ -9,6 +9,7 @@ export default function Footer() {
         <ul>
           {NAV.map((n) => <li key={n.to}><Link to={n.to}>{n.label}</Link></li>)}
           <li><Link to="/search">Search</Link></li>
+          <li><Link to="/privacy">Privacy</Link></li>
         </ul>
       </nav>
       <p>&copy; 2026 Offline Theory. An independent publication.</p>

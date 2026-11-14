@@ -7,6 +7,7 @@ import SectionPage from './pages/SectionPage.jsx'
 import ArticlePage from './pages/ArticlePage.jsx'
 import AboutPage from './pages/AboutPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
+import PrivacyPage from './pages/PrivacyPage.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 function ScrollToTop() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/guides" element={<SectionPage slug="guides" />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,0 +1,5 @@
+.privacy__body { max-width: 42rem; padding: 26px 0 56px; }
+.privacy__body h2 { margin: 2em 0 0.75em; }
+.privacy__body p { font: 400 18px/1.6 var(--font-serif); }
+.privacy__body p + p { margin-top: 1em; }
+.privacy__body a { text-decoration: underline; text-underline-offset: 0.15em; }
