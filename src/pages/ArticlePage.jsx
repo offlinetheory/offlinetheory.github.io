@@ -5,6 +5,7 @@ import { getSection } from '../data/sections.js'
 import { THUMBS } from '../data/images.js'
 import ArticleRow from '../components/ArticleRow.jsx'
 import Timeline from '../components/Timeline.jsx'
+import IncidentCard from '../components/IncidentCard.jsx'
 import Newsletter from '../components/Newsletter.jsx'
 import NotFound from './NotFound.jsx'
 import { useMeta } from '../hooks/useMeta.js'
@@ -71,7 +72,8 @@ export default function ArticlePage() {
   const thumb = a.thumb && THUMBS[a.thumb]
   // Optional timeline sits just before the first section heading (or after the intro).
   const firstH2 = a.body.findIndex((b) => b.type === 'h2')
-  const timelineAt = a.timeline?.length ? (firstH2 === -1 ? Math.min(1, a.body.length) : firstH2) : -1
+  // Optional incident card and timeline share one slot: just before the first section heading.
+  const factsAt = firstH2 === -1 ? Math.min(1, a.body.length - 1) : firstH2
 
   return (
     <article className={`article ${thumb ? (thumb.wide ? 'article--hero' : 'article--inset') : 'article--plain'}`}>
@@ -112,7 +114,8 @@ export default function ArticlePage() {
       <div className="article__body">
         {a.body.map((b, i) => (
           <Fragment key={i}>
-            {i === timelineAt && <Timeline steps={a.timeline} label={a.timelineLabel || 'Timeline'} />}
+            {i === factsAt && a.incident && <IncidentCard incident={a.incident} />}
+            {i === factsAt && a.timeline?.length > 0 && <Timeline steps={a.timeline} label={a.timelineLabel || 'Timeline'} />}
             <Block block={b} />
           </Fragment>
         ))}

@@ -257,6 +257,20 @@ export const ARTICLES = [
     placeholder: false,
     thumb: 'msOutage',
     caption: 'Illustration / OFFLINE THEORY',
+    incident: {
+      eyebrow: 'The incident',
+      status: 'Resolved',
+      title: 'Microsoft 365',
+      subtitle: 'Global service disruption',
+      facts: [
+        { label: 'Began', value: 'November 12, 2026' },
+        { label: 'Restoration', value: 'November 14, 2026' },
+        { label: 'Scope', value: 'Worldwide' },
+        { label: 'Classification', value: 'Technical outage' },
+      ],
+      services: ['Outlook', 'Microsoft Teams', 'Exchange Online', 'SharePoint', 'Copilot'],
+      note: 'Based on published incident reporting. Not every service was necessarily affected for every customer.',
+    },
     timeline: [
       { date: 'November 12', title: 'Disruption begins', text: 'Users begin reporting widespread problems accessing Outlook and Microsoft 365 services.' },
       { date: 'November 13', title: 'Recovery efforts', text: 'Microsoft implements mitigation measures, works through infrastructure issues, and monitors delayed email delivery.' },
