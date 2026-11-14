@@ -4,6 +4,7 @@ import { getArticle, articlesInSection, formatDate, ARTICLES } from '../data/art
 import { getSection } from '../data/sections.js'
 import { THUMBS } from '../data/images.js'
 import ArticleRow from '../components/ArticleRow.jsx'
+import Timeline from '../components/Timeline.jsx'
 import Newsletter from '../components/Newsletter.jsx'
 import NotFound from './NotFound.jsx'
 import { useMeta } from '../hooks/useMeta.js'
@@ -68,6 +69,9 @@ export default function ArticlePage() {
   const section = getSection(a.section)
   const related = [...articlesInSection(a.section), ...ARTICLES].filter((x, i, arr) => x.slug !== a.slug && arr.indexOf(x) === i).slice(0, 3)
   const thumb = a.thumb && THUMBS[a.thumb]
+  // Optional timeline sits just before the first section heading (or after the intro).
+  const firstH2 = a.body.findIndex((b) => b.type === 'h2')
+  const timelineAt = a.timeline?.length ? (firstH2 === -1 ? Math.min(1, a.body.length) : firstH2) : -1
 
   return (
     <article className={`article ${thumb ? (thumb.wide ? 'article--hero' : 'article--inset') : 'article--plain'}`}>
@@ -89,7 +93,7 @@ export default function ArticlePage() {
 
         {thumb && (
           <figure className="article__figure">
-            <div className="article__frame">
+            <div className="article__frame" style={thumb.wide && thumb.width ? { aspectRatio: `${thumb.width} / ${thumb.height}` } : undefined}>
               <img
                 src={thumb.src}
                 srcSet={thumb.srcSet}
@@ -106,7 +110,12 @@ export default function ArticlePage() {
       </div>
 
       <div className="article__body">
-        {a.body.map((b, i) => <Block key={i} block={b} />)}
+        {a.body.map((b, i) => (
+          <Fragment key={i}>
+            {i === timelineAt && <Timeline steps={a.timeline} label={a.timelineLabel || 'Timeline'} />}
+            <Block block={b} />
+          </Fragment>
+        ))}
         {a.placeholder !== false && (
           <p className="article__fiction meta">Editorial placeholder: this article is sample copy for the Offline Theory site build.</p>
         )}

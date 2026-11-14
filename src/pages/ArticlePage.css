@@ -46,7 +46,8 @@
 .article--inset .article__byline { justify-content: flex-start; margin-top: 32px; }
 .article--hero .article__figure,
 .article--inset .article__figure { display: flex; flex-direction: column; min-width: 0; }
-.article--hero .article__frame { flex: 1; min-height: clamp(420px, 62vh, 760px); }
+.article--hero .article__spread { align-items: start; }
+.article--hero .article__frame { flex: none; }
 .article--hero .article__frame img { aspect-ratio: auto; }
 .article--hero .article__figure figcaption,
 .article--inset .article__figure figcaption { padding-right: var(--margin); text-align: right; }
@@ -64,7 +65,7 @@
   }
   .article--hero .article__figure,
   .article--inset .article__figure { order: -1; }
-  .article--hero .article__frame { flex: none; min-height: 0; aspect-ratio: 4 / 3; }
+  .article--hero .article__frame { flex: none; min-height: 0; }
   .article--inset .article__frame { flex: none; min-height: 0; padding: 36px var(--margin); }
   .article--inset .article__frame img { width: min(100%, 320px); }
   .article--hero .article__figure figcaption,
