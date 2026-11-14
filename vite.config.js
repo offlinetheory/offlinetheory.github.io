@@ -62,18 +62,25 @@ function staticRoutes() {
       const indexPath = path.join(dist, 'index.html')
       if (!fs.existsSync(indexPath)) return
       const html = fs.readFileSync(indexPath, 'utf8')
+      const setOrInsert = (doc, pattern, replacement, insertBeforeHeadEnd) => {
+        if (pattern.test(doc)) return doc.replace(pattern, replacement)
+        return doc.replace('</head>', `${insertBeforeHeadEnd}\n  </head>`)
+      }
       const page = (title, desc, route) => {
         const full = `${title} — ${SITE}`
         const url = route == null ? null : `${siteUrl}/${route ? route + '/' : ''}`
-        const head = url
-          ? `<link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />\n  </head>`
-          : '</head>'
-        return html
-          .replace('</head>', head)
+        let out = html
           .replace(/<title>.*?<\/title>/, `<title>${esc(full)}</title>`)
           .replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
           .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(full)}$2`)
           .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
+          .replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${esc(full)}$2`)
+          .replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
+        if (url) {
+          out = setOrInsert(out, /(<link rel="canonical" href=")[^"]*(")/, `$1${url}$2`, `<link rel="canonical" href="${url}" />`)
+          out = setOrInsert(out, /(<meta property="og:url" content=")[^"]*(")/, `$1${url}$2`, `<meta property="og:url" content="${url}" />`)
+        }
+        return out
       }
       const routes = [
         ...SECTIONS.map((s) => [s.slug, s.title, s.description]),
@@ -86,8 +93,8 @@ function staticRoutes() {
         fs.mkdirSync(dir, { recursive: true })
         fs.writeFileSync(path.join(dir, 'index.html'), page(title, desc, route))
       }
-      // Homepage keeps its own title but gains canonical + og:url.
-      fs.writeFileSync(indexPath, html.replace('</head>', `<link rel="canonical" href="${siteUrl}/" />\n    <meta property="og:url" content="${siteUrl}/" />\n  </head>`))
+      // Homepage already has canonical, og:url and the social image tags in index.html.
+      fs.writeFileSync(indexPath, html)
       fs.writeFileSync(path.join(dist, '404.html'), page('Page not found', 'This page is offline.'))
       const urls = ['', ...routes.map(([r]) => r + '/')]
       fs.writeFileSync(
