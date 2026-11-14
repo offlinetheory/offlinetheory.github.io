@@ -1,15 +1,14 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import {
+  DEFAULT_DESC,
+  DEFAULT_SOCIAL,
+  HOME_OG_DESC,
+  pageTitle,
+  websiteJsonLd,
+} from '../data/seo.js'
 
-const SITE = 'Offline Theory'
 const SITE_URL = (import.meta.env.VITE_SITE_URL || '').replace(/\/$/, '')
-const DEFAULT_DESC =
-  'Offline Theory is an independent publishing initiative exploring cybersecurity, technology, and the culture of the internet.'
-const HOME_OG_TITLE = 'OFFLINE THEORY — The Digital Security Journal'
-const HOME_OG_DESC =
-  'Independent perspectives on cybersecurity, technology, and internet culture.'
-const SOCIAL_IMAGE_PATH = '/assets/offline-theory-social.png'
-const SOCIAL_IMAGE_ALT = 'OFFLINE THEORY — The Digital Security Journal'
 
 function origin() {
   return SITE_URL || (typeof window !== 'undefined'
@@ -17,12 +16,18 @@ function origin() {
     : 'https://offlinetheory.github.io')
 }
 
-function socialImageUrl() {
-  return origin() + SOCIAL_IMAGE_PATH
+function absUrl(pathOrUrl) {
+  if (!pathOrUrl) return origin() + DEFAULT_SOCIAL.path
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl
+  return origin() + (pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`)
 }
 
 function setMeta(attr, key, content) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`)
+  if (content == null || content === '') {
+    el?.remove()
+    return
+  }
   if (!el) {
     el = document.createElement('meta')
     el.setAttribute(attr, key)
@@ -31,17 +36,52 @@ function setMeta(attr, key, content) {
   el.setAttribute('content', content)
 }
 
-/** Sets <title>, description, Open Graph tags and canonical link per route. */
-export function useMeta({ title, description, type = 'website' } = {}) {
+function setJsonLd(data) {
+  let el = document.getElementById('ot-jsonld')
+  if (!data) {
+    el?.remove()
+    return
+  }
+  if (!el) {
+    el = document.createElement('script')
+    el.type = 'application/ld+json'
+    el.id = 'ot-jsonld'
+    document.head.appendChild(el)
+  }
+  el.textContent = JSON.stringify(data)
+}
+
+/** Sets <title>, description, Open Graph, Twitter, canonical, and JSON-LD per route. */
+export function useMeta({
+  title,
+  description,
+  type = 'website',
+  image,
+  imageAlt,
+  imageWidth,
+  imageHeight,
+  imageType,
+  publishedTime,
+  author,
+  jsonLd,
+  noindex = false,
+} = {}) {
   const { pathname } = useLocation()
+  const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : ''
   useEffect(() => {
     const isHome = !title
-    const full = title ? `${title} — ${SITE}` : HOME_OG_TITLE
+    const full = pageTitle(title)
     const pageDesc = description ?? DEFAULT_DESC
     const ogDesc = isHome && description == null ? HOME_OG_DESC : pageDesc
     const root = origin()
     const href = root + pathname.replace(/\/?$/, '/')
-    const image = socialImageUrl()
+    const social = {
+      url: absUrl(image || DEFAULT_SOCIAL.path),
+      alt: imageAlt || DEFAULT_SOCIAL.alt,
+      width: String(imageWidth || DEFAULT_SOCIAL.width),
+      height: String(imageHeight || DEFAULT_SOCIAL.height),
+      type: imageType || DEFAULT_SOCIAL.type,
+    }
 
     document.title = full
     setMeta('name', 'description', pageDesc)
@@ -50,16 +90,19 @@ export function useMeta({ title, description, type = 'website' } = {}) {
     setMeta('property', 'og:type', type)
     setMeta('property', 'og:url', href)
     setMeta('property', 'og:site_name', 'OFFLINE THEORY')
-    setMeta('property', 'og:image', image)
-    setMeta('property', 'og:image:width', '1200')
-    setMeta('property', 'og:image:height', '630')
-    setMeta('property', 'og:image:alt', SOCIAL_IMAGE_ALT)
-    setMeta('property', 'og:image:type', 'image/png')
+    setMeta('property', 'og:image', social.url)
+    setMeta('property', 'og:image:width', social.width)
+    setMeta('property', 'og:image:height', social.height)
+    setMeta('property', 'og:image:alt', social.alt)
+    setMeta('property', 'og:image:type', social.type)
+    setMeta('property', 'article:published_time', publishedTime || '')
+    setMeta('property', 'article:author', author || '')
     setMeta('name', 'twitter:card', 'summary_large_image')
     setMeta('name', 'twitter:title', full)
     setMeta('name', 'twitter:description', ogDesc)
-    setMeta('name', 'twitter:image', image)
-    setMeta('name', 'twitter:image:alt', SOCIAL_IMAGE_ALT)
+    setMeta('name', 'twitter:image', social.url)
+    setMeta('name', 'twitter:image:alt', social.alt)
+    setMeta('name', 'robots', noindex ? 'noindex' : '')
 
     let link = document.head.querySelector('link[rel="canonical"]')
     if (!link) {
@@ -68,5 +111,25 @@ export function useMeta({ title, description, type = 'website' } = {}) {
       document.head.appendChild(link)
     }
     link.href = href
-  }, [title, description, type, pathname])
+
+    const parsed = jsonLdKey ? JSON.parse(jsonLdKey) : null
+    const schema = parsed ?? (isHome ? websiteJsonLd({ url: href, description: HOME_OG_DESC }) : null)
+    setJsonLd(schema)
+  }, [
+    title,
+    description,
+    type,
+    image,
+    imageAlt,
+    imageWidth,
+    imageHeight,
+    imageType,
+    publishedTime,
+    author,
+    noindex,
+    jsonLdKey,
+    pathname,
+  ])
 }
+
+export { origin as siteOrigin }

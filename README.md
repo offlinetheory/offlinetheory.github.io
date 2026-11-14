@@ -34,7 +34,7 @@ Optional: copy `.env.example` to `.env` and fill it in (see *Connecting the news
 | `*` | 404 page |
 
 - **Search**: the magnifier (or the `/` key) opens an accessible `<dialog>` with live results; Enter goes to `/search?q=`. Search runs client-side over every article's title, dek, tags, section and body (`src/data/articles.js → searchArticles`).
-- **SEO**: per-route `<title>`, meta description, Open Graph tags and canonical link (`src/hooks/useMeta.js`). Note: this is a client-rendered SPA, so crawlers that don't run JavaScript only see the defaults in `index.html`. Add pre-rendering/SSR if that matters for launch.
+- **SEO**: per-route `<title>`, meta description, canonical URL, Open Graph and Twitter tags, and JSON-LD (`src/hooks/useMeta.js` for in-browser navigation; `staticRoutes()` in `vite.config.js` bakes the same tags into a real `index.html` for every route at build time, so crawlers and social scrapers do not need JavaScript). Articles with a unique cover use that image in `og:image` / `twitter:image` and include Article/NewsArticle JSON-LD. Placeholder (sample) articles get `noindex` and are omitted from the sitemap so only real editorial pages are submitted to search engines. The build also writes `sitemap.xml` (with `lastmod` on article URLs) and `robots.txt`.
 - **Accessibility**: semantic landmarks (`header`, `nav`, `main`, `article`, `footer`), skip link, labelled forms, `aria-current` on active nav links (via NavLink), `aria-expanded` mobile menu, live regions for search and newsletter status, visible focus styles, reduced-motion support.
 - **Responsive**: desktop three-column layout; tablet (≤900px) puts the hero full-width above journal + latest; mobile (≤640px) is single-column with a menu button. The masthead is auto-fitted to the container width (`src/hooks/useFitText.js`) so it never overflows.
 - **Images**: separate WebP assets with explicit width/height, `srcset`/`sizes`, lazy-loaded thumbnails and a high-priority hero. The logo is a vector SVG traced from the supplied logo artwork.
@@ -48,7 +48,7 @@ src/
   components/                Header, Logo, Masthead, JournalList, HeroBook, LatestList, InfoBar,
                              Newsletter, SearchDialog, ArticleRow, PageHeader, Footer, Icons (+ .css each)
   pages/                     Home, SectionPage, ArticlePage, AboutPage, SearchPage, NotFound
-  data/                      articles.js (all content + search), sections.js, nav.js, images.js
+  data/                      articles.js (all content + search), sections.js, nav.js, images.js, covers.js, seo.js
   services/newsletter.js     newsletter signup (beehiiv official Slim Inline embed by default)
   hooks/                     useMeta.js, useFitText.js
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
@@ -79,7 +79,7 @@ The site is published from the `offlinetheory` organization's user-site repo, so
 Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 20, builds with `BASE_PATH` and `VITE_SITE_URL` taken from the Pages settings (for this repo `BASE_PATH=/` and `VITE_SITE_URL=https://offlinetheory.github.io`), and publishes `dist/` with `actions/deploy-pages`. Pages is configured with **Source: GitHub Actions** (Settings → Pages).
 
 - **Base path:** `BASE_PATH` (default `/`) sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images, fonts and the favicon are emitted under that path. To host under a subpath instead, build with e.g. `BASE_PATH=/some-path/`.
-- **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link and `og:url` baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy.
+- **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link, Open Graph / Twitter tags and JSON-LD baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy. The visible page is still rendered by React in the browser; only the document `<head>` is pre-filled.
 - **Newsletter on Pages:** the signup form uses beehiiv's official Slim Inline embed by default. To point it at a different form, set a repository variable `BEEHIIV_FORM_ID` and uncomment the `VITE_BEEHIIV_FORM_ID` line in the workflow.
 - **Test the production build locally:** `npm run build && npm run preview`, then open http://localhost:4173/.
 

@@ -3,12 +3,14 @@ import { Link, useParams } from 'react-router-dom'
 import { getArticle, articlesInSection, formatDate, ARTICLES } from '../data/articles.js'
 import { getSection } from '../data/sections.js'
 import { THUMBS } from '../data/images.js'
+import { getSeoCover } from '../data/covers.js'
+import { articleJsonLd, largestSrc } from '../data/seo.js'
 import ArticleRow from '../components/ArticleRow.jsx'
 import Timeline from '../components/Timeline.jsx'
 import IncidentCard from '../components/IncidentCard.jsx'
 import Newsletter from '../components/Newsletter.jsx'
 import NotFound from './NotFound.jsx'
-import { useMeta } from '../hooks/useMeta.js'
+import { useMeta, siteOrigin } from '../hooks/useMeta.js'
 import './ArticlePage.css'
 
 function inlineText(text) {
@@ -64,12 +66,44 @@ function Block({ block }) {
 export default function ArticlePage() {
   const { slug } = useParams()
   const a = getArticle(slug)
-  useMeta(a ? { title: a.title, description: a.dek, type: 'article' } : { title: 'Not found' })
+  const cover = a?.thumb && getSeoCover(a.thumb)
+  const thumb = a?.thumb && THUMBS[a.thumb]
+  const shareImage = cover && thumb
+    ? largestSrc(thumb.srcSet, thumb.src)
+    : null
+  const pageUrl = a
+    ? `${siteOrigin()}/article/${a.slug}/`
+    : null
+  const imageAbs = shareImage
+    ? (shareImage.startsWith('http') ? shareImage : siteOrigin() + shareImage)
+    : null
+  useMeta(a ? {
+    title: a.title,
+    description: a.dek,
+    type: 'article',
+    image: shareImage || undefined,
+    imageAlt: cover?.alt,
+    imageWidth: cover?.width,
+    imageHeight: cover?.height,
+    imageType: cover?.type,
+    publishedTime: a.date,
+    author: a.author,
+    noindex: a.placeholder !== false,
+    jsonLd: articleJsonLd({
+      title: a.title,
+      description: a.dek,
+      url: pageUrl,
+      image: imageAbs,
+      date: a.date,
+      author: a.author,
+      section: a.section,
+      category: a.category,
+    }),
+  } : { title: 'Not found' })
   if (!a) return <NotFound />
 
   const section = getSection(a.section)
   const related = [...articlesInSection(a.section), ...ARTICLES].filter((x, i, arr) => x.slug !== a.slug && arr.indexOf(x) === i).slice(0, 3)
-  const thumb = a.thumb && THUMBS[a.thumb]
   // Optional timeline sits just before the first section heading (or after the intro).
   const firstH2 = a.body.findIndex((b) => b.type === 'h2')
   // Optional incident card and timeline share one slot: just before the first section heading.
