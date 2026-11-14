@@ -54,7 +54,7 @@ src/
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
 ```
 
-Typefaces: **Archivo 700** (OFFLINE masthead, width 112), **Bodoni Moda** (THEORY, book text, page titles), **Newsreader** (article headlines), **Source Serif 4** (body and reading text), **Inter** (navigation, metadata), **IBM Plex Mono** (code only). All are self-hosted and licensed under the SIL Open Font License 1.1.
+Typefaces: **Archivo 700** (OFFLINE masthead, width 100), **Bodoni Moda** (THEORY, book text, page titles), **Newsreader** (article headlines), **Source Serif 4** (body and reading text), **Inter** (navigation, metadata), **IBM Plex Mono** (code only). All are self-hosted and licensed under the SIL Open Font License 1.1.
 
 ## Content
 

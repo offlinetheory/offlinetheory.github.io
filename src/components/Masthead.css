@@ -1,10 +1,12 @@
 .masthead {
   margin: 0 -12px;           /* the reference runs the masthead slightly past the page margins */
   padding-top: 18px;
-  padding-bottom: 4px;           /* restore the pre-typography masthead height so columns stay put */
+  padding-bottom: 5px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
-  /* OFFLINE only: the reference grotesque is taller than Archivo at this width. */
-  --stretch: 1.105;
+  /* OFFLINE only: Archivo's cap is shorter than THEORY's at the shared fitted size.
+     scaleY plus a slightly raised transform-origin align the two cap heights
+     without changing the masthead box or THEORY. */
+  --stretch: 1.214;
 }
 .masthead__title {
   display: inline-flex; align-items: baseline; white-space: nowrap;
@@ -17,14 +19,14 @@
   position: relative;
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.125em;
+  letter-spacing: -0.04em;
   line-height: 1;
   margin-right: 0.165em;
-  font-stretch: 112%;
+  font-stretch: 100%;
   font-optical-sizing: none;
-  font-variation-settings: "wdth" 112, "wght" 700;
+  font-variation-settings: "wdth" 100, "wght" 700;
   transform: scaleY(var(--stretch));
-  transform-origin: 50% 100%;
+  transform-origin: 50% 85%;
 }
 /* Horizontal split: an ivory band cut through the letters.
    Archivo cap-height is 0.686em. The cut is 43.4% down the cap and 11.2% of
@@ -50,9 +52,9 @@
   font-variation-settings: "opsz" 12;
 }
 
-/* 1440/1536 keep the 5px pad that locks the column row. */
+/* 1440/1536 keep the 6px pad that locks the column row. */
 @media (min-width: 1100px) {
   .masthead {
-    padding-bottom: 5px;
+    padding-bottom: 6px;
   }
 }
