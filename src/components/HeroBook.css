@@ -26,3 +26,14 @@
   width: 24.5cqw; margin: 5.1cqw auto 0;
   border: 0; border-top: 1px solid rgba(8, 8, 8, .55);
 }
+
+/* Hand pop-out layer. Geometry is in % of the hero box, derived from the source:
+   layer = source x 740–1152, y 0–132; the hero shows source y 72–800 (728 rows). */
+.hero-wrap { position: relative; }
+.hero-book__hand {
+  position: absolute; z-index: 5; pointer-events: none; user-select: none;
+  left: 64.236%;            /* 740 / 1152 */
+  width: 35.764%;           /* 412 / 1152 */
+  top: -9.890%;             /* -72 / 728 of the hero height (photo box) */
+  height: auto;
+}
