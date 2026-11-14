@@ -162,7 +162,7 @@ export const ARTICLES = [
     section: 'tools',
     category: 'Tools',
     placeholder: false,
-    author: 'Ines Okafor',
+    author: 'Jamiah McQuiller',
     date: '2026-11-14',
     readTime: 8,
     dek: 'Four popular vaults, lined up on encryption, audits, price, and whether the free plan is actually usable. A researched comparison, not a lab test.',
