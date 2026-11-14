@@ -70,28 +70,40 @@ export default function ArticlePage() {
   const thumb = a.thumb && THUMBS[a.thumb]
 
   return (
-    <article className="article">
-      <header className="article__head">
-        <nav className="article__crumbs label" aria-label="Breadcrumb">
-          <Link to="/">Home</Link> <span aria-hidden="true">/</span>{' '}
-          <Link to={`/${section.slug}`}>{section.name}</Link>
-          {a.volume && <> <span aria-hidden="true">/</span> <span>{a.volume}</span></>}
-        </nav>
-        <p className="meta article__cat">{a.category || section.name} / {a.readTime} min read</p>
-        <h1 className="article__title">{a.title}</h1>
-        <p className="article__dek">{a.dek}</p>
-        <div className="article__byline">
-          <span className="meta">By {a.author}</span>
-          <time className="meta" dateTime={a.date}>{formatDate(a.date)}</time>
-        </div>
-      </header>
+    <article className={`article ${thumb ? (thumb.wide ? 'article--hero' : 'article--inset') : 'article--plain'}`}>
+      <div className="article__spread">
+        <header className="article__head">
+          <nav className="article__crumbs label" aria-label="Breadcrumb">
+            <Link to="/">Home</Link> <span aria-hidden="true">/</span>{' '}
+            <Link to={`/${section.slug}`}>{section.name}</Link>
+            {a.volume && <> <span aria-hidden="true">/</span> <span>{a.volume}</span></>}
+          </nav>
+          <p className="meta article__cat">{a.category || section.name} / {a.readTime} min read</p>
+          <h1 className="article__title">{a.title}</h1>
+          <p className="article__dek">{a.dek}</p>
+          <div className="article__byline">
+            <span className="meta">By {a.author}</span>
+            <time className="meta" dateTime={a.date}>{formatDate(a.date)}</time>
+          </div>
+        </header>
 
-      {thumb && (
-        <figure className="article__figure">
-          <img src={thumb.src} srcSet={thumb.srcSet} sizes="(max-width: 760px) 100vw, 480px" width="480" height="480" alt={thumb.alt} />
-          <figcaption className="meta">{a.caption || `${a.volume} / The Digital Security Journal`}</figcaption>
-        </figure>
-      )}
+        {thumb && (
+          <figure className="article__figure">
+            <div className="article__frame">
+              <img
+                src={thumb.src}
+                srcSet={thumb.srcSet}
+                sizes={thumb.wide ? '(max-width: 900px) 100vw, 64vw' : '(max-width: 900px) 100vw, 480px'}
+                width={thumb.width || 480}
+                height={thumb.height || 480}
+                alt={thumb.alt}
+                fetchPriority="high"
+              />
+            </div>
+            <figcaption className="meta">{a.caption || `${a.volume} / The Digital Security Journal`}</figcaption>
+          </figure>
+        )}
+      </div>
 
       <div className="article__body">
         {a.body.map((b, i) => <Block key={i} block={b} />)}
