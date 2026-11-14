@@ -3,7 +3,7 @@
   padding-top: 18px;
   padding-bottom: 3px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
-  /* the reference letterforms are taller than any webfont at this width: stretch vertically */
+  /* OFFLINE only: the reference grotesque is taller than Inter at this width. */
   --stretch: 1.105;
 }
 .masthead__title {
@@ -12,8 +12,6 @@
   line-height: 0.8;
   font-weight: 400;
   margin: 0;
-  transform: scaleY(var(--stretch));
-  transform-origin: 50% 100%;
 }
 .masthead__offline {
   position: relative;
@@ -23,6 +21,8 @@
   line-height: 1;
   margin-right: 0.165em;
   font-optical-sizing: auto;
+  transform: scaleY(var(--stretch));
+  transform-origin: 50% 100%;
 }
 /* Horizontal split: an ivory band cut through the letters.
    Inter 900 cap-height is 0.728em. The cut is 43.4% down the cap and 11.2% of
@@ -33,10 +33,24 @@
   top: 0.439em; height: 0.081em;
   background: var(--bg);
 }
+/* THEORY is not stretched (scaleY made it look tall and condensed). A low
+   optical size keeps Didone hairlines visible at display size; 1.12em and
+   tight tracking fill the masthead width and match OFFLINE's cap height
+   without shrinking the shared fitted size. line-height 0.7 keeps typo
+   ascent/descent from pushing the column row down. */
 .masthead__theory {
   font-family: var(--font-didone);
   font-weight: 800;
-  letter-spacing: -0.07em;
-  line-height: 1;
-  font-optical-sizing: auto;
+  font-size: 1.12em;
+  letter-spacing: -0.14em;
+  line-height: 0.7;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 18;
+}
+
+/* 1440 was 2px short after unstretching THEORY; 1024 stays exact at 3px. */
+@media (min-width: 1100px) {
+  .masthead {
+    padding-bottom: 5px;
+  }
 }
