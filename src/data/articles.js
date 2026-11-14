@@ -95,7 +95,6 @@ export const ARTICLES = [
     title: 'A Closer Look at the Latest Zero-Day',
     section: 'news',
     category: 'Security',
-    latest: 1,
     author: 'Theo Barrow',
     date: '2026-11-10',
     readTime: 8,
@@ -116,7 +115,6 @@ export const ARTICLES = [
     title: 'Open-Source Security Tools Worth Using',
     section: 'tools',
     category: 'Tools',
-    latest: 2,
     author: 'Ines Okafor',
     date: '2026-11-06',
     readTime: 6,
@@ -135,7 +133,6 @@ export const ARTICLES = [
     title: 'The Real Cost of Convenience',
     section: 'analysis',
     category: 'Analysis',
-    latest: 3,
     author: 'Mara Ellison',
     date: '2026-11-02',
     readTime: 10,
@@ -462,8 +459,14 @@ export const PRODUCTS = [
 
 export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
 export const journalIssues = () => ARTICLES.filter((a) => a.journal)
-export const latestArticles = () =>
-  ARTICLES.filter((a) => a.latest).sort((a, b) => a.latest - b.latest)
+// Homepage "Latest": the newest articles by date. On the same date, the one
+// added later to ARTICLES comes first, so new pieces always take slot 1.
+export const LATEST_COUNT = 3
+export const latestArticles = (count = LATEST_COUNT) =>
+  ARTICLES.map((a, i) => ({ a, i }))
+    .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
+    .slice(0, count)
+    .map(({ a }) => a)
 export const articlesInSection = (section) =>
   ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
 
