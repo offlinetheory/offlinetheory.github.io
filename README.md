@@ -49,7 +49,7 @@ src/
                              Newsletter, SearchDialog, ArticleRow, PageHeader, Footer, Icons (+ .css each)
   pages/                     Home, SectionPage, ArticlePage, AboutPage, SearchPage, NotFound
   data/                      articles.js (all content + search), sections.js, nav.js, images.js
-  services/newsletter.js     newsletter signup (beehiiv Magic Link by default)
+  services/newsletter.js     newsletter signup (beehiiv official Slim Inline embed by default)
   hooks/                     useMeta.js, useFitText.js
   assets/images/             logo.svg, hero-book-*.webp, thumb-*.webp
 ```
@@ -62,15 +62,13 @@ All articles, authors, the toolkit table and the About page are **fictional plac
 
 ## Connecting the newsletter
 
-`src/services/newsletter.js` validates the address client-side, then POSTs it to beehiiv's public Magic Link subscribe action. A GET to the Magic Link only opens a "Click to subscribe" page; the confirmation form POSTs `signup[email]` to complete the subscription:
+The heading and tagline stay on the site. `src/components/Newsletter.jsx` loads beehiiv's official Slim Inline subscribe form (email field + Subscribe button) into that section with the public v3 loader — no API key and no custom POST:
 
-`POST https://magic.beehiiv.com/v1/bc0634fe-2700-45f4-bb11-ccabad602e31?email=<address>`
+`<script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="ef3fc9ae-3ac2-4e1b-9569-4f9329d9b5aa"></script>`
 
-The request uses `mode: "no-cors"` so it works from GitHub Pages without an API key or a server-side proxy. A completed (opaque) response is treated as success; the subscriber gets beehiiv's welcome email. A network failure shows the existing "could not reach the newsletter service" message. If fetch is blocked, the request is retried as a hidden iframe form POST. The form design and remaining copy are unchanged; the success message tells the reader they are subscribed and to check their inbox for a welcome email.
+Each Newsletter instance (Home, section pages, article pages, and About) injects its own script tag on mount and tears it down on unmount, so client-side navigation still gets a working form. The form itself is styled in the beehiiv form builder.
 
-Set `VITE_NEWSLETTER_ENDPOINT` to override the Magic Link base URL (the `email` parameter is still appended, and the body still sends `signup[email]`). No `VITE_` variable should ever hold a secret API key, because those values are bundled into the public JavaScript.
-
-The form already includes a hidden honeypot field named `company`.
+Set `VITE_BEEHIIV_FORM_ID` to override the form id. No `VITE_` variable should ever hold a secret API key, because those values are bundled into the public JavaScript.
 
 ## Deploying
 
@@ -82,7 +80,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 - **Base path:** `BASE_PATH` (default `/`) sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images, fonts and the favicon are emitted under that path. To host under a subpath instead, build with e.g. `BASE_PATH=/some-path/`.
 - **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link and `og:url` baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy.
-- **Newsletter on Pages:** the signup form uses beehiiv's public Magic Link by default. To point it somewhere else, set a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
+- **Newsletter on Pages:** the signup form uses beehiiv's official Slim Inline embed by default. To point it at a different form, set a repository variable `BEEHIIV_FORM_ID` and uncomment the `VITE_BEEHIIV_FORM_ID` line in the workflow.
 - **Test the production build locally:** `npm run build && npm run preview`, then open http://localhost:4173/.
 
 ### Other hosts
@@ -93,7 +91,7 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 
 | Feature | Status |
 | --- | --- |
-| Newsletter delivery | beehiiv public Magic Link (no API key). Override with `VITE_NEWSLETTER_ENDPOINT`. |
+| Newsletter delivery | beehiiv official Slim Inline embed (no API key). Override with `VITE_BEEHIIV_FORM_ID`. |
 | Guides downloads / purchases | Not implemented (placeholders) |
 | CMS | Not implemented: content lives in `src/data/articles.js` |
 | Analytics, comments, accounts | Not implemented |

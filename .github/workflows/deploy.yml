@@ -30,7 +30,7 @@ jobs:
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           VITE_SITE_URL: ${{ steps.pages.outputs.base_url }}
-          # VITE_NEWSLETTER_ENDPOINT: ${{ vars.NEWSLETTER_ENDPOINT }}   # optional override; default is beehiiv Magic Link
+          # VITE_BEEHIIV_FORM_ID: ${{ vars.BEEHIIV_FORM_ID }}   # optional override; default is the official Slim Inline embed
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
