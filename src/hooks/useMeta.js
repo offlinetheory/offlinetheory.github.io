@@ -27,7 +27,7 @@ export function useMeta({ title, description = DEFAULT_DESC, type = 'website' } 
     setMeta('property', 'og:description', description)
     setMeta('property', 'og:type', type)
     const root = SITE_URL || window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '')
-    const href = root + (pathname === '/' ? '/' : pathname)
+    const href = root + pathname.replace(/\/?$/, '/')
     setMeta('property', 'og:url', href)
     let link = document.head.querySelector('link[rel="canonical"]')
     if (!link) {

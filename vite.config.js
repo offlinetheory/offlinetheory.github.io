@@ -8,6 +8,8 @@ import { SECTIONS } from './src/data/sections.js'
 // BASE_PATH lets the same code run at the domain root (dev, Netlify, Vercel)
 // or under a subpath such as GitHub Pages: BASE_PATH=/offline-theory/
 const base = process.env.BASE_PATH || '/'
+// Public origin + base, used for canonical/og:url tags and the sitemap.
+const siteUrl = (process.env.VITE_SITE_URL || 'https://offlinetheory.github.io' + base).replace(/\/$/, '')
 
 const SITE = 'Offline Theory'
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
@@ -27,9 +29,14 @@ function staticRoutes() {
       const indexPath = path.join(dist, 'index.html')
       if (!fs.existsSync(indexPath)) return
       const html = fs.readFileSync(indexPath, 'utf8')
-      const page = (title, desc) => {
+      const page = (title, desc, route) => {
         const full = `${title} — ${SITE}`
+        const url = route == null ? null : `${siteUrl}/${route ? route + '/' : ''}`
+        const head = url
+          ? `<link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />\n  </head>`
+          : '</head>'
         return html
+          .replace('</head>', head)
           .replace(/<title>.*?<\/title>/, `<title>${esc(full)}</title>`)
           .replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(desc)}$2`)
           .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(full)}$2`)
@@ -44,9 +51,17 @@ function staticRoutes() {
       for (const [route, title, desc] of routes) {
         const dir = path.join(dist, route)
         fs.mkdirSync(dir, { recursive: true })
-        fs.writeFileSync(path.join(dir, 'index.html'), page(title, desc))
+        fs.writeFileSync(path.join(dir, 'index.html'), page(title, desc, route))
       }
+      // Homepage keeps its own title but gains canonical + og:url.
+      fs.writeFileSync(indexPath, html.replace('</head>', `<link rel="canonical" href="${siteUrl}/" />\n    <meta property="og:url" content="${siteUrl}/" />\n  </head>`))
       fs.writeFileSync(path.join(dist, '404.html'), page('Page not found', 'This page is offline.'))
+      const urls = ['', ...routes.map(([r]) => r + '/')]
+      fs.writeFileSync(
+        path.join(dist, 'sitemap.xml'),
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${siteUrl}/${u}</loc></url>`).join('\n')}\n</urlset>\n`,
+      )
+      fs.writeFileSync(path.join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`)
     },
   }
 }

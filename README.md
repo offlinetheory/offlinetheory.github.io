@@ -1,8 +1,10 @@
 # OFFLINE THEORY
 
 An independent digital publication on cybersecurity, technology and the culture of the internet.
-**Live site:** https://jamiahmcquiller.github.io/offline-theory/
-**Repository:** https://github.com/jamiahmcquiller/offline-theory
+**Live site:** https://offlinetheory.github.io/
+**Repository:** https://github.com/offlinetheory/offlinetheory.github.io
+
+(The project previously lived at `jamiahmcquiller/offline-theory`; that address now redirects here.)
 
 Built with **React 19 + Vite + React Router + plain CSS** (CSS variables, one stylesheet per component), self-hosted fonts via `@fontsource`.
 
@@ -93,12 +95,14 @@ Then set `VITE_NEWSLETTER_ENDPOINT=https://your-site/api/subscribe` and rebuild.
 
 ### GitHub Pages (current)
 
-Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 20, builds with `BASE_PATH=/offline-theory/` and `VITE_SITE_URL` taken from the Pages settings, and publishes `dist/` with `actions/deploy-pages`. Pages is configured with **Source: GitHub Actions** (Settings → Pages).
+The site is published from the `offlinetheory` organization's user-site repo, so it is served at the domain root: https://offlinetheory.github.io/.
 
-- **Subpath:** `BASE_PATH` sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images/fonts/favicon are emitted under that path.
-- **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title and description baked in, plus `404.html` as the fallback for anything else (see `staticRoutes()` in `vite.config.js`). When you add an article to `src/data/articles.js`, its page is generated automatically on the next deploy.
+Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 20, builds with `BASE_PATH` and `VITE_SITE_URL` taken from the Pages settings (for this repo `BASE_PATH=/` and `VITE_SITE_URL=https://offlinetheory.github.io`), and publishes `dist/` with `actions/deploy-pages`. Pages is configured with **Source: GitHub Actions** (Settings → Pages).
+
+- **Base path:** `BASE_PATH` (default `/`) sets Vite's `base`; the router's `basename` and canonical URLs follow `import.meta.env.BASE_URL`, and all images, fonts and the favicon are emitted under that path. To host under a subpath instead, build with e.g. `BASE_PATH=/some-path/`.
+- **Deep links:** GitHub Pages has no SPA rewrites, so the build writes a real `index.html` for every route (`/news/`, `/article/<slug>/`, ...) with that page's title, description, canonical link and `og:url` baked in, plus `404.html` as the fallback for anything else, and `sitemap.xml` + `robots.txt` (see `staticRoutes()` in `vite.config.js`). New articles in `src/data/articles.js` get their own page and sitemap entry on the next deploy.
 - **Newsletter on Pages:** to go live, create a repository variable `NEWSLETTER_ENDPOINT` and uncomment the `VITE_NEWSLETTER_ENDPOINT` line in the workflow.
-- To test the subpath build locally: `BASE_PATH=/offline-theory/ npm run build && BASE_PATH=/offline-theory/ npm run preview`, then open http://localhost:4173/offline-theory/.
+- **Test the production build locally:** `npm run build && npm run preview`, then open http://localhost:4173/.
 
 ### Other hosts
 
