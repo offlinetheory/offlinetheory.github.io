@@ -1,0 +1,52 @@
+.site-header { position: relative; }
+.site-header__bar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 66px; padding: 0 0 0 9px;
+}
+.site-nav { margin-left: auto; margin-right: 56px; }
+.site-nav ul { display: flex; gap: 32.5px; }
+.site-nav a {
+  display: block; padding: 6px 0;
+  font: 500 11px/1 var(--font-sans);
+  letter-spacing: 0.27em; text-transform: uppercase;
+  margin-right: -0.27em;
+  border-bottom: 1px solid transparent;
+}
+.site-nav a:hover { color: var(--gray); }
+.site-nav a.is-active { border-bottom-color: var(--ink); }
+
+.site-header__actions { display: flex; align-items: center; gap: 8px; margin-right: 3px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 0; padding: 4px; cursor: pointer; color: var(--ink);
+}
+.icon-btn:hover { color: var(--gray); }
+.menu-btn { display: none; width: 34px; height: 34px; }
+.menu-btn__lines, .menu-btn__lines::before, .menu-btn__lines::after {
+  display: block; width: 22px; height: 1.4px; background: currentColor; position: relative;
+}
+.menu-btn__lines::before, .menu-btn__lines::after { content: ''; position: absolute; left: 0; }
+.menu-btn__lines::before { top: -6px; }
+.menu-btn__lines::after { top: 6px; }
+
+@media (max-width: 900px) {
+  .site-nav { margin-right: 24px; }
+  .site-nav ul { gap: 18px; }
+  .site-nav a { font-size: 10px; letter-spacing: 0.2em; margin-right: -0.2em; }
+}
+
+@media (max-width: 760px) {
+  .site-header__bar { height: 58px; padding-left: 0; }
+  .site-header__actions { margin-right: -4px; }
+  .menu-btn { display: inline-flex; }
+  .site-nav {
+    display: none; position: absolute; z-index: 30; left: 0; right: 0; top: 59px;
+    margin: 0; background: var(--bg); border-bottom: 1px solid var(--ink);
+    padding: 8px var(--margin) 18px;
+  }
+  .site-nav.is-open { display: block; }
+  .site-nav ul { flex-direction: column; gap: 0; }
+  .site-nav li + li { border-top: 1px solid var(--beige-dark); }
+  .site-nav a { padding: 16px 0; font-size: 12px; border: 0; }
+  .site-nav a.is-active { text-decoration: underline; text-underline-offset: 5px; }
+}

@@ -1,0 +1,25 @@
+:root {
+  --bg: #F7F5F0;
+  --ink: #080808;
+  --gray: #6E6B66;
+  --gray-light: #A9A59E;
+  --beige: #E6DFD3;
+  --beige-dark: #CFC6B7;
+  --rule: #080808;
+
+  --font-display: 'Outfit', 'Futura', 'Century Gothic', sans-serif;
+  --font-didone: 'Playfair Display', 'Didot', 'Bodoni 72', Georgia, serif;
+  --font-serif: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+  --font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  --margin: 28px;
+  --max: 1680px;
+  --track-wide: 0.26em;
+  --track-mid: 0.18em;
+  --hair: 1px;
+}
+
+@media (max-width: 640px) {
+  :root { --margin: 18px; }
+}

@@ -1,0 +1,7 @@
+.site-footer {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  border-top: 1px solid var(--ink); padding: 18px 0 28px;
+  font: 500 9.5px/1.4 var(--font-sans); letter-spacing: 0.22em; text-transform: uppercase; color: var(--gray);
+}
+.site-footer ul { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.site-footer a:hover { color: var(--ink); }

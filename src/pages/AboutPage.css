@@ -1,0 +1,15 @@
+.about__grid { display: grid; grid-template-columns: 1.3fr 1fr 0.8fr; gap: 48px; padding: 26px 0 56px; }
+.about__grid > section > .col-label { margin-bottom: 18px; }
+.about__mission p { font: 400 18px/1.6 var(--font-serif); }
+.about__mission p + p { margin-top: 1em; }
+.about__mission .about__lead { font: 400 clamp(24px, 2.3vw, 32px)/1.25 var(--font-didone); text-transform: uppercase; margin-bottom: 1em; }
+.about__principles > div { padding: 14px 0; border-bottom: 1px solid var(--beige-dark); }
+.about__principles dt { display: flex; align-items: baseline; gap: 12px; font-size: 19px; }
+.about__principles dd { margin: 6px 0 0; font: 400 15.5px/1.5 var(--font-serif); color: #2d2b28; }
+.about__staff > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--beige-dark); }
+.about__staff dd { margin: 0; font-size: 16px; text-align: right; }
+.about__contact-h { margin-top: 32px; margin-bottom: 14px; }
+.about__contact { font: 400 15.5px/1.5 var(--font-serif); margin-top: 12px; }
+.about__contact .mono { font-size: 13px; }
+@media (max-width: 1000px) { .about__grid { grid-template-columns: 1fr 1fr; } .about__mission { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .about__grid { grid-template-columns: 1fr; gap: 36px; } }

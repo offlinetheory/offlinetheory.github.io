@@ -1,0 +1,8 @@
+.latest .col-label { padding-top: 22px; padding-bottom: 7px; letter-spacing: 0.3em; font-size: 10.5px; }
+.latest__list li + li .latest__item { border-top: 1px solid var(--beige-dark); }
+.latest__item { display: flex; flex-direction: column; padding: 13px 0 11px; }
+.latest__title { font-size: 14.5px; line-height: 17px; margin: 4px 0 8px; max-width: 160px; font-weight: 600; }
+.latest__read { display: inline-flex; align-items: center; gap: 9px; }
+.latest__read .arrow { transition: transform .2s; }
+.latest__item:hover .latest__title { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+.latest__item:hover .arrow { transform: translateX(3px); }

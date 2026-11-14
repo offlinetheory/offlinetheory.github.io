@@ -1,0 +1,37 @@
+.masthead {
+  margin: 0 -10px;           /* the reference runs the masthead slightly past the page margins */
+  padding-top: 18px;
+  overflow: hidden;
+  /* the reference letterforms are taller than any webfont at this width: stretch vertically */
+  --stretch: 1.105;
+}
+.masthead__title {
+  display: inline-flex; align-items: baseline; white-space: nowrap;
+  font-size: 13.25vw;        /* pre-hydration fallback; useFitText refines it */
+  line-height: 0.8;
+  font-weight: 400;
+  margin: 0;
+  transform: scaleY(var(--stretch));
+  transform-origin: 50% 100%;
+}
+.masthead__offline {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-right: 0.165em;
+}
+/* Horizontal split: an ivory band cut through the letters (Outfit metrics: cap top at 0.158em, cap height 0.712em). */
+.masthead__offline::after {
+  content: '';
+  position: absolute; left: -0.05em; right: -0.05em;
+  top: 0.474em; height: 0.083em;
+  background: var(--bg);
+}
+.masthead__theory {
+  font-family: var(--font-didone);
+  font-weight: 900;
+  letter-spacing: -0.042em;
+  line-height: 1;
+}
