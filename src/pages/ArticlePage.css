@@ -113,6 +113,15 @@
   .article--inset .article__byline { align-items: flex-start; }
   .article__body blockquote { font-size: 21px; }
   .article__byline { flex-direction: column; gap: 6px; }
+  /* Phone opening: slightly smaller, tighter headline and dek (desktop untouched). */
+  .article--hero .article__title,
+  .article--inset .article__title { font-size: clamp(33px, 9vw, 50px); line-height: 0.99; margin: 14px 0 16px; max-width: none; }
+  .article--hero .article__head,
+  .article--inset .article__head { align-self: stretch; }
+  .article--hero .article__dek,
+  .article--inset .article__dek { font-size: 16.5px; line-height: 1.5; max-width: 37ch; }
+  .article--hero .article__byline,
+  .article--inset .article__byline { margin-top: 22px; }
 }
 
 .article__disclosure {
