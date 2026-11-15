@@ -5,6 +5,7 @@ export const ARTICLES = [
   // ── The Digital Security Journal (homepage left column) ──────────────
   {
     slug: 'the-invisible-infrastructure-we-trust',
+      placeholder: false,
     title: 'The Invisible Infrastructure We Trust',
     section: 'analysis',
     volume: 'VOL. 001',
@@ -29,6 +30,7 @@ export const ARTICLES = [
   },
   {
     slug: 'why-patching-still-matters',
+      placeholder: false,
     title: 'Why Patching Still Matters',
     section: 'guides',
     volume: 'VOL. 002',
@@ -51,6 +53,7 @@ export const ARTICLES = [
   },
   {
     slug: 'privacy-in-a-hyper-connected-world',
+      placeholder: false,
     title: 'Privacy in a Hyper-Connected World',
     section: 'analysis',
     volume: 'VOL. 003',
@@ -71,6 +74,7 @@ export const ARTICLES = [
   },
   {
     slug: 'the-rise-of-everyday-surveillance',
+      placeholder: false,
     title: 'The Rise of Everyday Surveillance',
     section: 'analysis',
     volume: 'VOL. 004',
@@ -92,6 +96,7 @@ export const ARTICLES = [
   // ── Latest (homepage right column) ──────────────────────────────────
   {
     slug: 'a-closer-look-at-the-latest-zero-day',
+      placeholder: false,
     title: 'A Closer Look at the Latest Zero-Day',
     section: 'news',
     category: 'Security',
@@ -112,6 +117,7 @@ export const ARTICLES = [
   },
   {
     slug: 'open-source-security-tools-worth-using',
+      placeholder: false,
     title: 'Open-Source Security Tools Worth Using',
     section: 'tools',
     category: 'Tools',
@@ -130,6 +136,7 @@ export const ARTICLES = [
   },
   {
     slug: 'the-real-cost-of-convenience',
+      placeholder: false,
     title: 'The Real Cost of Convenience',
     section: 'analysis',
     category: 'Analysis',
@@ -328,6 +335,7 @@ export const ARTICLES = [
   // ── Section depth ───────────────────────────────────────────────────
   {
     slug: 'ransomware-groups-shift-to-data-extortion',
+      placeholder: false,
     title: 'Ransomware Groups Shift to Pure Data Extortion',
     section: 'news',
     category: 'Threats',
@@ -343,6 +351,7 @@ export const ARTICLES = [
   },
   {
     slug: 'passkeys-reach-the-mainstream',
+      placeholder: false,
     title: 'Passkeys Quietly Reach the Mainstream',
     section: 'news',
     category: 'Identity',
@@ -358,6 +367,7 @@ export const ARTICLES = [
   },
   {
     slug: 'regulators-target-data-brokers',
+      placeholder: false,
     title: 'Regulators Turn Their Attention to Data Brokers',
     section: 'news',
     category: 'Policy',
@@ -372,6 +382,7 @@ export const ARTICLES = [
   },
   {
     slug: 'threat-modeling-for-normal-people',
+      placeholder: false,
     title: 'Threat Modeling for Normal People',
     section: 'analysis',
     category: 'Commentary',
@@ -388,6 +399,7 @@ export const ARTICLES = [
   },
   {
     slug: 'review-hardware-security-keys-2026',
+      placeholder: false,
     title: 'Review: Hardware Security Keys in 2026',
     section: 'tools',
     category: 'Review',
@@ -403,6 +415,7 @@ export const ARTICLES = [
   },
   {
     slug: 'a-minimal-privacy-browser-setup',
+      placeholder: false,
     title: 'A Minimal Privacy Browser Setup',
     section: 'tools',
     category: 'Recommendations',
@@ -417,6 +430,7 @@ export const ARTICLES = [
   },
   {
     slug: 'how-to-audit-your-accounts-in-an-afternoon',
+      placeholder: false,
     title: 'How to Audit Your Accounts in an Afternoon',
     section: 'guides',
     category: 'Tutorial',
@@ -435,6 +449,7 @@ export const ARTICLES = [
   },
   {
     slug: 'encrypting-your-backups',
+      placeholder: false,
     title: 'Encrypting Your Backups, Properly',
     section: 'guides',
     category: 'Tutorial',
