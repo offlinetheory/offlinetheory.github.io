@@ -3,15 +3,53 @@
   padding-top: 18px;
   padding-bottom: 5px;           /* restore the pre-typography masthead height so columns stay put */
   overflow: hidden;
+  /* OFFLINE only: Archivo's cap is shorter than THEORY's at the shared fitted size.
+     scaleY plus a slightly raised transform-origin align the two cap heights
+     without changing the masthead box or THEORY. */
+  --stretch: 1.214;
 }
 .masthead__title {
+  display: inline-flex; align-items: baseline; white-space: nowrap;
+  font-size: 13.25vw;        /* pre-hydration fallback; useFitText refines it */
+  line-height: 0.8;
+  font-weight: 400;
   margin: 0;
-  line-height: 0;
 }
-.masthead__title img {
-  display: block;
-  width: 100%;
-  height: auto;
+.masthead__offline {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-right: 0.165em;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "wdth" 100, "wght" 700;
+  transform: scaleY(var(--stretch));
+  transform-origin: 50% 85%;
+}
+/* Horizontal split: an ivory band cut through the letters.
+   Archivo cap-height is 0.686em. The cut is 43.4% down the cap and 11.2% of
+   cap high, matching the reference; `top` is calibrated to Archivo in this line box. */
+.masthead__offline::after {
+  content: '';
+  position: absolute; left: -0.05em; right: -0.05em;
+  top: 0.442em; height: 0.077em;
+  background: var(--bg);
+}
+/* THEORY stays a high-contrast Didone, but weight 600 (not 800) so the
+   verticals are not chunky. opsz 12 keeps hairlines visible at display size.
+   1.12em and tracking fill the masthead width and match OFFLINE's cap height
+   without changing the shared fitted size. line-height 0.7 keeps typo
+   ascent/descent from pushing the column row down. */
+.masthead__theory {
+  font-family: var(--font-didone);
+  font-weight: 600;
+  font-size: 1.12em;
+  letter-spacing: -0.12em;
+  line-height: 0.7;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 12;
 }
 
 /* 1440/1536 keep the 6px pad that locks the column row. */

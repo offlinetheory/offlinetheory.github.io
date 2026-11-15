@@ -27,9 +27,7 @@ export default function Header() {
   return (
     <header className="site-header page">
       <div className="site-header__bar">
-        {/* The homepage already shows the giant logo masthead below, so the
-            small header logo is hidden there to keep the wordmark on screen once. */}
-        {location.pathname !== '/' && <Logo />}
+        <Logo />
         <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} id="site-nav" aria-label="Primary">
           <ul>
             {NAV.map((item) => (
