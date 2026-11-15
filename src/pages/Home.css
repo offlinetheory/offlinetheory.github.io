@@ -30,8 +30,13 @@
 /* Mobile: single column, hero → latest → journal */
 @media (max-width: 640px) {
   /* Clear gap between the masthead and the hero; the hero sits directly
-     beneath the masthead with nothing overlapping it. */
-  .home-grid { grid-template-columns: 1fr; row-gap: 32px; margin-top: 20px; }
+     beneath the masthead with nothing overlapping it. The 40px top margin
+     is sized for the hand layer: the hand extends ~22px above the hero
+     (top -9.890% of a ~224px hero), and the gap from the masthead's O to
+     the hero top was ~6px — so 40px leaves ~4px of clear ivory between
+     the hand's top and the O. The hand itself occupies most of the gap,
+     so it reads as intentional spacing, not an empty band. */
+  .home-grid { grid-template-columns: 1fr; row-gap: 32px; margin-top: 40px; }
   .home-grid__hero, .home-grid__latest, .home-grid__journal { grid-column: 1; }
   .home-grid__latest { grid-row: 2; }
   .home-grid__journal { grid-row: 3; }
