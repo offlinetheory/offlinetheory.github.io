@@ -39,9 +39,11 @@
 }
 
 @media (max-width: 640px) {
-  /* Mobile: hide the pop-out hand layer entirely. The only hand is the one
-     baked into the photograph, which sits inside the hero box (clipped by
-     .hero-book overflow:hidden) at the book's corner, below the masthead —
-     it never overlaps or appears on top of the masthead. */
-  .hero-book__hand { display: none; }
+  /* Mobile: the hand layer IS shown, at the same book's-corner alignment as
+     desktop (left 64.236%, top -9.890%), so the cutout stays aligned with
+     the hand baked into the photo — no seams or duplicated fingers. Do NOT
+     scale or reposition it. The masthead clearance comes from the increased
+     .home-grid margin-top (40px) in Home.css: the hand extends ~22px above
+     the hero, and the gap from the masthead's O to the hero top is ~26px,
+     leaving a small clear strip of ivory between the hand and the O. */
 }
