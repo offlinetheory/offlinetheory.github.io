@@ -45,7 +45,11 @@
 
 @media (max-width: 640px) {
   .hero-book__hand {
-    left: 72.1%;            /* pinch on the O's lower-left (mobile) */
-    top: -18.8%;
+    /* Smaller on mobile: at full width the hand sprawls over O, R and Y
+       and gets cut off by the screen edge. At 24% it fits inside the
+       viewport with the fingers on the O. */
+    left: 75%;
+    width: 24%;
+    top: -25%;
   }
 }
