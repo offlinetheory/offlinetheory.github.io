@@ -1,6 +1,9 @@
 import hero640 from '../assets/images/hero-book-640.webp'
 import hero960 from '../assets/images/hero-book-960.webp'
 import hero1152 from '../assets/images/hero-book-1152.webp'
+import heroNoHand640 from '../assets/images/hero-book-nohand-640.webp'
+import heroNoHand960 from '../assets/images/hero-book-nohand-960.webp'
+import heroNoHand1152 from '../assets/images/hero-book-nohand-1152.webp'
 import hand206 from '../assets/images/hero-hand-206.webp'
 import hand412 from '../assets/images/hero-hand-412.webp'
 import './HeroBook.css'
@@ -10,6 +13,12 @@ export default function HeroBook() {
   return (
     <div className="hero-wrap">
     <figure className="hero-book">
+      <picture>
+        {/* Mobile: hand-free photo, so the hand layer can sit over the O
+            without the photo's own hand showing at the book's corner. */}
+        <source media="(max-width: 640px)"
+          srcSet={`${heroNoHand640} 640w, ${heroNoHand960} 960w, ${heroNoHand1152} 1152w`}
+          sizes="100vw" />
       <img
         className="hero-book__img"
         src={hero960}
@@ -19,6 +28,7 @@ export default function HeroBook() {
         alt="An open blank book on a beige stone surface, a hand lifting the corner of the right-hand page"
         fetchpriority="high" decoding="async"
       />
+      </picture>
       <figcaption className="hero-book__text">
         <p>
           <span>Offline Theory is an</span>{' '}
