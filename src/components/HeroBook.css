@@ -37,3 +37,15 @@
   top: -9.890%;             /* -72 / 728 of the hero height (photo box) */
   height: auto;
 }
+
+@media (max-width: 640px) {
+  .hero-book__hand {
+    /* Mobile only: the hand sits over the O in THEORY. Desktop keeps it at
+       the book's corner. The mobile photo is the hand-free version (see
+       HeroBook.jsx <picture>), so no ghost hand shows at the corner.
+       Smaller (24%) so the whole hand fits inside the viewport. */
+    left: 77%;
+    width: 24%;
+    top: -15%;
+  }
+}
