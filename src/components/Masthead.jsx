@@ -1,14 +1,12 @@
-import { useFitText } from '../hooks/useFitText.js'
+import logoUrl from '../assets/images/logo.svg'
 import './Masthead.css'
 
-/** Oversized OFFLINE THEORY masthead, auto-fitted edge to edge. */
+/** Oversized OFFLINE THEORY masthead — the wordmark logo, edge to edge. */
 export default function Masthead({ as: Tag = 'h1' }) {
-  const ref = useFitText()
   return (
     <div className="masthead">
-      <Tag className="masthead__title" ref={ref}>
-        <span className="masthead__offline">OFFLINE</span>
-        <span className="masthead__theory">THEORY</span>
+      <Tag className="masthead__title">
+        <img src={logoUrl} alt="OFFLINE THEORY" />
       </Tag>
     </div>
   )
