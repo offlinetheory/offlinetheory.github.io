@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://offlinetheory.github.io/sitemap.xml
