@@ -27,29 +27,13 @@
   border: 0; border-top: 1px solid rgba(8, 8, 8, .55);
 }
 
-/* Hand pop-out layer. The hand is cut from the hero photo and sits over it
-   as a separate layer so it can rise above the book and overlap the
-   masthead. The hero photo itself has no hand in it (retouched out Nov 15,
-   2026), so this layer is the only hand and can be positioned freely.
-   Positioned so the fingers/thumb overlap the "O" in THEORY: desktop puts
-   the pinch on the O's lower-left; mobile re-aims it for the narrower
-   masthead. */
+/* Hand pop-out layer. Geometry is in % of the hero box, derived from the source:
+   layer = source x 740–1152, y 0–132; the hero shows source y 72–800 (728 rows). */
 .hero-wrap { position: relative; }
 .hero-book__hand {
   position: absolute; z-index: 5; pointer-events: none; user-select: none;
-  left: 88.8%;              /* pinch on the O's lower-left (desktop) */
+  left: 64.236%;            /* 740 / 1152 */
   width: 35.764%;           /* 412 / 1152 */
-  top: -22.8%;              /* fingers over the O's middle */
+  top: -9.890%;             /* -72 / 728 of the hero height (photo box) */
   height: auto;
-}
-
-@media (max-width: 640px) {
-  .hero-book__hand {
-    /* Smaller on mobile: at full width the hand sprawls over O, R and Y
-       and gets cut off by the screen edge. At 24% it fits inside the
-       viewport with the fingers on the O. */
-    left: 75%;
-    width: 24%;
-    top: -25%;
-  }
 }
