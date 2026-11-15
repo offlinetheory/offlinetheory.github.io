@@ -29,7 +29,9 @@
 
 /* Mobile: single column, hero → latest → journal */
 @media (max-width: 640px) {
-  .home-grid { grid-template-columns: 1fr; row-gap: 32px; }
+  /* Clear gap between the masthead and the hero; the hero sits directly
+     beneath the masthead with nothing overlapping it. */
+  .home-grid { grid-template-columns: 1fr; row-gap: 32px; margin-top: 20px; }
   .home-grid__hero, .home-grid__latest, .home-grid__journal { grid-column: 1; }
   .home-grid__latest { grid-row: 2; }
   .home-grid__journal { grid-row: 3; }

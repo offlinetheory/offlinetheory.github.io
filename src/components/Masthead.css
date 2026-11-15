@@ -1,7 +1,13 @@
 .masthead {
-  margin: 0 -12px;           /* the reference runs the masthead slightly past the page margins */
+  /* No negative margins: the masthead sits inside the page padding so it can
+     never bleed past the viewport edges. The fit (useFitText) sizes the title
+     to 97% of this box, leaving breathing room on both sides. */
+  margin: 0;
   padding-top: 18px;
   padding-bottom: 5px;           /* restore the pre-typography masthead height so columns stay put */
+  /* Clips only the vertical overflow of OFFLINE's scaleY stretch. Horizontal
+     fit is guaranteed by the inset + the 0.97 fit ratio, so no letter is
+     ever clipped at the sides. */
   overflow: hidden;
   /* OFFLINE only: Archivo's cap is shorter than THEORY's at the shared fitted size.
      scaleY plus a slightly raised transform-origin align the two cap heights
@@ -10,7 +16,12 @@
 }
 .masthead__title {
   display: inline-flex; align-items: baseline; white-space: nowrap;
-  font-size: 13.25vw;        /* pre-hydration fallback; useFitText refines it */
+  /* Fluid fallback (pre-hydration): clamp() keeps it inside the viewport at
+     every width; useFitText refines it to exactly fill the masthead.
+     Measured with the real fonts: the title is ~8.32x the font-size wide
+     (OFFLINE 408.6 + 16.5 gap + THEORY 406.7 at 100px), so 10vw stays
+     below the fitted size at every width and can never overflow. */
+  font-size: clamp(32px, 10vw, 185px);
   line-height: 0.8;
   font-weight: 400;
   margin: 0;

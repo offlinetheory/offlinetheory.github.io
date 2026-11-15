@@ -39,14 +39,9 @@
 }
 
 @media (max-width: 640px) {
-  .hero-book__hand {
-    /* Mobile only: the hand sits over the O in THEORY. Desktop keeps it at
-       the book's corner. The mobile photo is the hand-free version (see
-       HeroBook.jsx <picture>), so no ghost hand shows at the corner.
-       Smaller (19%) and centred on the O so the whole hand fits inside the
-       viewport and the wrist does not run off the right edge. */
-    left: 79%;
-    width: 19%;
-    top: -23%;
-  }
+  /* Mobile: hide the pop-out hand layer entirely. The only hand is the one
+     baked into the photograph, which sits inside the hero box (clipped by
+     .hero-book overflow:hidden) at the book's corner, below the masthead —
+     it never overlaps or appears on top of the masthead. */
+  .hero-book__hand { display: none; }
 }
