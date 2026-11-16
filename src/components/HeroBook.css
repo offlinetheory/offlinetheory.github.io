@@ -31,7 +31,11 @@
    layer = source x 740–1152, y 0–132; the hero shows source y 72–800 (728 rows). */
 .hero-wrap { position: relative; }
 .hero-book__hand {
-  position: absolute; z-index: 5; pointer-events: none; user-select: none;
+  /* Layer 3: the hand sits IN FRONT of both the masthead (z-index 1) and
+     the photograph (inside .hero-book, z-index auto). The grid is z-index 2,
+     so this z-index 10 is evaluated inside the grid's stacking context and
+     the hand always paints on top. */
+  position: absolute; z-index: 10; pointer-events: none; user-select: none;
   left: 64.236%;            /* 740 / 1152 */
   width: 35.764%;           /* 412 / 1152 */
   top: -9.890%;             /* -72 / 728 of the hero height (photo box) */
@@ -42,8 +46,9 @@
   /* Mobile: the hand layer IS shown, at the same book's-corner alignment as
      desktop (left 64.236%, top -9.890%), so the cutout stays aligned with
      the hand baked into the photo — no seams or duplicated fingers. Do NOT
-     scale or reposition it. The masthead clearance comes from the increased
-     .home-grid margin-top (40px) in Home.css: the hand extends ~22px above
-     the hero, and the gap from the masthead's O to the hero top is ~26px,
-     leaving a small clear strip of ivory between the hand and the O. */
+     scale or reposition it. The hand OVERLAPS the bottom of the THEORY
+     lettering (see the .home-grid margin-top 27px in Home.css, which pulls
+     the hero up so the fingers/wrist reach ~10px into the letters). The
+     hand is in front of the letters (z-index 10, grid z-index 2, masthead
+     z-index 1). */
 }
