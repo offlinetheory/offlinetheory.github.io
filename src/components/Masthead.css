@@ -1,7 +1,13 @@
 .masthead {
   /* No negative margins: the masthead sits inside the page padding so it can
      never bleed past the viewport edges. The fit (useFitText) sizes the title
-     to 97% of this box, leaving breathing room on both sides. */
+     to 97% of this box, leaving breathing room on both sides.
+     Layering: the masthead is layer 1 (ivory page is the background). It is
+     positioned with z-index 1 so the grid (z-index 2, including the hand
+     cutout at z-index 10) paints IN FRONT of it — the hand overlaps the
+     bottom of the THEORY lettering. This does not move the masthead. */
+  position: relative;
+  z-index: 1;
   margin: 0;
   padding-top: 18px;
   padding-bottom: 5px;           /* restore the pre-typography masthead height so columns stay put */
