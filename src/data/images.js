@@ -9,6 +9,9 @@ import surveillance480 from '../assets/images/thumb-surveillance-480.webp'
 import msOutage480 from '../assets/images/cover-microsoft-outage-480.webp'
 import msOutage960 from '../assets/images/cover-microsoft-outage-960.webp'
 import msOutage1536 from '../assets/images/cover-microsoft-outage-1536.webp'
+import jj480 from '../assets/images/cover-jonathan-james-480.webp'
+import jj960 from '../assets/images/cover-jonathan-james-960.webp'
+import jj1448 from '../assets/images/cover-jonathan-james-1448.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -17,4 +20,5 @@ export const THUMBS = {
   privacy: { src: privacy240, srcSet: `${privacy240} 240w, ${privacy480} 480w`, alt: 'Halftone illustration of a person wearing headphones beside a wall-mounted CCTV camera, framed by red corner brackets' },
   surveillance: { src: surveillance240, srcSet: `${surveillance240} 240w, ${surveillance480} 480w`, alt: 'Halftone illustration of CCTV cameras mounted on a pole above a building, beneath a large red sun' },
   msOutage: { src: msOutage960, srcSet: `${msOutage480} 480w, ${msOutage960} 960w, ${msOutage1536} 1536w`, wide: true, width: SEO_COVERS.msOutage.width, height: SEO_COVERS.msOutage.height, alt: SEO_COVERS.msOutage.alt },
+  jonathanJames: { src: jj960, srcSet: `${jj480} 480w, ${jj960} 960w, ${jj1448} 1448w`, wide: true, width: SEO_COVERS.jonathanJames.width, height: SEO_COVERS.jonathanJames.height, alt: SEO_COVERS.jonathanJames.alt },
 }
