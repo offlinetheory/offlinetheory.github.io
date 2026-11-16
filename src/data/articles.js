@@ -466,15 +466,16 @@ export const ARTICLES = [
 ]
 
 // Downloadable guides. Free sample templates ship as PDFs in public/downloads/;
-// the three full guides are placeholders: no files, prices, or checkout exist yet.
+// the four paid guides are sold via Gumroad (buyUrl); prices live on the listings.
 export const PRODUCTS = [
   { slug: 'sample-vulnerability-remediation-report', title: 'Vulnerability Remediation Report (Sample)', format: 'PDF · 5 pages', price: 'Free download', status: 'Free sample', file: '/downloads/Sample_Vulnerability_Remediation_Report.pdf' },
   { slug: 'sample-hipaa-access-control-policy', title: 'HIPAA Access Control Policy (Sample)', format: 'PDF · 5 pages', price: 'Free download', status: 'Free sample', file: '/downloads/Sample_HIPAA_Access_Control_Policy.pdf' },
   { slug: 'sample-patch-management-sop', title: 'Vulnerability & Patch Management SOP (Sample)', format: 'PDF · 5 pages', price: 'Free download', status: 'Free sample', file: '/downloads/Sample_Patch_Management_SOP.pdf' },
   { slug: 'sample-soc2-evidence-tracker', title: 'SOC 2 Evidence Tracker Template (Sample)', format: 'PDF · 5 pages', price: 'Free download', status: 'Free sample', file: '/downloads/Sample_SOC2_Evidence_Tracker_Template.pdf' },
-  { slug: 'personal-security-field-guide', title: 'The Personal Security Field Guide', format: 'PDF · 64 pages', price: 'Placeholder price', status: 'Coming soon' },
-  { slug: 'small-office-hardening-checklist', title: 'Small Office Hardening Checklist', format: 'PDF + spreadsheet', price: 'Placeholder price', status: 'Coming soon' },
-  { slug: 'offline-theory-print-001', title: 'Offline Theory, Print Edition VOL. 001', format: 'Printed journal', price: 'Placeholder price', status: 'Coming soon' },
+  { slug: 'personal-security-field-guide', title: 'The Personal Security Field Guide', format: 'PDF · 62 pages', price: '$24', status: 'Available', buyUrl: 'https://theoryjournal.gumroad.com/l/dxjbt' },
+  { slug: 'small-office-hardening-checklist', title: 'Small Office Hardening Checklist', format: 'PDF + spreadsheet', price: '$12', status: 'Available', buyUrl: 'https://theoryjournal.gumroad.com/l/brlwtu' },
+  { slug: 'offline-theory-print-001', title: 'Offline Theory, Print Edition VOL. 001', format: 'PDF · 37 pages — digital download', price: '$29', status: 'Available', buyUrl: 'https://theoryjournal.gumroad.com/l/wdxmxq' },
+  { slug: 'bundle-field-guide-checklist', title: 'Bundle: Field Guide + Hardening Checklist', format: 'PDFs + spreadsheet', price: '$29', status: 'Available', buyUrl: 'https://theoryjournal.gumroad.com/l/lkusx' },
 ]
 
 export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
