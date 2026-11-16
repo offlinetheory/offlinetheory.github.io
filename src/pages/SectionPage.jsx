@@ -46,14 +46,16 @@ export default function SectionPage({ slug }) {
           {slug === 'guides' && (
             <section>
               <h2 className="label col-label">Downloads</h2>
-              <p className="placeholder-flag">Sample templates: free to download. Full guides coming soon.</p>
+              <p className="placeholder-flag">Sample templates: free to download. Full guides available to buy.</p>
               <ul className="products">
                 {PRODUCTS.map((p) => (
                   <li key={p.slug}>
                     <span className="meta">{p.format}</span>
                     <h3 className="serif-head">{p.title}</h3>
                     <span className="meta products__status">{p.status} / {p.price}</span>
-                    {p.file ? (
+                    {p.buyUrl ? (
+                      <a className="btn btn--ghost" href={p.buyUrl} target="_blank" rel="noreferrer">Buy — {p.price}</a>
+                    ) : p.file ? (
                       <a className="btn btn--ghost" href={p.file} download>Download PDF</a>
                     ) : (
                       <button type="button" className="btn btn--ghost" disabled aria-disabled="true">Coming soon</button>
