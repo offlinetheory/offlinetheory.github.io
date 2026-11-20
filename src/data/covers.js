@@ -17,6 +17,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage: a black-and-white photo of Jonathan James in front of a red sun, with the headline \u201cJonathan James\u201d and his handle \u201cc0mrade\u201d, the NASA Marshall Space Flight Center building, the International Space Station above Earth, a Defense Threat Reduction Agency seal, a beige 1990s computer, and labels reading \u201c1999, age 15\u201d, \u201c13 NASA computers\u201d and \u201cSix-month detention sentence \u00b7 2000\u201d.',
   },
+  vendorBreach: {
+    filePrefix: 'cover-vendor-breach-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Illustration: a pale grey office filing cabinet with its top drawer pulled open and index cards standing inside, as a trail of white envelopes drifts out of it and away across a large red sun and a dark, generic city skyline. On the desk in front sit a plain dark payment card with a gold chip, an unlocked padlock and a white mug.',
+  },
 }
 
 export function getSeoCover(thumbKey) {
