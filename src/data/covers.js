@@ -31,12 +31,12 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Illustration: a tall grey server cabinet stands on the horizon with thin lines running out to small, generic buildings on either side, one link drawn as a broken red dashed line, beneath a large red sun. A plain unmarked patrol car drives along the road below. On the desk in front, a boxy computer terminal shows rows of abstract bars with one row in red, beside a stack of index cards under a magnifying glass and a white mug.',
   },
-  smallBizPresence: {
-    filePrefix: 'cover-small-biz-presence-1536',
+  bleuprint: {
+    filePrefix: 'cover-bleuprint-1536',
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: two almost-identical small shopfronts sit on a quiet street beneath a large red sun. A dark map pin marks the shop on the left; the shop on the right is paler, outlined in red, with a red slash across its blank sign and a red map pin above it. On the desk in front are a white mug, an unlocked padlock, a paper map with two pins, and a phone showing an abstract map and listing rows.',
+    alt: 'A cream, editorial photograph of a phone on a paper background, showing the Bleuprint homepage. The screen has no status bar or browser bar. It reads “Be the one customers choose,” with a photo of founder Kalena Waters-Gardner smiling in front of blue and red sculptural flowers, badges for 500K+ views and “Found → Booked → Paid,” and a button that says “Book your free audit.”',
   },
 }
 

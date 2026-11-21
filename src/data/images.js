@@ -18,9 +18,9 @@ import vb1536 from '../assets/images/cover-vendor-breach-1536.webp'
 import fbi480 from '../assets/images/cover-fbi-ncic-480.webp'
 import fbi960 from '../assets/images/cover-fbi-ncic-960.webp'
 import fbi1536 from '../assets/images/cover-fbi-ncic-1536.webp'
-import smb480 from '../assets/images/cover-small-biz-presence-480.webp'
-import smb960 from '../assets/images/cover-small-biz-presence-960.webp'
-import smb1536 from '../assets/images/cover-small-biz-presence-1536.webp'
+import bleuprint480 from '../assets/images/cover-bleuprint-480.webp'
+import bleuprint960 from '../assets/images/cover-bleuprint-960.webp'
+import bleuprint1536 from '../assets/images/cover-bleuprint-1536.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -32,5 +32,5 @@ export const THUMBS = {
   jonathanJames: { src: jj960, srcSet: `${jj480} 480w, ${jj960} 960w, ${jj1448} 1448w`, wide: true, width: SEO_COVERS.jonathanJames.width, height: SEO_COVERS.jonathanJames.height, alt: SEO_COVERS.jonathanJames.alt },
   vendorBreach: { src: vb960, srcSet: `${vb480} 480w, ${vb960} 960w, ${vb1536} 1536w`, wide: true, width: SEO_COVERS.vendorBreach.width, height: SEO_COVERS.vendorBreach.height, alt: SEO_COVERS.vendorBreach.alt },
   fbiNcic: { src: fbi960, srcSet: `${fbi480} 480w, ${fbi960} 960w, ${fbi1536} 1536w`, wide: true, width: SEO_COVERS.fbiNcic.width, height: SEO_COVERS.fbiNcic.height, alt: SEO_COVERS.fbiNcic.alt },
-  smallBizPresence: { src: smb960, srcSet: `${smb480} 480w, ${smb960} 960w, ${smb1536} 1536w`, wide: true, width: SEO_COVERS.smallBizPresence.width, height: SEO_COVERS.smallBizPresence.height, alt: SEO_COVERS.smallBizPresence.alt },
+  bleuprint: { src: bleuprint960, srcSet: `${bleuprint480} 480w, ${bleuprint960} 960w, ${bleuprint1536} 1536w`, wide: true, width: SEO_COVERS.bleuprint.width, height: SEO_COVERS.bleuprint.height, alt: SEO_COVERS.bleuprint.alt },
 }
