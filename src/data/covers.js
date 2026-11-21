@@ -24,6 +24,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Illustration: a pale grey office filing cabinet with its top drawer pulled open and index cards standing inside, as a trail of white envelopes drifts out of it and away across a large red sun and a dark, generic city skyline. On the desk in front sit a plain dark payment card with a gold chip, an unlocked padlock and a white mug.',
   },
+  fbiNcic: {
+    filePrefix: 'cover-fbi-ncic-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Illustration: a tall grey server cabinet stands on the horizon with thin lines running out to small, generic buildings on either side, one link drawn as a broken red dashed line, beneath a large red sun. A plain unmarked patrol car drives along the road below. On the desk in front, a boxy computer terminal shows rows of abstract bars with one row in red, beside a stack of index cards under a magnifying glass and a white mug.',
+  },
 }
 
 export function getSeoCover(thumbKey) {
