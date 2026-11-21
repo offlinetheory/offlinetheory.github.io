@@ -606,7 +606,7 @@ export const ARTICLES = [
     category: 'Tools',
     placeholder: false,
     thumb: 'bleuprint',
-    caption: 'Illustration / OFFLINE THEORY',
+    caption: 'Cover / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
     date: '2026-11-21',
     readTime: 7,

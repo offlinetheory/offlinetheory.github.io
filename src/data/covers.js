@@ -36,7 +36,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a stylized woman with a warm smile, long dark hair and a dark top stands between two sculptural flowers of coiled blue yarn with red centres, beneath a large red sun. A small shop with a map pin sits on the street to the left. On the desk in front are a white mug, a plain camera, a phone showing an abstract map, and a red map pin.',
+    alt: 'Cover collage with the headline “BLEUPRINT: The Metro Detroit Tool for Getting Found and Chosen,” a halftone portrait of a smiling woman with long dark hair and a dark sleeveless top, a laptop showing the Bleuprint site with the line “Be the one customers choose,” a Michigan map, the Detroit skyline, a “Made in Metro Detroit” badge, and a checklist reading “Get found / Get booked / Get paid.”',
   },
 }
 
