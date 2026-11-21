@@ -36,7 +36,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'A cream, editorial photograph of a phone on a paper background, showing the Bleuprint homepage. The screen has no status bar or browser bar. It reads “Be the one customers choose,” with a photo of founder Kalena Waters-Gardner smiling in front of blue and red sculptural flowers, badges for 500K+ views and “Found → Booked → Paid,” and a button that says “Book your free audit.”',
+    alt: 'Illustration: a stylized woman with a warm smile, long dark hair and a dark top stands between two sculptural flowers of coiled blue yarn with red centres, beneath a large red sun. A small shop with a map pin sits on the street to the left. On the desk in front are a white mug, a plain camera, a phone showing an abstract map, and a red map pin.',
   },
 }
 
