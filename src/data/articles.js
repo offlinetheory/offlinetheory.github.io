@@ -610,7 +610,7 @@ export const ARTICLES = [
     author: 'Jamiah McQuiller',
     date: '2026-11-21',
     readTime: 7,
-    dek: 'Kalena Waters-Gardner built Bleuprint to help Metro Detroit small business owners get found and chosen, starting with a free 15-minute social media audit. Here is what she offers, drawn from her own site.',
+    dek: 'Kalena Waters-Gardner built Bleuprint to help Metro Detroit small business owners get found and chosen, starting with a free 15-minute social media audit. Here is what she offers.',
     tags: ['bleuprint', 'small business', 'metro detroit', 'tools', 'marketing'],
     body: [
       { type: 'p', text: [
