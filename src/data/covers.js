@@ -29,7 +29,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a tall grey server cabinet stands on the horizon with thin lines running out to small, generic buildings on either side, one link drawn as a broken red dashed line, beneath a large red sun. A plain unmarked patrol car drives along the road below. On the desk in front, a boxy computer terminal shows rows of abstract bars with one row in red, beside a stack of index cards under a magnifying glass and a white mug.',
+    alt: 'Collage illustration: a large halftone fingerprint on torn paper beside a long row of black filing cabinets receding into the distance, with a cut-out police radio microphone in front, rust-colored redaction bars, and cobalt and rust circles on cream paper.',
   },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',
