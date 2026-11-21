@@ -31,6 +31,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Illustration: a tall grey server cabinet stands on the horizon with thin lines running out to small, generic buildings on either side, one link drawn as a broken red dashed line, beneath a large red sun. A plain unmarked patrol car drives along the road below. On the desk in front, a boxy computer terminal shows rows of abstract bars with one row in red, beside a stack of index cards under a magnifying glass and a white mug.',
   },
+  smallBizPresence: {
+    filePrefix: 'cover-small-biz-presence-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Illustration: two almost-identical small shopfronts sit on a quiet street beneath a large red sun. A dark map pin marks the shop on the left; the shop on the right is paler, outlined in red, with a red slash across its blank sign and a red map pin above it. On the desk in front are a white mug, an unlocked padlock, a paper map with two pins, and a phone showing an abstract map and listing rows.',
+  },
 }
 
 export function getSeoCover(thumbKey) {
