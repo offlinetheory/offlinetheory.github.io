@@ -8,7 +8,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a beige retro CRT computer on a desk shows a Microsoft \u201cWe\u2019re having trouble connecting right now\u201d screen with a loading spinner, a yellow sticky note on the monitor reads \u201cAgain?\u201d, and a big red sun sets behind the Detroit skyline across the river. A Michigan map is pinned to the wall, and books labeled Cybersecurity, Technology and Internet Culture sit beside a coffee mug, a potted plant and headphones.',
+    alt: 'Cover collage with the headline “What the Microsoft 365 Outage Actually Broke, and What to Do Now,” a “News / Outages / Productivity” label, a laptop showing a Microsoft 365 service-outage screen, floating Outlook, Teams and cloud app icons, a Microsoft office building, a rust-orange sun in the clouds, and a checklist reading “What broke / Impact / What to do now,” with the last item checked.',
   },
   jonathanJames: {
     filePrefix: 'cover-jonathan-james-1448',
@@ -22,7 +22,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a pale grey office filing cabinet with its top drawer pulled open and index cards standing inside, as a trail of white envelopes drifts out of it and away across a large red sun and a dark, generic city skyline. On the desk in front sit a plain dark payment card with a gold chip, an unlocked padlock and a white mug.',
+    alt: 'Cover collage with the headline “Chase, Visa and Mastercard Data Leaked Through Their Vendors,” a “News / Security / Data Breach” label, branded Chase, Visa and Mastercard payment cards, a “Vendor Breach” warning with a barcode, a torn card form with blank name and card-number fields, and a hooded figure behind a laptop showing a padlock on a red screen, with a globe and a building in the background.',
   },
   fbiNcic: {
     filePrefix: 'cover-fbi-ncic-1536',
