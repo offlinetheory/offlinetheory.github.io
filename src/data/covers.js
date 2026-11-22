@@ -13,7 +13,7 @@ export const SEO_COVERS = {
   mclaren: {
     filePrefix: 'cover-mclaren-1536',
     width: 1536,
-    height: 1153,
+    height: 1182,
     type: 'image/webp',
     alt: 'Cover collage: the McLaren Flint hospital building with a red \u201cEmergency\u201d sign, a hooded figure in front of a red sun behind a laptop showing a padlock, and a pinned note reading \u201c2023: Ransomware attack (ALPHV/BlackCat), ~2.2 million people affected\u201d and \u201c2024: Second cyberattack, ~740,000 people affected\u201d.',
   },
