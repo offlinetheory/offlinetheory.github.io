@@ -818,6 +818,7 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
+    hideFromLatest: true,
     thumb: 'guidePhishing',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -890,6 +891,7 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
+    hideFromLatest: true,
     thumb: 'guideSocialEngineering',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -954,6 +956,7 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
+    hideFromLatest: true,
     thumb: 'guideRansomware',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -1031,8 +1034,11 @@ export const journalIssues = () => ARTICLES.filter((a) => a.journal)
 // Homepage "Latest": the newest articles by date. On the same date, the one
 // added later to ARTICLES comes first, so new pieces always take slot 1.
 export const LATEST_COUNT = 3
+// Articles with hideFromLatest: true still appear in their section, search and
+// related lists, but are left out of the homepage Latest list.
 export const latestArticles = (count = LATEST_COUNT) =>
   ARTICLES.map((a, i) => ({ a, i }))
+    .filter(({ a }) => !a.hideFromLatest)
     .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
     .slice(0, count)
     .map(({ a }) => a)
