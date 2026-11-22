@@ -343,6 +343,8 @@ export const ARTICLES = [
     section: 'analysis',
     category: 'Analysis',
     placeholder: false,
+    thumb: 'genesee',
+    caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
     date: '2026-11-22',
     readTime: 6,

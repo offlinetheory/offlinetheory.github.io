@@ -36,6 +36,9 @@ import mcl1536 from '../assets/images/cover-mclaren-1536.webp'
 import sb001_480 from '../assets/images/cover-security-briefs-ep001-480.webp'
 import sb001_960 from '../assets/images/cover-security-briefs-ep001-960.webp'
 import sb001_1536 from '../assets/images/cover-security-briefs-ep001-1536.webp'
+import gen480 from '../assets/images/cover-genesee-480.webp'
+import gen960 from '../assets/images/cover-genesee-960.webp'
+import gen1536 from '../assets/images/cover-genesee-1536.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -44,6 +47,7 @@ export const THUMBS = {
   privacy: { src: privacy240, srcSet: `${privacy240} 240w, ${privacy480} 480w`, alt: 'Halftone illustration of a person wearing headphones beside a wall-mounted CCTV camera, framed by red corner brackets' },
   surveillance: { src: surveillance240, srcSet: `${surveillance240} 240w, ${surveillance480} 480w`, alt: 'Halftone illustration of CCTV cameras mounted on a pole above a building, beneath a large red sun' },
   msOutage: { src: msOutage960, srcSet: `${msOutage480} 480w, ${msOutage960} 960w, ${msOutage1536} 1536w`, wide: true, width: SEO_COVERS.msOutage.width, height: SEO_COVERS.msOutage.height, alt: SEO_COVERS.msOutage.alt },
+  genesee: { src: gen960, srcSet: `${gen480} 480w, ${gen960} 960w, ${gen1536} 1536w`, wide: true, width: SEO_COVERS.genesee.width, height: SEO_COVERS.genesee.height, alt: SEO_COVERS.genesee.alt },
   mclaren: { src: mcl960, srcSet: `${mcl480} 480w, ${mcl960} 960w, ${mcl1536} 1536w`, wide: true, width: SEO_COVERS.mclaren.width, height: SEO_COVERS.mclaren.height, alt: SEO_COVERS.mclaren.alt },
   jonathanJames: { src: jj960, srcSet: `${jj480} 480w, ${jj960} 960w, ${jj1448} 1448w`, wide: true, width: SEO_COVERS.jonathanJames.width, height: SEO_COVERS.jonathanJames.height, alt: SEO_COVERS.jonathanJames.alt },
   vendorBreach: { src: vb960, srcSet: `${vb480} 480w, ${vb960} 960w, ${vb1536} 1536w`, wide: true, width: SEO_COVERS.vendorBreach.width, height: SEO_COVERS.vendorBreach.height, alt: SEO_COVERS.vendorBreach.alt },

@@ -10,6 +10,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with the headline “What the Microsoft 365 Outage Actually Broke, and What to Do Now,” a “News / Outages / Productivity” label, a laptop showing a Microsoft 365 service-outage screen, floating Outlook, Teams and cloud app icons, a Microsoft office building, a rust-orange sun in the clouds, and a checklist reading “What broke / Impact / What to do now,” with the last item checked.',
   },
+  genesee: {
+    filePrefix: 'cover-genesee-1536',
+    width: 1536,
+    height: 865,
+    type: 'image/webp',
+    alt: 'Cover collage: the Genesee County Administration Building with its \u201cGenesee County Administration Bldg.\u201d sign, the Genesee County, Michigan seal, torn red paper, and the headline \u201cGenesee County: Inside the 2019 Ransomware Attack\u201d.',
+  },
   mclaren: {
     filePrefix: 'cover-mclaren-1536',
     width: 1536,
