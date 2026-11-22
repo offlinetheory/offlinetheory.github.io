@@ -832,11 +832,11 @@ export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
 // Hidden from section index lists and homepage modules (Latest, Journal).
 // Articles stay in ARTICLES, so their URLs, search, and related lists are unchanged.
 export const SECTION_LIST_HIDDEN_SLUGS = new Set([
-  // News: former first four (FBI NCIC, Chase/Visa/Mastercard, Microsoft 365, zero-day)
-  'fbi-ncic-crime-database-breach-november-2026',
-  'chase-visa-mastercard-vendor-data-leak-november-2026',
-  'microsoft-365-outage-november-2026',
+  // News: hide Zero-Day, Ransomware, Passkeys, and Data Brokers; keep FBI, Chase, Microsoft 365
   'a-closer-look-at-the-latest-zero-day',
+  'ransomware-groups-shift-to-data-extortion',
+  'passkeys-reach-the-mainstream',
+  'regulators-target-data-brokers',
   // Analysis: former 02-06; c0mrade stays
   'the-real-cost-of-convenience',
   'threat-modeling-for-normal-people',
