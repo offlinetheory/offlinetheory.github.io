@@ -38,6 +38,27 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with the headline “BLEUPRINT: The Metro Detroit Tool for Getting Found and Chosen,” a halftone portrait of a smiling woman with long dark hair and a dark sleeveless top, a laptop showing the Bleuprint site with the line “Be the one customers choose,” a Michigan map, the Detroit skyline, a “Made in Metro Detroit” badge, and a checklist reading “Get found / Get booked / Get paid.”',
   },
+  guidePhishing: {
+    filePrefix: 'cover-guide-phishing-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Cover collage with the headline \u201cPhishing: The Hook That Steals Your Data,\u201d a fishing hook piercing an \u201cAccount Login\u201d form with email and password fields and a Log In button, a hooded figure at a laptop beside a warning triangle, an envelope on a browser window, and a checklist titled \u201cLook for the signs\u201d: urgent requests, unexpected links, login page lookalikes, suspicious senders, and requests for sensitive information.',
+  },
+  guideSocialEngineering: {
+    filePrefix: 'cover-guide-social-engineering-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Cover collage with the label \u201cSecurity / Human Risk / Awareness\u201d and the headline \u201cSocial Engineering: How Attackers Manipulate People, Not Systems,\u201d a halftone portrait of a woman with a rust-orange strip across her eyes, a fishing hook holding an envelope, a laptop showing a sign-in form, silhouetted figures walking, and a checklist reading phishing, pretexting, baiting, vishing and tailgating.',
+  },
+  guideRansomware: {
+    filePrefix: 'cover-guide-ransomware-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Cover collage with the headline \u201cRansomware: How It Locks Your Data, Disrupts Operations, and Extorts a Payout,\u201d a rust-red padlock on an opened hard drive, a torn note reading \u201cYour data has been encrypted. Pay in 72 hours or lose access,\u201d office buildings, and a row of old computer monitors, one showing a warning triangle.',
+  },
 }
 
 export function getSeoCover(thumbKey) {

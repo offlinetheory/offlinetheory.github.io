@@ -21,6 +21,15 @@ import fbi1536 from '../assets/images/cover-fbi-ncic-1536.webp'
 import bleuprint480 from '../assets/images/cover-bleuprint-480.webp'
 import bleuprint960 from '../assets/images/cover-bleuprint-960.webp'
 import bleuprint1536 from '../assets/images/cover-bleuprint-1536.webp'
+import gph480 from '../assets/images/cover-guide-phishing-480.webp'
+import gph960 from '../assets/images/cover-guide-phishing-960.webp'
+import gph1536 from '../assets/images/cover-guide-phishing-1536.webp'
+import gse480 from '../assets/images/cover-guide-social-engineering-480.webp'
+import gse960 from '../assets/images/cover-guide-social-engineering-960.webp'
+import gse1536 from '../assets/images/cover-guide-social-engineering-1536.webp'
+import grw480 from '../assets/images/cover-guide-ransomware-480.webp'
+import grw960 from '../assets/images/cover-guide-ransomware-960.webp'
+import grw1536 from '../assets/images/cover-guide-ransomware-1536.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -33,4 +42,7 @@ export const THUMBS = {
   vendorBreach: { src: vb960, srcSet: `${vb480} 480w, ${vb960} 960w, ${vb1536} 1536w`, wide: true, width: SEO_COVERS.vendorBreach.width, height: SEO_COVERS.vendorBreach.height, alt: SEO_COVERS.vendorBreach.alt },
   fbiNcic: { src: fbi960, srcSet: `${fbi480} 480w, ${fbi960} 960w, ${fbi1536} 1536w`, wide: true, width: SEO_COVERS.fbiNcic.width, height: SEO_COVERS.fbiNcic.height, alt: SEO_COVERS.fbiNcic.alt },
   bleuprint: { src: bleuprint960, srcSet: `${bleuprint480} 480w, ${bleuprint960} 960w, ${bleuprint1536} 1536w`, wide: true, width: SEO_COVERS.bleuprint.width, height: SEO_COVERS.bleuprint.height, alt: SEO_COVERS.bleuprint.alt },
+  guidePhishing: { src: gph960, srcSet: `${gph480} 480w, ${gph960} 960w, ${gph1536} 1536w`, wide: true, width: SEO_COVERS.guidePhishing.width, height: SEO_COVERS.guidePhishing.height, alt: SEO_COVERS.guidePhishing.alt },
+  guideSocialEngineering: { src: gse960, srcSet: `${gse480} 480w, ${gse960} 960w, ${gse1536} 1536w`, wide: true, width: SEO_COVERS.guideSocialEngineering.width, height: SEO_COVERS.guideSocialEngineering.height, alt: SEO_COVERS.guideSocialEngineering.alt },
+  guideRansomware: { src: grw960, srcSet: `${grw480} 480w, ${grw960} 960w, ${grw1536} 1536w`, wide: true, width: SEO_COVERS.guideRansomware.width, height: SEO_COVERS.guideRansomware.height, alt: SEO_COVERS.guideRansomware.alt },
 }

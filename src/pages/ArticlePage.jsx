@@ -17,6 +17,8 @@ function inlineText(text) {
   if (typeof text === 'string' || text == null) return text
   return text.map((part, i) => {
     if (typeof part === 'string') return <Fragment key={i}>{part}</Fragment>
+    // Internal links (to other articles on this site) stay in the same tab.
+    if (part.href.startsWith('/')) return <Link key={i} to={part.href}>{part.text}</Link>
     return (
       <a
         key={i}

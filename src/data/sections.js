@@ -24,8 +24,8 @@ export const SECTIONS = [
     slug: 'guides',
     name: 'Guides',
     title: 'Guides',
-    kicker: 'Practice',
-    description: 'Tutorials and educational resources for everyday security.',
+    kicker: 'Awareness & Training',
+    description: 'Plain-language guides to the attacks that target people, from phishing to ransomware, and the habits that stop them.',
   },
 ]
 
