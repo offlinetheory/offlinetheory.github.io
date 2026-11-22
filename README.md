@@ -58,7 +58,7 @@ Typefaces: **Archivo 700** (OFFLINE masthead, width 100), **Bodoni Moda** (THEOR
 
 ## Content
 
-Most articles, the toolkit table, and the three Guides products are still **placeholder copy**. The Guides products have no files, prices or checkout, and their buttons are disabled. The About page lists Jamiah McQuiller as founder and editor. Replace remaining sample articles in `src/data/` before promoting those pages.
+Most articles and the toolkit table are still **placeholder copy**. The About page lists Jamiah McQuiller as founder and editor. Replace remaining sample articles in `src/data/` before promoting those pages.
 
 ## Connecting the newsletter
 
@@ -92,7 +92,6 @@ Every push to `main` runs `.github/workflows/deploy.yml`: it installs with Node 
 | Feature | Status |
 | --- | --- |
 | Newsletter delivery | beehiiv official Slim Inline embed (no API key). Override with `VITE_BEEHIIV_FORM_ID`. |
-| Guides downloads / purchases | Not implemented (placeholders) |
 | CMS | Not implemented: content lives in `src/data/articles.js` |
 | Analytics, comments, accounts | Not implemented |
 

@@ -8,14 +8,6 @@
 .mono { font-family: var(--font-mono); font-size: 12px; }
 .aside-note { margin-top: 12px; font: italic 14px/1.4 var(--font-serif); color: var(--gray); }
 .aside-quote { font: italic 400 21px/1.35 var(--font-serif); }
-.placeholder-flag {
-  font: 600 9px/1.5 var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase;
-  border: 1px dashed var(--ink); padding: 8px 10px; margin-bottom: 8px;
-}
-.products li { padding: 16px 0; border-bottom: 1px solid var(--beige-dark); display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.products h3 { font-size: 19px; line-height: 1.2; }
-.products__status { color: var(--gray); }
-.products .btn { height: 32px; font-size: 9px; }
 .section-page__newsletter { border-top: 1px solid var(--ink); }
 @media (max-width: 900px) {
   .section-page__layout { grid-template-columns: 1fr; gap: 24px; }

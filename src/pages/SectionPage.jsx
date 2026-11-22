@@ -1,5 +1,5 @@
 import { getSection } from '../data/sections.js'
-import { articlesInSection, PRODUCTS } from '../data/articles.js'
+import { articlesInSection } from '../data/articles.js'
 import PageHeader from '../components/PageHeader.jsx'
 import ArticleRow from '../components/ArticleRow.jsx'
 import Newsletter from '../components/Newsletter.jsx'
@@ -28,6 +28,8 @@ export default function SectionPage({ slug }) {
           {items.map((a, i) => <ArticleRow key={a.slug} article={a} index={i + 1} headingLevel={2} />)}
         </div>
 
+        {/* Guides has no sidebar module right now; the empty column keeps the list width the same as the other sections. */}
+        {slug === 'guides' ? <div className="section-page__aside" aria-hidden="true" /> : (
         <aside className="section-page__aside" aria-label={`${section.name} extras`}>
           {slug === 'tools' && (
             <section>
@@ -43,28 +45,6 @@ export default function SectionPage({ slug }) {
               <p className="aside-note">Editorial picks. We take no affiliate fees.</p>
             </section>
           )}
-          {slug === 'guides' && (
-            <section>
-              <h2 className="label col-label">Downloads</h2>
-              <p className="placeholder-flag">Sample templates: free to download. Full guides available to buy.</p>
-              <ul className="products">
-                {PRODUCTS.map((p) => (
-                  <li key={p.slug}>
-                    <span className="meta">{p.format}</span>
-                    <h3 className="serif-head">{p.title}</h3>
-                    <span className="meta products__status">{p.status} / {p.price}</span>
-                    {p.buyUrl ? (
-                      <a className="btn btn--ghost" href={p.buyUrl} target="_blank" rel="noreferrer">Buy — {p.price}</a>
-                    ) : p.file ? (
-                      <a className="btn btn--ghost" href={p.file} download>Download PDF</a>
-                    ) : (
-                      <button type="button" className="btn btn--ghost" disabled aria-disabled="true">Coming soon</button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
           {(slug === 'news' || slug === 'analysis') && (
             <section>
               <h2 className="label col-label">Editor&rsquo;s note</h2>
@@ -76,6 +56,7 @@ export default function SectionPage({ slug }) {
             </section>
           )}
         </aside>
+        )}
       </div>
 
       <div className="section-page__newsletter"><Newsletter compact /></div>

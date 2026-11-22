@@ -25,7 +25,7 @@ export const SECTIONS = [
     name: 'Guides',
     title: 'Guides',
     kicker: 'Practice',
-    description: 'Tutorials, educational resources, and downloadable field guides for everyday security.',
+    description: 'Tutorials and educational resources for everyday security.',
   },
 ]
 
