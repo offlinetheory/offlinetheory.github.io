@@ -31,6 +31,7 @@ export const ARTICLES = [
   {
     slug: 'why-patching-still-matters',
       placeholder: false,
+    hideFromSection: true,
     title: 'Why Patching Still Matters',
     section: 'guides',
     volume: 'VOL. 002',
@@ -780,6 +781,7 @@ export const ARTICLES = [
   {
     slug: 'how-to-audit-your-accounts-in-an-afternoon',
       placeholder: false,
+    hideFromSection: true,
     title: 'How to Audit Your Accounts in an Afternoon',
     section: 'guides',
     category: 'Tutorial',
@@ -799,6 +801,7 @@ export const ARTICLES = [
   {
     slug: 'encrypting-your-backups',
       placeholder: false,
+    hideFromSection: true,
     title: 'Encrypting Your Backups, Properly',
     section: 'guides',
     category: 'Tutorial',
@@ -818,7 +821,6 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
-    hideFromLatest: true,
     thumb: 'guidePhishing',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -891,7 +893,6 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
-    hideFromLatest: true,
     thumb: 'guideSocialEngineering',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -956,7 +957,6 @@ export const ARTICLES = [
     section: 'guides',
     category: 'Awareness',
     placeholder: false,
-    hideFromLatest: true,
     thumb: 'guideRansomware',
     caption: 'Illustration / OFFLINE THEORY',
     author: 'Jamiah McQuiller',
@@ -1034,16 +1034,29 @@ export const journalIssues = () => ARTICLES.filter((a) => a.journal)
 // Homepage "Latest": the newest articles by date. On the same date, the one
 // added later to ARTICLES comes first, so new pieces always take slot 1.
 export const LATEST_COUNT = 3
-// Articles with hideFromLatest: true still appear in their section, search and
-// related lists, but are left out of the homepage Latest list.
 export const latestArticles = (count = LATEST_COUNT) =>
   ARTICLES.map((a, i) => ({ a, i }))
-    .filter(({ a }) => !a.hideFromLatest)
     .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
     .slice(0, count)
     .map(({ a }) => a)
+// hideFromSection: the article keeps its URL and stays in search, but is left out of
+// section lists, the homepage and "Continue reading".
+export const listedArticles = () => ARTICLES.filter((a) => !a.hideFromSection)
 export const articlesInSection = (section) =>
-  ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
+  listedArticles().filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
+// Homepage left column: newest News stories that have a cover image.
+export const HOME_NEWS_COUNT = 4
+export const homeNewsArticles = (count = HOME_NEWS_COUNT) =>
+  articlesInSection('news').filter((a) => a.thumb).slice(0, count)
+// Homepage right column: a hand-picked list, in this order.
+export const FEATURED_SLUGS = [
+  'bleuprint-the-metro-detroit-tool-for-getting-found-and-chosen',
+  'jonathan-james-c0mrade-nasa-pentagon-hacker',
+  'how-to-spot-a-phish-before-you-click',
+  'social-engineering-the-call-the-text-the-urgent-wire-request',
+  'ransomware-how-it-gets-in-and-how-to-stay-recoverable',
+]
+export const featuredArticles = () => FEATURED_SLUGS.map((slug) => ARTICLES.find((a) => a.slug === slug)).filter(Boolean)
 
 function collectText(value) {
   if (value == null) return ''

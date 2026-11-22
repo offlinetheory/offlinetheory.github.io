@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getArticle, articlesInSection, formatDate, ARTICLES } from '../data/articles.js'
+import { getArticle, articlesInSection, formatDate, listedArticles } from '../data/articles.js'
 import { getSection } from '../data/sections.js'
 import { THUMBS } from '../data/images.js'
 import { getSeoCover } from '../data/covers.js'
@@ -105,7 +105,7 @@ export default function ArticlePage() {
   if (!a) return <NotFound />
 
   const section = getSection(a.section)
-  const related = [...articlesInSection(a.section), ...ARTICLES].filter((x, i, arr) => x.slug !== a.slug && arr.indexOf(x) === i).slice(0, 3)
+  const related = [...articlesInSection(a.section), ...listedArticles()].filter((x, i, arr) => x.slug !== a.slug && arr.indexOf(x) === i).slice(0, 3)
   // Optional timeline sits just before the first section heading (or after the intro).
   const firstH2 = a.body.findIndex((b) => b.type === 'h2')
   // Optional incident card and timeline share one slot: just before the first section heading.

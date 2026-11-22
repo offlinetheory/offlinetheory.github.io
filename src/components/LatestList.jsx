@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
-import { latestArticles } from '../data/articles.js'
+import { featuredArticles } from '../data/articles.js'
 import { Arrow } from './Icons.jsx'
 import './LatestList.css'
 
 export default function LatestList() {
-  const items = latestArticles()
+  const items = featuredArticles()
   return (
     <section className="latest" aria-labelledby="latest-heading">
-      <h2 id="latest-heading" className="label col-label">Latest</h2>
+      <h2 id="latest-heading" className="label col-label">Featured</h2>
       <ol className="latest__list">
         {items.map((a, i) => (
           <li key={a.slug}>
