@@ -8,7 +8,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a beige retro CRT computer on a desk shows a Microsoft \u201cWe\u2019re having trouble connecting right now\u201d screen with a loading spinner, a yellow sticky note on the monitor reads \u201cAgain?\u201d, and a big red sun sets behind the Detroit skyline across the river. A Michigan map is pinned to the wall, and books labeled Cybersecurity, Technology and Internet Culture sit beside a coffee mug, a potted plant and headphones.',
+    alt: 'Collage illustration: a vintage telephone switchboard with unplugged cords hanging from its jacks, a black rotary phone with the receiver off the hook in front of a stack of blank envelopes, and a clock with no numerals overlapping a rust-orange circle, with a cobalt circle and a rust bar on cream paper.',
   },
   jonathanJames: {
     filePrefix: 'cover-jonathan-james-1448',
@@ -22,7 +22,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Illustration: a pale grey office filing cabinet with its top drawer pulled open and index cards standing inside, as a trail of white envelopes drifts out of it and away across a large red sun and a dark, generic city skyline. On the desk in front sit a plain dark payment card with a gold chip, an unlocked padlock and a white mug.',
+    alt: 'Collage illustration: a vintage megaphone in front of a cobalt circle, with torn papers and blank envelopes bursting toward a rust-orange field, a broken padlock with its shackle in pieces, and a generic unbranded payment card with only a chip, taped onto cream paper.',
   },
   fbiNcic: {
     filePrefix: 'cover-fbi-ncic-1536',
