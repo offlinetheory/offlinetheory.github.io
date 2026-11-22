@@ -7,7 +7,7 @@ export default function LatestList() {
   const items = featuredArticles()
   return (
     <section className="latest" aria-labelledby="latest-heading">
-      <h2 id="latest-heading" className="label col-label">Featured</h2>
+      <h2 id="latest-heading" className="label col-label">Latest</h2>
       <ol className="latest__list">
         {items.map((a, i) => (
           <li key={a.slug}>

@@ -4,13 +4,12 @@ import { THUMBS } from '../data/images.js'
 import { Arrow } from './Icons.jsx'
 import './JournalList.css'
 
-// Homepage left column. It used to list the Digital Security Journal issues; it now
-// lists the latest News stories, in the same row style.
+// Homepage left column ("The Digital Security Journal"): shows the latest News stories.
 export default function JournalList() {
   const issues = homeNewsArticles()
   return (
     <section className="journal" aria-labelledby="journal-heading">
-      <h2 id="journal-heading" className="label col-label">Latest<br />News</h2>
+      <h2 id="journal-heading" className="label col-label">The Digital<br />Security Journal</h2>
       <ol className="journal__list">
         {issues.map((a) => {
           const t = THUMBS[a.thumb]
@@ -22,7 +21,7 @@ export default function JournalList() {
                   width="80" height="62" alt={t.alt} loading="lazy" decoding="async"
                 />
                 <span className="journal__text">
-                  <span className="meta">{formatDate(a.date)}</span>
+                  <span className="meta">{a.volume || `${a.category} / ${formatDate(a.date)}`}</span>
                   <span className="journal__title serif-head">{a.title.replace(/-/g, '\u2011')}</span>
                 </span>
                 <Arrow className="journal__arrow" />
