@@ -769,9 +769,6 @@ export const ARTICLES = [
     section: 'news',
     category: 'News',
     placeholder: false,
-    // DRAFT: kept out of section lists and the homepage until Jamiah approves.
-    // The article URL works. Delete this line to list it under News and on the homepage.
-    hideFromSection: true,
     thumb: 'entraHealth',
     caption: 'Illustration / OFFLINE THEORY',
     incident: {
