@@ -1,6 +1,5 @@
 import AboutMagazine from '../components/AboutMagazine.jsx'
 import { useMeta } from '../hooks/useMeta.js'
-import './AboutPage.css'
 
 export default function AboutPage() {
   useMeta({

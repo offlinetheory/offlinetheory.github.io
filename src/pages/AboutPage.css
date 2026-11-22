@@ -1,15 +1,18 @@
-/* Magazine-only About experience: the magazine is the whole page.
-   Warm ivory ground, magazine centred and scaled to the viewport. */
-.mag-page {
-  background: var(--bg, #f7f5f0);
-  min-height: 100vh;
-  min-height: 100dvh;
+.about__kicker {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 0;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  color: var(--gray);
+  padding: 28px 0 18px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 8px;
 }
-
-.mag-page .about {
-  width: 100%;
+.about__kicker-title {
+  margin: 0;
+  color: var(--gray);
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .about__kicker { padding: 20px 0 14px; }
 }

@@ -17,23 +17,6 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  const { pathname } = useLocation()
-  // The About page is a magazine-only experience: no site header, nav or
-  // footer while it is open — just the magazine on warm ivory.
-  const isAbout = pathname === '/about' || pathname.startsWith('/about/')
-  if (isAbout) {
-    return (
-      <>
-        <ScrollToTop />
-        <main id="main" className="mag-page" tabIndex={-1}>
-          <Routes>
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/about/*" element={<AboutPage />} />
-          </Routes>
-        </main>
-      </>
-    )
-  }
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>

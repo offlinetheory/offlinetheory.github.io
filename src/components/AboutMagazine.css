@@ -1,7 +1,6 @@
 .mag {
   position: relative;
-  width: 100%;
-  padding: 0;
+  padding: 16px 0 24px;
 }
 
 .mag__sr {
@@ -19,11 +18,8 @@
 
 .mag-stage {
   position: relative;
-  /* Fill the viewport while keeping the photograph's proportions:
-     the calc() term is the width that fits 96vh at the photo's aspect,
-     so the stage never has to stretch to meet a height cap. */
-  width: min(1680px, 96vw, calc(96vh * 1904 / 1328));
-  width: min(1680px, 96vw, calc(96dvh * 1904 / 1328));
+  width: min(1120px, 100%);
+  max-height: min(78vh, 860px);
   margin: 0 auto;
   aspect-ratio: 1904 / 1328;
   height: auto;
@@ -78,29 +74,29 @@
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 20px,
-    #000 calc(100% - 20px),
+    #000 10px,
+    #000 calc(100% - 10px),
     transparent 100%
   ),
   linear-gradient(
     to bottom,
     transparent 0,
-    #000 20px,
-    #000 calc(100% - 20px),
+    #000 10px,
+    #000 calc(100% - 10px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 20px,
-    #000 calc(100% - 20px),
+    #000 10px,
+    #000 calc(100% - 10px),
     transparent 100%
   ),
   linear-gradient(
     to bottom,
     transparent 0,
-    #000 20px,
-    #000 calc(100% - 20px),
+    #000 10px,
+    #000 calc(100% - 10px),
     transparent 100%
   );
   -webkit-mask-composite: destination-in;
@@ -191,44 +187,6 @@
   position: absolute;
   z-index: 10;
   pointer-events: auto;
-}
-
-/* Narrow layout, driven by the component's own measured stage width
-   (the is-narrow class, set when the stage is under 640px wide) as well
-   as by the viewport media query below. The media query alone did not
-   take effect on iPhone Safari — the magazine rendered as a small
-   landscape strip in a sea of cream — so the layout now also follows
-   the measured width, which is reliable on every browser. */
-.mag-stage.is-narrow {
-  width: 100%;
-  max-height: none;
-  aspect-ratio: 390 / 680;
-  height: auto;
-  overflow: hidden;
-}
-.mag-stage.is-narrow > .mag-stage__inner {
-  inset: auto;
-  width: 340%;
-  height: auto;
-  aspect-ratio: 1904 / 1328;
-  top: 50%;
-  transform: translateY(-50%);
-}
-/* Right page center is at 64.21% of the photo; left page center at 37.42%. */
-.mag-stage.is-narrow.is-focus-right > .mag-stage__inner {
-  left: calc(50% - 64.21% * 3.4);
-}
-.mag-stage.is-narrow.is-focus-left > .mag-stage__inner {
-  left: calc(50% - 37.42% * 3.4);
-}
-.mag-stage.is-narrow.is-focus-right .mag-ui__folio {
-  left: 64.2%;
-}
-.mag-stage.is-narrow.is-focus-left .mag-ui__folio {
-  left: 37.4%;
-}
-.mag-stage.is-narrow .mag-ui__folio {
-  font-size: 11px;
 }
 
 /* Mobile: pan a full-resolution magazine so one page fills the viewport.

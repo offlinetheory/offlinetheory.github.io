@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-"""Render typographic magazine pages for the About page-turn.
-
-Re-paginated Nov 22, 2026: the four About sections each get their own
-spread (8 pages total) so body type can be ~1.5x larger than the first
-4-page version and still have generous white space. Copy is taken
-verbatim from src/data/about.js — nothing is rewritten or invented.
-
-Page geometry: 1572 x 2596 (393 x 649 at SCALE 4). Displayed, a page is
-about 26% of the magazine width, so 68pt body here reads ~15px when the
-magazine is shown at ~1500px wide, ~13px at the 94vh height limit on a
-900px-tall desktop viewport.
-"""
+"""Render typographic magazine pages and the opening-right texture for the About page-turn."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -25,8 +14,6 @@ INK_SOFT = (8, 8, 8, 220)
 RULE = (8, 8, 8, 160)
 SCALE = 4
 W, H = 393 * SCALE, 649 * SCALE  # 1572 x 2596
-MARGIN = int(W * 0.11)           # 173
-COL = W - 2 * MARGIN             # 1226
 
 
 def font(path, size, weight=None):
@@ -44,6 +31,11 @@ def width_of(fnt, text):
         return 0
     b = fnt.getbbox(text)
     return b[2] - b[0]
+
+
+def height_of(fnt, text="Hg"):
+    b = fnt.getbbox(text)
+    return b[3] - b[1]
 
 
 def draw_tracked(draw, xy, text, fnt, fill, tracking=0):
@@ -72,6 +64,7 @@ def wrap(text, fnt, max_w):
 
 def paper():
     img = Image.new("RGBA", (W, H), PAGE)
+    # faint fiber
     noise = Image.effect_noise((W, H), 8).convert("L")
     noise = noise.point(lambda v: 128 + (v - 128) // 6)
     grain = Image.merge("RGBA", (noise, noise, noise, Image.new("L", (W, H), 18)))
@@ -79,26 +72,18 @@ def paper():
     return img
 
 
-def folio(draw, number, y):
-    fnt = font(FONTS / "inter-var.ttf", 30, weight=500)
+def folio(draw, number, y, margin, col):
+    fnt = font(FONTS / "inter-var.ttf", 22, weight=500)
     label = "OFFLINE THEORY"
     num = f"{int(number):02d}"
-    draw_tracked(draw, (MARGIN, y), label, fnt, INK, tracking=5)
+    draw_tracked(draw, (margin, y), label, fnt, INK, tracking=4)
     nw = width_of(fnt, num)
-    draw.text((MARGIN + COL - nw, y), num, font=fnt, fill=INK)
-    return y + 58
+    draw.text((margin + col - nw, y), num, font=fnt, fill=INK)
+    return y + 48
 
 
-def rule(draw, y, x2=None, w=3):
-    draw.rectangle((MARGIN, y, x2 or (MARGIN + COL), y + w), fill=RULE)
-
-
-def body_block(draw, text, y, size=68, leading=96, fnt_path=None):
-    body = font(fnt_path or FONTS / "source-serif-400.ttf", size)
-    for ln in wrap(text, body, COL):
-        draw.text((MARGIN, y), ln, font=body, fill=INK)
-        y += leading
-    return y
+def rule(draw, x1, x2, y, w=2):
+    draw.rectangle((x1, y, x2, y + w), fill=RULE)
 
 
 def save(img, name):
@@ -107,152 +92,188 @@ def save(img, name):
     print("wrote", path, path.stat().st_size)
 
 
-def new_page(number):
+# --- Page 1: introduction and philosophy ---
+def page1():
     img = paper()
     d = ImageDraw.Draw(img)
+    margin = int(W * 0.11)
+    col = W - 2 * margin
     y = int(H * 0.075)
-    y = folio(d, number, y)
-    rule(d, y)
-    return img, d, y + 84
+    y = folio(d, 1, y, margin, col)
+    rule(d, margin, margin + col, y)
+    y += 70
 
+    title = font(FONTS / "bodoni-var.ttf", 168, weight=900)
+    for line, tracking in (("OFFLINE", -3), ("THEORY", -3)):
+        draw_tracked(d, (margin, y), line, title, INK, tracking=tracking)
+        y += int(168 * 0.86)
+    y += 54
 
-# --- Page 1: introduction — title + dek ---
-def page1():
-    img, d, y = new_page(1)
-    title = font(FONTS / "bodoni-var.ttf", 200, weight=900)
-    for line in ("OFFLINE", "THEORY"):
-        draw_tracked(d, (MARGIN, y), line, title, INK, tracking=-3)
-        y += int(200 * 0.88)
-    y += 64
     dek = "Offline Theory is an independent publishing initiative exploring cybersecurity, technology, and the culture of the internet."
-    dek_f = font(FONTS / "source-serif-700.ttf", 60)
-    for ln in wrap(dek.upper(), dek_f, COL):
-        d.text((MARGIN, y), ln, font=dek_f, fill=INK)
-        y += 84
-    print("page-1 content ends at y", y, "of", H)
-    save(img, "page-1.webp")
+    dek_f = font(FONTS / "source-serif-700.ttf", 42)
+    for ln in wrap(dek.upper(), dek_f, col):
+        d.text((margin, y), ln, font=dek_f, fill=INK)
+        y += 56
+    y += 48
 
-
-# --- Page 2: introduction — the two body paragraphs ---
-def page2():
-    img, d, y = new_page(2)
+    body = font(FONTS / "source-serif-400.ttf", 44)
+    leading = 66
     paras = [
         "We started from a simple observation: the systems that shape everyday life are discussed either in jargon or in panic. Offline Theory sits in between. We write about security the way a good magazine writes about architecture, with attention to how things are built, who they serve, and what they cost.",
         "The name is a reminder, not a rule. Stepping away from the network, even briefly, is often the clearest way to understand it.",
     ]
     for para in paras:
-        y = body_block(d, para, y, size=68, leading=100)
-        y += 44
-    print("page-2 content ends at y", y, "of", H)
+        for ln in wrap(para, body, col):
+            d.text((margin, y), ln, font=body, fill=INK)
+            y += leading
+        y += 28
+    save(img, "page-1.webp")
+
+
+# --- Page 2: editorial principles ---
+def page2():
+    img = paper()
+    d = ImageDraw.Draw(img)
+    margin = int(W * 0.11)
+    col = W - 2 * margin
+    y = int(H * 0.075)
+    y = folio(d, 2, y, margin, col)
+    rule(d, margin, margin + col, y)
+    y += 64
+
+    title = font(FONTS / "bodoni-var.ttf", 96, weight=900)
+    # two-line title so it is not squeezed
+    draw_tracked(d, (margin, y), "EDITORIAL", title, INK, tracking=-1)
+    y += int(96 * 0.9)
+    draw_tracked(d, (margin, y), "PRINCIPLES", title, INK, tracking=-1)
+    y += int(96 * 0.95) + 36
+
+    principles = [
+        ("01", "Plain language", "Security writing should be readable by the people it affects. We define our terms and skip the fear."),
+        ("02", "Independence", "We do not publish vendor-written copy. When an article includes affiliate links, we say so next to those links. Recommendations are made on the merits, not the commission."),
+        ("03", "Verification", "Claims about vulnerabilities and incidents are sourced to advisories, researchers or primary documents."),
+        ("04", "Restraint", "We publish less, on purpose. A weekly dispatch, a quarterly journal, and nothing that exists only to fill a feed."),
+    ]
+    num_f = font(FONTS / "inter-var.ttf", 22, weight=500)
+    name_f = font(FONTS / "bodoni-var.ttf", 52, weight=700)
+    body = font(FONTS / "source-serif-400.ttf", 38)
+    for num, name, text in principles:
+        label = f"{num}  —  {name.upper()}"
+        draw_tracked(d, (margin, y), label, num_f, INK, tracking=3)
+        y += 40
+        # name is already in the label; body follows
+        for ln in wrap(text, body, col):
+            d.text((margin, y), ln, font=body, fill=INK)
+            y += 54
+        y += 36
     save(img, "page-2.webp")
 
 
-# --- Pages 3–4: editorial principles, two per page ---
-PRINCIPLES = [
-    ("01", "Plain language", "Security writing should be readable by the people it affects. We define our terms and skip the fear."),
-    ("02", "Independence", "We do not publish vendor-written copy. When an article includes affiliate links, we say so next to those links. Recommendations are made on the merits, not the commission."),
-    ("03", "Verification", "Claims about vulnerabilities and incidents are sourced to advisories, researchers or primary documents."),
-    ("04", "Restraint", "We publish less, on purpose. A weekly dispatch, a quarterly journal, and nothing that exists only to fill a feed."),
-]
-
-
-def principles_page(number, items, title_lines=True):
-    img, d, y = new_page(number)
-    if title_lines:
-        title = font(FONTS / "bodoni-var.ttf", 110, weight=900)
-        draw_tracked(d, (MARGIN, y), "EDITORIAL", title, INK, tracking=-1)
-        y += int(110 * 0.92)
-        draw_tracked(d, (MARGIN, y), "PRINCIPLES", title, INK, tracking=-1)
-        y += int(110 * 0.95) + 56
-    else:
-        y += 20
-    num_f = font(FONTS / "inter-var.ttf", 30, weight=500)
-    for num, name, text in items:
-        draw_tracked(d, (MARGIN, y), f"{num}  —  {name.upper()}", num_f, INK, tracking=4)
-        y += 58
-        y = body_block(d, text, y, size=62, leading=90)
-        y += 64
-    print(f"page-{number} content ends at y", y, "of", H)
-    save(img, f"page-{number}.webp")
-
-
+# --- Page 3: masthead and bio ---
 def page3():
-    principles_page(3, PRINCIPLES[:2], title_lines=True)
+    img = paper()
+    d = ImageDraw.Draw(img)
+    margin = int(W * 0.11)
+    col = W - 2 * margin
+    y = int(H * 0.075)
+    y = folio(d, 3, y, margin, col)
+    rule(d, margin, margin + col, y)
+    y += 80
 
+    kicker = font(FONTS / "inter-var.ttf", 24, weight=500)
+    draw_tracked(d, (margin, y), "MASTHEAD", kicker, INK, tracking=5)
+    y += 48
+    draw_tracked(d, (margin, y), "FOUNDER  &  EDITOR", kicker, INK, tracking=4)
+    y += 90
 
-def page4():
-    principles_page(4, PRINCIPLES[2:], title_lines=False)
-
-
-# --- Page 5: masthead — name and role ---
-def page5():
-    img, d, y = new_page(5)
-    kicker = font(FONTS / "inter-var.ttf", 30, weight=500)
-    draw_tracked(d, (MARGIN, y), "MASTHEAD", kicker, INK, tracking=6)
-    y += 62
-    draw_tracked(d, (MARGIN, y), "FOUNDER  &  EDITOR", kicker, INK, tracking=5)
-    y += 120
-    name = font(FONTS / "bodoni-var.ttf", 120, weight=900)
-    d.text((MARGIN, y), "Jamiah", font=name, fill=INK)
-    y += int(120 * 0.92)
-    d.text((MARGIN, y), "McQuiller", font=name, fill=INK)
-    y += int(120 * 1.05) + 48
-    rule(d, y, x2=MARGIN + int(COL * 0.42))
-    print("page-5 content ends at y", y, "of", H)
-    save(img, "page-5.webp")
-
-
-# --- Page 6: masthead — biography ---
-def page6():
-    img, d, y = new_page(6)
-    y += 120  # let the bio sit lower, magazine-style, opposite the name
-    bio = "Jamiah is a Security+ certified IT End User Computing Technician (vulnerability and patch management) and an M.S. Cybersecurity student at the University of Michigan – Flint. She is based in Flint, Michigan."
-    y = body_block(d, bio, y, size=72, leading=108)
-    print("page-6 content ends at y", y, "of", H)
-    save(img, "page-6.webp")
-
-
-# --- Page 7: contact — lead + email ---
-def page7():
-    img, d, y = new_page(7)
-    kicker = font(FONTS / "inter-var.ttf", 30, weight=500)
-    title = font(FONTS / "bodoni-var.ttf", 150, weight=900)
-    draw_tracked(d, (MARGIN, y), "CONTACT", kicker, INK, tracking=6)
-    y += 72
-    d.text((MARGIN, y), "Contact", font=title, fill=INK)
-    y += 190
-    y = body_block(d, "Tips, corrections and letters:", y, size=68, leading=96)
-    y += 16
-    email = "offlinetheory@proton.me"
-    mail_f = font(FONTS / "source-serif-600.ttf", 68)
-    d.text((MARGIN, y), email, font=mail_f, fill=INK)
-    ew = width_of(mail_f, email)
-    d.rectangle((MARGIN, y + 94, MARGIN + ew, y + 97), fill=INK)
-    y += 150
-    print("page-7 content ends at y", y, "of", H)
-    save(img, "page-7.webp")
-
-
-# --- Page 8: contact — secure drop + disclosure ---
-def page8():
-    img, d, y = new_page(8)
+    name = font(FONTS / "bodoni-var.ttf", 110, weight=900)
+    # name may wrap
+    full = "Jamiah McQuiller"
+    if width_of(name, full) <= col:
+        d.text((margin, y), full, font=name, fill=INK)
+        y += int(110 * 1.05)
+    else:
+        d.text((margin, y), "Jamiah", font=name, fill=INK)
+        y += int(110 * 0.9)
+        d.text((margin, y), "McQuiller", font=name, fill=INK)
+        y += int(110 * 1.05)
     y += 40
+    rule(d, margin, margin + int(col * 0.42), y, w=2)
+    y += 56
+
+    bio = "Jamiah is a Security+ certified IT End User Computing Technician (vulnerability and patch management) and an M.S. Cybersecurity student at the University of Michigan – Flint. She is based in Flint, Michigan."
+    body = font(FONTS / "source-serif-400.ttf", 44)
+    for ln in wrap(bio, body, col):
+        d.text((margin, y), ln, font=body, fill=INK)
+        y += 66
+    save(img, "page-3.webp")
+
+
+# --- Page 4: contact and disclosure ---
+def page4():
+    img = paper()
+    d = ImageDraw.Draw(img)
+    margin = int(W * 0.11)
+    col = W - 2 * margin
+    y = int(H * 0.075)
+    y = folio(d, 4, y, margin, col)
+    rule(d, margin, margin + col, y)
+    y += 80
+
+    kicker = font(FONTS / "inter-var.ttf", 24, weight=500)
+    title = font(FONTS / "bodoni-var.ttf", 120, weight=900)
+    body = font(FONTS / "source-serif-400.ttf", 44)
+    body_i = font(FONTS / "source-serif-400i.ttf", 40)
+    mail_f = font(FONTS / "source-serif-600.ttf", 44)
+
+    draw_tracked(d, (margin, y), "CONTACT", kicker, INK, tracking=5)
+    y += 56
+    d.text((margin, y), "Contact", font=title, fill=INK)
+    y += 150
+
+    lead = "Tips, corrections and letters:"
+    for ln in wrap(lead, body, col):
+        d.text((margin, y), ln, font=body, fill=INK)
+        y += 66
+    y += 8
+    email = "offlinetheory@proton.me"
+    d.text((margin, y), email, font=mail_f, fill=INK)
+    ew = width_of(mail_f, email)
+    d.rectangle((margin, y + 52, margin + ew, y + 54), fill=INK)
+    y += 100
+
     drop = "For sensitive tips, we recommend an end-to-end encrypted channel. A secure-drop address will be published here once it exists."
-    y = body_block(d, drop, y, size=68, leading=96)
-    y += 72
-    rule(d, y)
-    y += 64
+    for ln in wrap(drop, body, col):
+        d.text((margin, y), ln, font=body, fill=INK)
+        y += 66
+    y += 56
+    rule(d, margin, margin + col, y)
+    y += 48
     aff = "OFFLINE THEORY may earn a commission if you buy through links we mark as sponsored. That does not change our recommendations."
-    y = body_block(d, aff, y, size=62, leading=88, fnt_path=FONTS / "source-serif-400i.ttf")
-    print("page-8 content ends at y", y, "of", H)
-    save(img, "page-8.webp")
+    for ln in wrap(aff, body_i, col):
+        d.text((margin, y), ln, font=body_i, fill=INK)
+        y += 60
+    save(img, "page-4.webp")
 
 
 def opening_right():
-    """Kept for reference only: regenerating the first turning sheet needs
-    opening-1505.webp / hands-1505.webp, which are not in this repo.
-    The existing src/assets/about/pages/opening-right.webp is unchanged."""
-    raise RuntimeError("opening-right.webp is not regenerated here; see docstring")
+    """Crop the cleaned opening photograph's right page and lift the thumb off the texture."""
+    opening = Image.open(ROOT / "src/assets/about/opening-1505.webp").convert("RGBA")
+    hands = Image.open(ROOT / "src/assets/about/hands-1505.webp").convert("RGBA")
+    box = (775, 200, 1168, 849)  # 393 x 649
+    crop = opening.crop(box)
+    hand = hands.crop(box)
+    paper_c = (247, 245, 240, 255)
+    # Where the overlay hands sit on the leaf, fill with paper so the thumb
+    # stays with the fixed hands layer and does not ride the turning page.
+    hx = hand.split()[-1].point(lambda a: 255 if a > 24 else 0)
+    # feather the punch
+    hx = hx.filter(ImageFilter.GaussianBlur(1.2))
+    fill = Image.new("RGBA", crop.size, paper_c)
+    crop = Image.composite(fill, crop, hx)
+    path = OUT / "opening-right.webp"
+    crop.save(path, "WEBP", quality=94, method=6)
+    print("wrote", path, path.stat().st_size, crop.size)
 
 
 if __name__ == "__main__":
@@ -260,7 +281,4 @@ if __name__ == "__main__":
     page2()
     page3()
     page4()
-    page5()
-    page6()
-    page7()
-    page8()
+    opening_right()

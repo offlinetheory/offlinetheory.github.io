@@ -2,7 +2,7 @@
 
 The About route (`/about/`) is a physical magazine held in a photograph (source: the v2 opening photograph, with leftover reference-magazine type replaced). The magazine, hands, portrait well and surrounding composition stay fixed. Visitors turn pages inside that magazine; About copy is printed on the pages and never appears beside, below or over it as a separate document.
 
-Header, navigation, logo, footer and typography of the rest of the site are unchanged — but while the About route is open, `App.jsx` renders no header or footer at all, so the magazine is the entire experience on warm ivory.
+Header, navigation, logo, footer and typography of the rest of the site are unchanged.
 
 This rebuild lives on the `about-pageturn` preview branch until it is approved for `main`.
 
@@ -24,21 +24,10 @@ The opening photograph is spread 0. The right-hand ABOUT leaf is the first sheet
 | Spread | Left page | Right page |
 | --- | --- | --- |
 | 0 (opening) | Portrait in the photograph | Opening ABOUT leaf (Offline Theory folio and intro dek; leftover reference-magazine type has been removed) |
-| 1 (introduction) | Page 1 — Offline Theory title and publication dek | Page 2 — introduction body: the jargon-or-panic observation and the name |
-| 2 (editorial principles) | Page 3 — Editorial Principles, 01 Plain language, 02 Independence | Page 4 — 03 Verification, 04 Restraint |
-| 3 (masthead) | Page 5 — Masthead, Founder & Editor, Jamiah McQuiller | Page 6 — biography |
-| 4 (contact) | Page 7 — Contact, tips lead and email | Page 8 — sensitive-tips note and sponsorship / affiliate disclosure |
-
-Each section gets its own spread (Nov 22, 2026 re-pagination) so body type
-is ~68pt in the page renders — about 14px on a 900px-tall desktop viewport
-with the magazine at 96vh, ~17px on a 1080px-tall one — instead of the
-44pt of the first 4-page version, which read ~8px.
+| 1 (after first turn) | Page 1 — introduction and publication philosophy | Page 2 — editorial principles 01–04 |
+| 2 (after second turn) | Page 3 — masthead and founder & editor biography | Page 4 — contact and sponsorship disclosure |
 
 Turns are visitor-controlled (no auto-advance after a page settles). Each animated turn takes about 5.2 seconds. A single small corner-lift hint plays once on the opening, then waits.
-
-The folio label at the bottom of the magazine updates as soon as a turn
-is committed — at the start of a click/keyboard turn, or when a drag
-passes halfway — and returns to the current spread if a drag snaps back.
 
 ## Controls
 
@@ -72,13 +61,7 @@ export const ABOUT_PORTRAIT = {
 
 ### Blending the portrait into the page
 
-The well behind the portrait is the site cream (`--bg`). The portrait
-asset itself (`scripts/fix-about-assets.py`) has its near-neutral light
-studio backdrop remapped to paper cream (247,245,240), so there is no
-gray tint at the top when it is displayed. The image also uses
-`mix-blend-mode: multiply` and a ~20px feathered mask so a white or
-light-gray studio backdrop melts into the page instead of showing as a
-hard rectangle.
+The well behind the portrait is the site cream (`--bg`). The image uses `mix-blend-mode: multiply` and a ~10px feathered mask so a white or light-gray studio backdrop melts into the page instead of showing as a hard rectangle.
 
 This is applied at display time, not baked into `portrait.webp`, so a new headshot is blended the same way. The blend is designed for portraits on a light studio background. If a future headshot has a dark or strongly colored backdrop, crop tighter to the subject or supply a version with a light or transparent ground; otherwise multiply will darken that backdrop.
 
@@ -105,45 +88,8 @@ Append `?scene=` to `/about/`:
 - `open` — opening spread at rest
 - `lift` — outer corner beginning to lift
 - `mid`, `mid2`, `mid3` — along the first turn
-- `settled` or `spread1` — introduction spread at rest
-- `spread2` — editorial principles spread
-- `spread3` — masthead spread
-- `spread4` — contact spread
+- `settled` or `spread1` — first content spread at rest
+- `spread2` — masthead / contact spread
 - `back` — mid backward turn from spread 1
 
 `?spread=0&t=0.5` and `?turn=back` can also be combined.
-
-## Pre-launch fixes (Nov 22, 2026)
-
-- **Type size:** re-paginated from 2 content spreads (4 pages) to 4 content
-  spreads (8 pages); body 44pt → 68pt, dek 42pt → 60pt, titles up
-  accordingly. Magazine stage enlarged from max 1120px / 78vh to
-  `min(1680px, 96vw, 96vh × aspect)`.
-- **Photo edge:** the opening photograph's studio backdrop ended in a hard
-  straight edge just below the hands. `scripts/fix-about-assets.py`
-  feathers the bottom edge of `opening-*` and `hands-*` in the centre of
-  the frame over ~150px, so the shadow melts into the site cream.
-- **Late-turn thinning:** the curl radius used to collapse to ~0 by the
-  end of a turn (`sin(πe)`), flattening the sheet to an edge. The radius
-  now has a floor of 0.08 × page width until the last ~5% of the turn,
-  and the sheet only settles flat in the final few percent
-  (`smoothstep(0.94, 0.995, e)` in the vertex shader).
-- **Back-side blur:** page textures now use mipmaps
-  (`LinearMipmapLinearFilter`) and anisotropy 8 instead of plain linear
-  minification, which blurred the back-side type at glancing angles.
-- **Folio label:** see Pagination above — it now follows the turn, not
-  just the settled spread.
-- **Portrait tint:** see "Blending the portrait" above.
-- **Safari:** not yet tested on a real Safari (no Safari available in
-  this environment). Code review notes: the portrait mask keeps both
-  `-webkit-mask-composite: destination-in` and the standard
-  `mask-composite: intersect`; the stage uses `dvh` with a `vh` fallback;
-  WebGL2 is used only where `supportsWebGL()` passes, with the instant
-  fallback otherwise. Confirm on an iPhone / Mac Safari before launch.
-- **Mobile layout (Nov 22, 2026):** the narrow zoom (one page filling a
-  phone screen, stage aspect 390/680, inner 340% wide) was originally
-  driven only by the `@media (max-width: 640px)` viewport query, and on
-  iPhone Safari the magazine rendered as a small landscape strip in a
-  sea of cream instead. The same rules are now also applied under
-  `.mag-stage.is-narrow`, driven by the component's own measured stage
-  width (under 640px), which does not depend on the viewport query.

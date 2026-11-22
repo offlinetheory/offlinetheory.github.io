@@ -46,9 +46,7 @@ vec3 curlPoint(vec3 p, float e, float W, float H, float tilt, float R) {
     curled = vec3(p.x + dproj * c, p.y - dproj * s, 0.0);
   }
 
-  // Settle the sheet only in the last few percent of the turn: until then
-  // keep a real roll, so the page never thins to a flat edge late in the turn.
-  float k = smoothstep(0.94, 0.995, e);
+  float k = smoothstep(0.86, 1.0, e);
   return mix(curled, settled, k);
 }
 
@@ -173,13 +171,10 @@ function loadTexture(url) {
       url,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace
-        // Mipmaps + anisotropy keep the back-side type sharp while the
-        // sheet is foreshortened mid-turn; plain linear minification
-        // blurred it at glancing angles.
-        tex.generateMipmaps = true
-        tex.minFilter = THREE.LinearMipmapLinearFilter
+        tex.minFilter = THREE.LinearFilter
         tex.magFilter = THREE.LinearFilter
-        tex.anisotropy = 8
+        tex.generateMipmaps = false
+        tex.anisotropy = 4
         tex.needsUpdate = true
         resolve(tex)
       },
@@ -309,18 +304,8 @@ export function createPageCurlEngine(canvas, layout) {
 
   function radiusFor(progress) {
     const e = Math.min(Math.max(progress, 0), 1)
-    // Comfortable roll mid-turn. Keep a real roll late in the turn too:
-    // the old sin curve collapsed to ~0 by e=0.97, so the sheet thinned to
-    // a flat edge. The floor holds the curl until the last ~5%, then lets
-    // it settle quickly onto the left page.
-    const base = rightRect.w * 0.17 * Math.sin(Math.PI * Math.min(Math.max(e, 0.001), 0.999))
-    const floor = rightRect.w * 0.08 * (1 - smoothstep(0.93, 0.985, e))
-    return Math.max(base, floor)
-  }
-
-  function smoothstep(a, b, x) {
-    const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
-    return t * t * (3 - 2 * t)
+    // Comfortable roll mid-turn, shrinks to zero so the sheet can lie flat
+    return rightRect.w * 0.17 * Math.sin(Math.PI * Math.min(Math.max(e, 0.001), 0.999))
   }
 
   function apply() {
