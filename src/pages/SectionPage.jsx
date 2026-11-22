@@ -21,7 +21,7 @@ export default function SectionPage({ slug }) {
 
   return (
     <div className={`section-page section-page--${slug}`}>
-      <PageHeader kicker={`${section.kicker} / ${items.length} stories`} title={section.title} description={section.description} />
+      <PageHeader kicker={`${section.kicker} / ${items.length} stories`} title={section.title} description={section.hideDescription ? undefined : section.description} />
 
       <div className="section-page__layout">
         <div className="section-page__list">

@@ -25,6 +25,8 @@ export const SECTIONS = [
     name: 'Guides',
     title: 'Guides',
     kicker: 'Awareness & Training',
+    // The description stays in the page's search/share metadata but is not shown on the page.
+    hideDescription: true,
     description: 'Plain-language guides to the attacks that target people, from phishing to ransomware, and the habits that stop them.',
   },
 ]
