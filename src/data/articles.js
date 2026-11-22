@@ -828,21 +828,9 @@ export const PRODUCTS = [
 ]
 
 export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
-export const journalIssues = () => ARTICLES.filter((a) => a.journal)
-// Homepage "Latest": the newest articles by date. On the same date, the one
-// added later to ARTICLES comes first, so new pieces always take slot 1.
-export const LATEST_COUNT = 3
-export const latestArticles = (count = LATEST_COUNT) =>
-  ARTICLES.map((a, i) => ({ a, i }))
-    .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
-    .slice(0, count)
-    .map(({ a }) => a)
-export const articlesInSection = (section) =>
-  ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
 
-// Hidden from section index lists only (News, Analysis, Tools, Guides).
-// Articles stay in ARTICLES, so their URLs, search, related lists, and
-// homepage modules (Latest, Journal) are unchanged.
+// Hidden from section index lists and homepage modules (Latest, Journal).
+// Articles stay in ARTICLES, so their URLs, search, and related lists are unchanged.
 export const SECTION_LIST_HIDDEN_SLUGS = new Set([
   // News: former first four (FBI NCIC, Chase/Visa/Mastercard, Microsoft 365, zero-day)
   'fbi-ncic-crime-database-breach-november-2026',
@@ -861,6 +849,20 @@ export const SECTION_LIST_HIDDEN_SLUGS = new Set([
   'review-hardware-security-keys-2026',
   'a-minimal-privacy-browser-setup',
 ])
+
+export const journalIssues = () =>
+  ARTICLES.filter((a) => a.journal && !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
+// Homepage "Latest": the newest visible articles by date. On the same date, the one
+// added later to ARTICLES comes first, so new pieces always take slot 1.
+export const LATEST_COUNT = 3
+export const latestArticles = (count = LATEST_COUNT) =>
+  ARTICLES.map((a, i) => ({ a, i }))
+    .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
+    .filter(({ a }) => !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
+    .slice(0, count)
+    .map(({ a }) => a)
+export const articlesInSection = (section) =>
+  ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
 
 export const sectionListArticles = (section) =>
   articlesInSection(section).filter((a) => !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
