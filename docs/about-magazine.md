@@ -140,3 +140,10 @@ Append `?scene=` to `/about/`:
   `mask-composite: intersect`; the stage uses `dvh` with a `vh` fallback;
   WebGL2 is used only where `supportsWebGL()` passes, with the instant
   fallback otherwise. Confirm on an iPhone / Mac Safari before launch.
+- **Mobile layout (Nov 22, 2026):** the narrow zoom (one page filling a
+  phone screen, stage aspect 390/680, inner 340% wide) was originally
+  driven only by the `@media (max-width: 640px)` viewport query, and on
+  iPhone Safari the magazine rendered as a small landscape strip in a
+  sea of cream instead. The same rules are now also applied under
+  `.mag-stage.is-narrow`, driven by the component's own measured stage
+  width (under 640px), which does not depend on the viewport query.
