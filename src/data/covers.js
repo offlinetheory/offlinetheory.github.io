@@ -10,6 +10,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with the headline “What the Microsoft 365 Outage Actually Broke, and What to Do Now,” a “News / Outages / Productivity” label, a laptop showing a Microsoft 365 service-outage screen, floating Outlook, Teams and cloud app icons, a Microsoft office building, a rust-orange sun in the clouds, and a checklist reading “What broke / Impact / What to do now,” with the last item checked.',
   },
+  mclaren: {
+    filePrefix: 'cover-mclaren-1536',
+    width: 1536,
+    height: 1182,
+    type: 'image/webp',
+    alt: 'Cover collage: the McLaren Flint hospital building with a red \u201cEmergency\u201d sign, a hooded figure in front of a red sun behind a laptop showing a padlock, an \u201cInvestigation\u201d label, and a pinned note reading \u201c2023: Ransomware attack (ALPHV/BlackCat), ~2.2 million people affected\u201d and \u201c2024: Second cyberattack, ~740,000 people affected\u201d.',
+  },
   jonathanJames: {
     filePrefix: 'cover-jonathan-james-1448',
     width: 1448,

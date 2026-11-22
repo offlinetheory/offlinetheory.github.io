@@ -30,6 +30,9 @@ import gse1536 from '../assets/images/cover-guide-social-engineering-1536.webp'
 import grw480 from '../assets/images/cover-guide-ransomware-480.webp'
 import grw960 from '../assets/images/cover-guide-ransomware-960.webp'
 import grw1536 from '../assets/images/cover-guide-ransomware-1536.webp'
+import mcl480 from '../assets/images/cover-mclaren-480.webp'
+import mcl960 from '../assets/images/cover-mclaren-960.webp'
+import mcl1536 from '../assets/images/cover-mclaren-1536.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -38,6 +41,7 @@ export const THUMBS = {
   privacy: { src: privacy240, srcSet: `${privacy240} 240w, ${privacy480} 480w`, alt: 'Halftone illustration of a person wearing headphones beside a wall-mounted CCTV camera, framed by red corner brackets' },
   surveillance: { src: surveillance240, srcSet: `${surveillance240} 240w, ${surveillance480} 480w`, alt: 'Halftone illustration of CCTV cameras mounted on a pole above a building, beneath a large red sun' },
   msOutage: { src: msOutage960, srcSet: `${msOutage480} 480w, ${msOutage960} 960w, ${msOutage1536} 1536w`, wide: true, width: SEO_COVERS.msOutage.width, height: SEO_COVERS.msOutage.height, alt: SEO_COVERS.msOutage.alt },
+  mclaren: { src: mcl960, srcSet: `${mcl480} 480w, ${mcl960} 960w, ${mcl1536} 1536w`, wide: true, width: SEO_COVERS.mclaren.width, height: SEO_COVERS.mclaren.height, alt: SEO_COVERS.mclaren.alt },
   jonathanJames: { src: jj960, srcSet: `${jj480} 480w, ${jj960} 960w, ${jj1448} 1448w`, wide: true, width: SEO_COVERS.jonathanJames.width, height: SEO_COVERS.jonathanJames.height, alt: SEO_COVERS.jonathanJames.alt },
   vendorBreach: { src: vb960, srcSet: `${vb480} 480w, ${vb960} 960w, ${vb1536} 1536w`, wide: true, width: SEO_COVERS.vendorBreach.width, height: SEO_COVERS.vendorBreach.height, alt: SEO_COVERS.vendorBreach.alt },
   fbiNcic: { src: fbi960, srcSet: `${fbi480} 480w, ${fbi960} 960w, ${fbi1536} 1536w`, wide: true, width: SEO_COVERS.fbiNcic.width, height: SEO_COVERS.fbiNcic.height, alt: SEO_COVERS.fbiNcic.alt },
