@@ -45,6 +45,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with a masthead reading “NEWS / SECURITY / LAW ENFORCEMENT,” the headline “The FBI Is Investigating a Reported Breach of Its National Crime Database,” a rust-red torn-paper banner behind the words National Crime Database, a vintage CRT monitor showing a fingerprint file and an “UNAUTHORIZED ACCESS” warning, a Department of Justice Federal Bureau of Investigation seal, a government office building under a rust-red sun with a silhouetted figure, and a torn contact sheet of mugshot-style portraits and a fingerprint.',
   },
+  entraHealth: {
+    filePrefix: 'cover-entra-connect-health-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Cover collage with the label \u201cNews / Security / Identity\u201d and the headline \u201cEntra Connect Health: Admin emails & tenant data exposed\u201d on torn black and rust paper, a vintage monitor labeled \u201cConnect Health Monitoring\u201d showing a heartbeat line that breaks off into a dashed rust line, index cards labeled Admin Contact, Technical Contact, Tenant ID, Initial Domain, Directory Sync and License Tier with their details blacked out, a cobalt circle, halftone clouds and server racks, and an agent-registration certificate stamped \u201cExpired\u201d.',
+  },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',
     width: 1536,
