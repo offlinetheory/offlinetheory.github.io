@@ -10,6 +10,10 @@ import page1 from '../assets/about/pages/page-1.webp'
 import page2 from '../assets/about/pages/page-2.webp'
 import page3 from '../assets/about/pages/page-3.webp'
 import page4 from '../assets/about/pages/page-4.webp'
+import page5 from '../assets/about/pages/page-5.webp'
+import page6 from '../assets/about/pages/page-6.webp'
+import page7 from '../assets/about/pages/page-7.webp'
+import page8 from '../assets/about/pages/page-8.webp'
 
 // To use a new headshot, replace src/assets/about/portrait.webp
 // (or point `src` at another imported file) and update `alt` if needed.
@@ -29,6 +33,10 @@ export const ABOUT_MAGAZINE_ASSETS = {
     'page-2': page2,
     'page-3': page3,
     'page-4': page4,
+    'page-5': page5,
+    'page-6': page6,
+    'page-7': page7,
+    'page-8': page8,
   },
 }
 
@@ -84,12 +92,17 @@ export const ABOUT_COPY = {
 
 // Spreads inside the physical magazine.
 // 0: portrait | opening ABOUT page
-// 1: introduction (page 1) | editorial principles (page 2)
-// 2: masthead & bio (page 3) | contact & disclosure (page 4)
+// 1: introduction — title + dek (page 1) | introduction body (page 2)
+// 2: editorial principles 01–02 (page 3) | principles 03–04 (page 4)
+// 3: masthead — name & role (page 5) | biography (page 6)
+// 4: contact — lead + email (page 7) | secure drop + disclosure (page 8)
+// Each section gets its own spread so the type can stay large and readable.
 export const ABOUT_SPREADS = [
   { id: 'opening', left: null, right: 'opening-right' },
   { id: 'intro', left: 'page-1', right: 'page-2' },
-  { id: 'masthead', left: 'page-3', right: 'page-4' },
+  { id: 'principles', left: 'page-3', right: 'page-4' },
+  { id: 'masthead', left: 'page-5', right: 'page-6' },
+  { id: 'contact', left: 'page-7', right: 'page-8' },
 ]
 
 export const ABOUT_TIMING = {
