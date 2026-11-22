@@ -1,42 +1,60 @@
 import portraitSrc from '../assets/about/portrait.webp'
 import opening800 from '../assets/about/opening-800.webp'
 import opening1200 from '../assets/about/opening-1200.webp'
-import opening1505 from '../assets/about/opening-1505.webp'
+import opening1904 from '../assets/about/opening-1904.webp'
 import hands800 from '../assets/about/hands-800.webp'
 import hands1200 from '../assets/about/hands-1200.webp'
-import hands1505 from '../assets/about/hands-1505.webp'
-import leafMask from '../assets/about/leaf-mask.png'
+import hands1904 from '../assets/about/hands-1904.webp'
+import openingRight from '../assets/about/pages/opening-right.webp'
+import page1 from '../assets/about/pages/page-1.webp'
+import page2 from '../assets/about/pages/page-2.webp'
+import page3 from '../assets/about/pages/page-3.webp'
+import page4 from '../assets/about/pages/page-4.webp'
 
 // To use a new headshot, replace src/assets/about/portrait.webp
 // (or point `src` at another imported file) and update `alt` if needed.
-// The image is placed with object-fit: cover in the left-page well.
+// The image is placed with object-fit: cover in the left-page well
+// and blended into the cream paper at display time.
 export const ABOUT_PORTRAIT = {
   src: portraitSrc,
   alt: 'Jamiah McQuiller, founder and editor of Offline Theory',
 }
 
 export const ABOUT_MAGAZINE_ASSETS = {
-  opening: { 800: opening800, 1200: opening1200, 1505: opening1505 },
-  hands: { 800: hands800, 1200: hands1200, 1505: hands1505 },
-  leafMask,
+  opening: { 800: opening800, 1200: opening1200, 1904: opening1904 },
+  hands: { 800: hands800, 1200: hands1200, 1904: hands1904 },
+  pages: {
+    'opening-right': openingRight,
+    'page-1': page1,
+    'page-2': page2,
+    'page-3': page3,
+    'page-4': page4,
+  },
 }
 
 // Fractions of the opening photograph (1505 × 1045).
 export const MAGAZINE_LAYOUT = {
-  photoWidth: 1505,
-  photoHeight: 1045,
-  aspect: 1505 / 1045,
-  leaf: {
-    left: 775 / 1505,
-    top: 200 / 1045,
-    width: (1168 - 775) / 1505,
-    height: (849 - 200) / 1045,
+  photoWidth: 1904,
+  photoHeight: 1328,
+  aspect: 1904 / 1328,
+  spineX: 975 / 1904,
+  right: {
+    left: 975 / 1904,
+    top: 243 / 1328,
+    width: (1470 - 975) / 1904,
+    height: (1069 - 243) / 1328,
+  },
+  left: {
+    left: 450 / 1904,
+    top: 243 / 1328,
+    width: (975 - 450) / 1904,
+    height: (1069 - 243) / 1328,
   },
   portrait: {
-    left: 382 / 1505,
-    top: 229 / 1045,
-    width: (763 - 382) / 1505,
-    height: (821 - 229) / 1045,
+    left: 480 / 1904,
+    top: 283 / 1328,
+    width: (960 - 480) / 1904,
+    height: (1033 - 283) / 1328,
   },
 }
 
@@ -64,9 +82,20 @@ export const ABOUT_COPY = {
   affiliate: 'OFFLINE THEORY may earn a commission if you buy through links we mark as sponsored. That does not change our recommendations.',
 }
 
+// Spreads inside the physical magazine.
+// 0: portrait | opening ABOUT page
+// 1: introduction (page 1) | editorial principles (page 2)
+// 2: masthead & bio (page 3) | contact & disclosure (page 4)
+export const ABOUT_SPREADS = [
+  { id: 'opening', left: null, right: 'opening-right' },
+  { id: 'intro', left: 'page-1', right: 'page-2' },
+  { id: 'masthead', left: 'page-3', right: 'page-4' },
+]
+
 export const ABOUT_TIMING = {
-  pauseMs: 1500,
-  turnMs: 1300,
-  holdMs: 700,
-  revealMs: 500,
+  turnMs: 5200,
+  snapMs: 900,
+  peekDelayMs: 1400,
+  peekMs: 1600,
+  peekAmount: 0.07,
 }
