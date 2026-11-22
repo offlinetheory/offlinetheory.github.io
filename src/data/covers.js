@@ -29,7 +29,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Collage illustration: a large halftone fingerprint on torn paper beside a long row of black filing cabinets receding into the distance, with a cut-out police radio microphone in front, rust-colored redaction bars, and cobalt and rust circles on cream paper.',
+    alt: 'Cover collage with a masthead reading “NEWS / SECURITY / LAW ENFORCEMENT,” the headline “The FBI Is Investigating a Reported Breach of Its National Crime Database,” a rust-red torn-paper banner behind the words National Crime Database, a vintage CRT monitor showing a fingerprint file and an “UNAUTHORIZED ACCESS” warning, a Department of Justice Federal Bureau of Investigation seal, a government office building under a rust-red sun with a silhouetted figure, and a torn contact sheet of mugshot-style portraits and a fingerprint.',
   },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',
