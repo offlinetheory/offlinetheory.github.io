@@ -828,17 +828,44 @@ export const PRODUCTS = [
 ]
 
 export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
-export const journalIssues = () => ARTICLES.filter((a) => a.journal)
-// Homepage "Latest": the newest articles by date. On the same date, the one
+
+// Hidden from section index lists and homepage modules (Latest, Journal).
+// Articles stay in ARTICLES, so their URLs, search, and related lists are unchanged.
+export const SECTION_LIST_HIDDEN_SLUGS = new Set([
+  // News: hide Zero-Day, Ransomware, Passkeys, and Data Brokers; keep FBI, Chase, Microsoft 365
+  'a-closer-look-at-the-latest-zero-day',
+  'ransomware-groups-shift-to-data-extortion',
+  'passkeys-reach-the-mainstream',
+  'regulators-target-data-brokers',
+  // Analysis: former 02-06; c0mrade stays
+  'the-real-cost-of-convenience',
+  'threat-modeling-for-normal-people',
+  'the-rise-of-everyday-surveillance',
+  'privacy-in-a-hyper-connected-world',
+  'the-invisible-infrastructure-we-trust',
+  // Tools: former 02-05; Bleuprint stays
+  'password-managers-compared-2026',
+  'open-source-security-tools-worth-using',
+  'review-hardware-security-keys-2026',
+  'a-minimal-privacy-browser-setup',
+])
+
+export const journalIssues = () =>
+  ARTICLES.filter((a) => a.journal && !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
+// Homepage "Latest": the newest visible articles by date. On the same date, the one
 // added later to ARTICLES comes first, so new pieces always take slot 1.
 export const LATEST_COUNT = 3
 export const latestArticles = (count = LATEST_COUNT) =>
   ARTICLES.map((a, i) => ({ a, i }))
     .sort((x, y) => y.a.date.localeCompare(x.a.date) || y.i - x.i)
+    .filter(({ a }) => !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
     .slice(0, count)
     .map(({ a }) => a)
 export const articlesInSection = (section) =>
   ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
+
+export const sectionListArticles = (section) =>
+  articlesInSection(section).filter((a) => !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
 
 function collectText(value) {
   if (value == null) return ''
