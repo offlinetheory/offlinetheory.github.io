@@ -1,5 +1,5 @@
 import { getSection } from '../data/sections.js'
-import { articlesInSection, PRODUCTS } from '../data/articles.js'
+import { sectionListArticles, PRODUCTS } from '../data/articles.js'
 import PageHeader from '../components/PageHeader.jsx'
 import ArticleRow from '../components/ArticleRow.jsx'
 import Newsletter from '../components/Newsletter.jsx'
@@ -16,7 +16,7 @@ const TOOLKIT = [
 
 export default function SectionPage({ slug }) {
   const section = getSection(slug)
-  const items = articlesInSection(slug)
+  const items = sectionListArticles(slug)
   useMeta({ title: section.title, description: section.description })
 
   return (

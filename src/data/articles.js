@@ -840,6 +840,31 @@ export const latestArticles = (count = LATEST_COUNT) =>
 export const articlesInSection = (section) =>
   ARTICLES.filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
 
+// Hidden from section index lists only (News, Analysis, Tools, Guides).
+// Articles stay in ARTICLES, so their URLs, search, related lists, and
+// homepage modules (Latest, Journal) are unchanged.
+export const SECTION_LIST_HIDDEN_SLUGS = new Set([
+  // News: former first four (FBI NCIC, Chase/Visa/Mastercard, Microsoft 365, zero-day)
+  'fbi-ncic-crime-database-breach-november-2026',
+  'chase-visa-mastercard-vendor-data-leak-november-2026',
+  'microsoft-365-outage-november-2026',
+  'a-closer-look-at-the-latest-zero-day',
+  // Analysis: former 02-06; c0mrade stays
+  'the-real-cost-of-convenience',
+  'threat-modeling-for-normal-people',
+  'the-rise-of-everyday-surveillance',
+  'privacy-in-a-hyper-connected-world',
+  'the-invisible-infrastructure-we-trust',
+  // Tools: former 02-05; Bleuprint stays
+  'password-managers-compared-2026',
+  'open-source-security-tools-worth-using',
+  'review-hardware-security-keys-2026',
+  'a-minimal-privacy-browser-setup',
+])
+
+export const sectionListArticles = (section) =>
+  articlesInSection(section).filter((a) => !SECTION_LIST_HIDDEN_SLUGS.has(a.slug))
+
 function collectText(value) {
   if (value == null) return ''
   if (typeof value === 'string') return value
