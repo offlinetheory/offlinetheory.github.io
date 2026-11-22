@@ -430,15 +430,29 @@ export default function AboutMagazine() {
     }
   }, [animateTo, finishTurn, next, paintSpread, prev, reduce, stopTurn, webgl])
 
-  // Narrow (mobile) detection
+  // Narrow (mobile) detection. The stage's own measured width is the
+  // primary signal, but iPhone Safari in "Request Desktop Website" mode
+  // lays the page out at ~980px, so the stage measures wide and the
+  // viewport media query never matches — the magazine then renders as a
+  // small landscape strip. The physical screen width is unaffected by
+  // that mode, so a phone screen (<640px) also counts as narrow and the
+  // one-page layout applies either way.
   useEffect(() => {
     const stage = stageRef.current
     if (!stage) return undefined
-    const measure = () => setNarrow(stage.getBoundingClientRect().width < 640)
+    const measure = () => {
+      const stageWidth = stage.getBoundingClientRect().width
+      const screenWidth = typeof window !== 'undefined' ? window.screen.width : 0
+      setNarrow(stageWidth < 640 || screenWidth < 640)
+    }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(stage)
-    return () => ro.disconnect()
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
   const canPrev = spread > 0 && !turning
