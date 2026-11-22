@@ -1,6 +1,7 @@
 .mag {
   position: relative;
-  padding: 16px 0 24px;
+  width: 100%;
+  padding: 0;
 }
 
 .mag__sr {
@@ -18,8 +19,11 @@
 
 .mag-stage {
   position: relative;
-  width: min(1120px, 100%);
-  max-height: min(78vh, 860px);
+  /* Fill the viewport while keeping the photograph's proportions:
+     the calc() term is the width that fits 96vh at the photo's aspect,
+     so the stage never has to stretch to meet a height cap. */
+  width: min(1680px, 96vw, calc(96vh * 1904 / 1328));
+  width: min(1680px, 96vw, calc(96dvh * 1904 / 1328));
   margin: 0 auto;
   aspect-ratio: 1904 / 1328;
   height: auto;
@@ -74,29 +78,29 @@
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 10px,
-    #000 calc(100% - 10px),
+    #000 20px,
+    #000 calc(100% - 20px),
     transparent 100%
   ),
   linear-gradient(
     to bottom,
     transparent 0,
-    #000 10px,
-    #000 calc(100% - 10px),
+    #000 20px,
+    #000 calc(100% - 20px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 10px,
-    #000 calc(100% - 10px),
+    #000 20px,
+    #000 calc(100% - 20px),
     transparent 100%
   ),
   linear-gradient(
     to bottom,
     transparent 0,
-    #000 10px,
-    #000 calc(100% - 10px),
+    #000 20px,
+    #000 calc(100% - 20px),
     transparent 100%
   );
   -webkit-mask-composite: destination-in;

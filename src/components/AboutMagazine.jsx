@@ -18,7 +18,7 @@ const HANDS_SRCSET = [
   `${ABOUT_MAGAZINE_ASSETS.hands[1200]} 1200w`,
   `${ABOUT_MAGAZINE_ASSETS.hands[1904]} 1904w`,
 ].join(', ')
-const SIZES = '(max-width: 640px) 100vw, min(1120px, 92vw)'
+const SIZES = '(max-width: 640px) 100vw, min(1680px, 96vw)'
 const PAGES = ABOUT_MAGAZINE_ASSETS.pages
 const LAST_SPREAD = ABOUT_SPREADS.length - 1
 
@@ -50,6 +50,8 @@ function qaFromQuery() {
     settled: { spread: 1, t: 0, dir: 1 },
     spread1: { spread: 1, t: 0, dir: 1 },
     spread2: { spread: 2, t: 0, dir: 1 },
+    spread3: { spread: 3, t: 0, dir: 1 },
+    spread4: { spread: 4, t: 0, dir: 1 },
     back: { spread: 1, t: 0.52, dir: -1 },
     backlift: { spread: 1, t: 0.1, dir: -1 },
     backend: { spread: 0, t: 0, dir: 1 },
@@ -91,6 +93,9 @@ export default function AboutMagazine() {
   const spreadRef = useRef(0)
   const turningRef = useRef(false)
   const [spread, setSpread] = useState(0)
+  // Folio label spread: updates as soon as a turn is committed (or as a
+  // drag passes halfway), not only after the turn finishes.
+  const [folioSpread, setFolioSpread] = useState(0)
   const [turning, setTurning] = useState(false)
   const [webgl, setWebgl] = useState(true)
   const [ready, setReady] = useState(false)
@@ -176,6 +181,7 @@ export default function AboutMagazine() {
     const next = spreadRef.current + (dir > 0 ? 1 : -1)
     spreadRef.current = next
     setSpread(next)
+    setFolioSpread(next)
     setFocus(dir > 0 ? 'left' : 'right')
     paintSpread(next, { dir: 1, progress: 0 }).then(() => {
       turningRef.current = false
@@ -190,6 +196,7 @@ export default function AboutMagazine() {
     if (dir < 0 && s <= 0) return
     turningRef.current = true
     setTurning(true)
+    setFolioSpread(s + (dir > 0 ? 1 : -1))
     const engine = engineRef.current
     const reduced = prefersReducedMotion()
     if (!engine || reduced || !webgl) {
@@ -249,6 +256,7 @@ export default function AboutMagazine() {
       const startDir = qa ? qa.dir : 1
       spreadRef.current = startSpread
       setSpread(startSpread)
+      setFolioSpread(startSpread)
       setFocus(startSpread === 0 ? 'right' : 'left')
       await paintSpread(startSpread, { dir: startDir, progress: startT })
       if (cancelled) return
@@ -302,6 +310,7 @@ export default function AboutMagazine() {
         if (!turningRef.current) {
           spreadRef.current = 0
           setSpread(0)
+          setFolioSpread(0)
           setFocus('right')
           paintSpread(0, { progress: 0 })
         }
@@ -310,6 +319,7 @@ export default function AboutMagazine() {
         if (!turningRef.current) {
           spreadRef.current = LAST_SPREAD
           setSpread(LAST_SPREAD)
+          setFolioSpread(LAST_SPREAD)
           setFocus('left')
           paintSpread(LAST_SPREAD, { progress: 0 })
         }
@@ -368,6 +378,9 @@ export default function AboutMagazine() {
       const rect = photoRect()
       const frac = Math.abs(dx) / (rect.width * L.right.width * 1.15)
       const p = Math.min(0.92, Math.max(0, frac))
+      // Folio follows the drag: past halfway it shows the spread being
+      // turned to, before that the spread being left.
+      setFolioSpread(p >= 0.5 ? s + drag.dir : s)
       if (engine && drag.pulled) {
         engine.setProgress(p)
         engine.setCurlVisible(p > 0.001)
@@ -395,6 +408,8 @@ export default function AboutMagazine() {
         const remain = Math.max(800, ABOUT_TIMING.turnMs * (1 - p))
         animateTo(p, 1, remain, () => finishTurn(drag.dir))
       } else {
+        // Snapped back: the folio returns to the spread we stayed on.
+        setFolioSpread(spreadRef.current)
         animateTo(p, 0, ABOUT_TIMING.snapMs, () => {
           turningRef.current = false
           setTurning(false)
@@ -431,11 +446,15 @@ export default function AboutMagazine() {
   const showPortrait = spread === 0
   const fallback = !webgl
 
-  const folioLabel = spread === 0
+  const folioLabel = folioSpread === 0
     ? 'Opening'
-    : spread === 1
+    : folioSpread === 1
       ? '01–02'
-      : '03–04'
+      : folioSpread === 2
+        ? '03–04'
+        : folioSpread === 3
+          ? '05–06'
+          : '07–08'
 
   return (
     <div className="mag">
@@ -539,11 +558,13 @@ export default function AboutMagazine() {
             className="mag-ui__mail"
             href={`mailto:offlinetheory@proton.me`}
             aria-label="Email offlinetheory@proton.me"
+            // Email line sits on page 7 (left page of the contact spread),
+            // ~27% down the page image, ~5% tall.
             style={{
-              left: `${(L.right.left + L.right.width * 0.11) * 100}%`,
-              top: `${(L.right.top + L.right.height * 0.42) * 100}%`,
-              width: `${L.right.width * 0.78 * 100}%`,
-              height: `${L.right.height * 0.07 * 100}%`,
+              left: `${(L.left.left + L.left.width * 0.11) * 100}%`,
+              top: `${(L.left.top + L.left.height * 0.27) * 100}%`,
+              width: `${L.left.width * 0.78 * 100}%`,
+              height: `${L.left.height * 0.06 * 100}%`,
             }}
           />
         )}
