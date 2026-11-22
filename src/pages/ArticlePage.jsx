@@ -33,6 +33,9 @@ function inlineText(text) {
   })
 }
 
+// Files in public/ resolve against the deploy base path (e.g. / or /offline-theory/).
+const mediaUrl = (path) => (/^https?:\/\//i.test(path) ? path : `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`)
+
 function Block({ block }) {
   switch (block.type) {
     case 'h2': return <h2>{block.text}</h2>
@@ -40,6 +43,13 @@ function Block({ block }) {
     case 'code': return <pre><code>{block.text}</code></pre>
     case 'list': return <ul>{block.items.map((item, i) => <li key={i}>{inlineText(item)}</li>)}</ul>
     case 'disclosure': return <aside className="article__disclosure">{block.text}</aside>
+    // Static files under public/ (videos, captions): plain anchors, not router links.
+    case 'downloads': return (
+      <aside className="article__downloads" aria-label={block.label || 'Downloads'}>
+        <h2 className="label">{block.label || 'Downloads'}</h2>
+        <ul>{block.items.map((item, i) => <li key={i}><a href={mediaUrl(item.href)} download>{item.text}</a></li>)}</ul>
+      </aside>
+    )
     case 'table': return (
       <div className="article__table-wrap">
         <table className="article__table">
@@ -132,6 +142,22 @@ export default function ArticlePage() {
         {thumb && (
           <figure className="article__figure">
             <div className="article__frame" style={thumb.wide && thumb.width ? { aspectRatio: `${thumb.width} / ${thumb.height}` } : undefined}>
+              {a.video ? (
+                <video
+                  className="article__video"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster={thumb.poster || largestSrc(thumb.srcSet, thumb.src)}
+                  width={thumb.width}
+                  height={thumb.height}
+                  aria-label={a.video.label || a.title}
+                >
+                  <source src={mediaUrl(a.video.src)} type="video/mp4" />
+                  {a.video.captions && <track kind="captions" src={mediaUrl(a.video.captions)} srcLang="en" label="English" default />}
+                  <a href={mediaUrl(a.video.src)}>Download the video</a>
+                </video>
+              ) : (
               <img
                 src={thumb.src}
                 srcSet={thumb.srcSet}
@@ -141,6 +167,7 @@ export default function ArticlePage() {
                 alt={thumb.alt}
                 fetchPriority="high"
               />
+              )}
             </div>
             <figcaption className="meta">{a.caption || `${a.volume} / The Digital Security Journal`}</figcaption>
           </figure>

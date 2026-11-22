@@ -29,7 +29,7 @@ export default function SectionPage({ slug }) {
         </div>
 
         {/* Guides has no sidebar module right now; the empty column keeps the list width the same as the other sections. */}
-        {slug === 'guides' ? <div className="section-page__aside" aria-hidden="true" /> : (
+        {slug === 'guides' || slug === 'awareness-training' ? <div className="section-page__aside" aria-hidden="true" /> : (
         <aside className="section-page__aside" aria-label={`${section.name} extras`}>
           {slug === 'tools' && (
             <section>

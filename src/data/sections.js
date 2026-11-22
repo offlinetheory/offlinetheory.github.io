@@ -29,6 +29,13 @@ export const SECTIONS = [
     hideDescription: true,
     description: 'Plain-language guides to the attacks that target people, from phishing to ransomware, and the habits that stop them.',
   },
+  {
+    slug: 'awareness-training',
+    name: 'Awareness & Training',
+    title: 'Cybersecurity Awareness & Training',
+    kicker: 'Security Briefs',
+    description: 'Short investigative video briefs and training on the attacks that target people, starting with the Offline Theory Security Briefs series.',
+  },
 ]
 
 export const getSection = (slug) => SECTIONS.find((s) => s.slug === slug)

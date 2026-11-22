@@ -33,6 +33,9 @@ import grw1536 from '../assets/images/cover-guide-ransomware-1536.webp'
 import mcl480 from '../assets/images/cover-mclaren-480.webp'
 import mcl960 from '../assets/images/cover-mclaren-960.webp'
 import mcl1536 from '../assets/images/cover-mclaren-1536.webp'
+import sb001_480 from '../assets/images/cover-security-briefs-ep001-480.webp'
+import sb001_960 from '../assets/images/cover-security-briefs-ep001-960.webp'
+import sb001_1536 from '../assets/images/cover-security-briefs-ep001-1536.webp'
 import { SEO_COVERS } from './covers.js'
 
 export const THUMBS = {
@@ -48,5 +51,6 @@ export const THUMBS = {
   bleuprint: { src: bleuprint960, srcSet: `${bleuprint480} 480w, ${bleuprint960} 960w, ${bleuprint1536} 1536w`, wide: true, width: SEO_COVERS.bleuprint.width, height: SEO_COVERS.bleuprint.height, alt: SEO_COVERS.bleuprint.alt },
   guidePhishing: { src: gph960, srcSet: `${gph480} 480w, ${gph960} 960w, ${gph1536} 1536w`, wide: true, width: SEO_COVERS.guidePhishing.width, height: SEO_COVERS.guidePhishing.height, alt: SEO_COVERS.guidePhishing.alt },
   guideSocialEngineering: { src: gse960, srcSet: `${gse480} 480w, ${gse960} 960w, ${gse1536} 1536w`, wide: true, width: SEO_COVERS.guideSocialEngineering.width, height: SEO_COVERS.guideSocialEngineering.height, alt: SEO_COVERS.guideSocialEngineering.alt },
+  securityBriefsEp001: { src: sb001_960, srcSet: `${sb001_480} 480w, ${sb001_960} 960w, ${sb001_1536} 1536w`, wide: true, width: SEO_COVERS.securityBriefsEp001.width, height: SEO_COVERS.securityBriefsEp001.height, alt: SEO_COVERS.securityBriefsEp001.alt, poster: sb001_1536 },
   guideRansomware: { src: grw960, srcSet: `${grw480} 480w, ${grw960} 960w, ${grw1536} 1536w`, wide: true, width: SEO_COVERS.guideRansomware.width, height: SEO_COVERS.guideRansomware.height, alt: SEO_COVERS.guideRansomware.alt },
 }

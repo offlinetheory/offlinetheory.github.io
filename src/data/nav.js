@@ -3,5 +3,6 @@ export const NAV = [
   { to: '/analysis', label: 'Analysis' },
   { to: '/tools', label: 'Tools' },
   { to: '/guides', label: 'Guides' },
+  { to: '/awareness-training', label: 'Training' },
   { to: '/about', label: 'About' },
 ]

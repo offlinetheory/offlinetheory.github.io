@@ -66,6 +66,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with the headline \u201cRansomware: How It Locks Your Data, Disrupts Operations, and Extorts a Payout,\u201d a rust-red padlock on an opened hard drive, a torn note reading \u201cYour data has been encrypted. Pay in 72 hours or lose access,\u201d office buildings, and a row of old computer monitors, one showing a warning triangle.',
   },
+  securityBriefsEp001: {
+    filePrefix: 'cover-security-briefs-ep001-1536',
+    width: 1536,
+    height: 864,
+    type: 'image/webp',
+    alt: 'Thumbnail for Offline Theory Security Briefs EP. 001 \u2014 Phishing: the headline \u201cThe Hook That Steals Your Data\u201d in black and rust-orange type on cream paper, beside a screen-print illustration of a fishing hook piercing a browser login window with an envelope icon, username and password fields and a sign-in button, rising out of black ink waves in front of a rust-orange sun.',
+  },
 }
 
 export function getSeoCover(thumbKey) {

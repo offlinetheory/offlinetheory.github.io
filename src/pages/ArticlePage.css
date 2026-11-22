@@ -156,3 +156,14 @@
   color: var(--gray);
 }
 .article__table tbody th { font: 600 13px/1.35 var(--font-sans); }
+
+/* Video cover (Security Briefs episodes): fills the same frame as a cover image. */
+.article__frame .article__video { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--ink); }
+/* Download links for static files (video cuts, captions). */
+.article__downloads {
+  margin-top: 1.6em;
+  padding-top: 1.1em;
+  border-top: 1px solid var(--beige-dark);
+}
+.article__downloads h2.label { margin: 0 0 0.6em; font-size: inherit; }
+.article__downloads ul { margin: 0; }

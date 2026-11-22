@@ -1101,6 +1101,61 @@ export const ARTICLES = [
       ] },
     ],
   },
+  {
+    slug: 'security-briefs-ep-001-phishing-the-hook-that-steals-your-data',
+    title: 'The Hook That Steals Your Data',
+    section: 'guides',
+    // Also listed in the Cybersecurity Awareness & Training section (see articlesInSection).
+    alsoIn: ['awareness-training'],
+    volume: 'Security Briefs EP. 001',
+    category: 'Phishing',
+    placeholder: false,
+    thumb: 'securityBriefsEp001',
+    caption: 'Security Briefs EP. 001 / 90-second investigative short / OFFLINE THEORY',
+    video: {
+      src: 'media/security-briefs/ep001/ep001-the-hook-that-steals-your-data-1080p.mp4',
+      captions: 'media/security-briefs/ep001/ep001-the-hook-that-steals-your-data.en.vtt',
+      label: 'Security Briefs EP. 001: The Hook That Steals Your Data (90 seconds, with English captions)',
+    },
+    author: 'Jamiah McQuiller',
+    date: '2026-11-22',
+    readTime: 2,
+    dek: 'The first Offline Theory Security Brief: a 90-second investigative short on phishing, how one convincing message turns into a stolen account, the four warning signs to watch for, and what to do instead of clicking.',
+    tags: ['security briefs', 'phishing', 'video', 'awareness', 'training', 'credential theft', 'mfa'],
+    body: [
+      { type: 'quote', text: 'You don\u2019t have to be hacked to lose control of your account. Sometimes, all it takes is one convincing message.' },
+      { type: 'p', text: 'Security Briefs is a new Offline Theory video series: short, investigative explainers on the attacks that target people rather than machines. Episode 001 starts with the oldest trick that still works. A message that looks like Microsoft, your bank or a coworker says there is a problem with your account and that it needs your attention now. The link leads to an imitation login page, and whatever you type goes straight to the attacker.' },
+      { type: 'h2', text: 'The warning signs' },
+      { type: 'list', items: [
+        'An unusual sender address, close to a name you trust but not quite right.',
+        'An attachment you were not expecting.',
+        'A link that does not lead where it claims to. Hover over it, or press and hold on a phone, before you trust it.',
+        'Pressure to act immediately. Urgency is the hook.',
+        'A familiar logo. Logos are easy to copy and do not guarantee a message is legitimate.',
+      ] },
+      { type: 'h2', text: 'Don\u2019t take the bait' },
+      { type: 'list', items: [
+        'Don\u2019t click first and investigate later.',
+        'Visit the organization\u2019s official website directly, by typing the address or using a bookmark you saved yourself.',
+        'Verify unexpected requests through a trusted channel, such as a phone number you already have.',
+        'Use multifactor authentication, so a stolen password alone is not enough.',
+        'Report suspicious messages to your IT or security team.',
+      ] },
+      { type: 'p', text: ['For the longer version, with texts, calls, QR codes and what to do if you already clicked, read ', { text: 'How to Spot a Phish Before You Click', href: '/article/how-to-spot-a-phish-before-you-click' }, '.'] },
+      { type: 'h2', text: 'Transcript' },
+      { type: 'p', text: 'You receive an email. It looks familiar. Maybe it\u2019s Microsoft, your bank, or even someone you work with. It says there\u2019s a problem with your account. And it needs your attention now.' },
+      { type: 'p', text: 'This is phishing. A form of social engineering where attackers impersonate trusted organizations to trick people into revealing sensitive information, opening malicious attachments, or visiting fraudulent websites.' },
+      { type: 'p', text: 'Once you enter your credentials, an attacker may capture them and attempt to access your real account. From there, they could expose sensitive information, impersonate you, or use your account to target others.' },
+      { type: 'p', text: 'Watch for unusual sender addresses. Unexpected attachments. Links that don\u2019t lead where they claim. And messages that pressure you to act immediately. Familiar logos don\u2019t guarantee legitimate messages.' },
+      { type: 'p', text: 'Don\u2019t click first and investigate later. Visit the organization\u2019s official website directly. Verify unexpected requests through a trusted channel. Use multifactor authentication, and report suspicious messages to your IT or security team.' },
+      { type: 'p', text: 'Because the easiest way into an account isn\u2019t always through a computer. Sometimes, it\u2019s through a person.' },
+      { type: 'quote', text: 'Stay offline. Stay informed.' },
+      { type: 'downloads', label: 'Downloads', items: [
+        { text: 'Vertical cut for Reels and TikTok (1080 \u00d7 1920, captions burned in, MP4)', href: 'media/security-briefs/ep001/ep001-the-hook-that-steals-your-data-vertical.mp4' },
+        { text: 'Captions (WebVTT)', href: 'media/security-briefs/ep001/ep001-the-hook-that-steals-your-data.en.vtt' },
+      ] },
+    ],
+  },
 ]
 
 export const getArticle = (slug) => ARTICLES.find((a) => a.slug === slug)
@@ -1117,13 +1172,14 @@ export const latestArticles = (count = LATEST_COUNT) =>
 // section lists, the homepage and "Continue reading".
 export const listedArticles = () => ARTICLES.filter((a) => !a.hideFromSection)
 export const articlesInSection = (section) =>
-  listedArticles().filter((a) => a.section === section).sort((a, b) => b.date.localeCompare(a.date))
+  listedArticles().filter((a) => a.section === section || (a.alsoIn || []).includes(section)).sort((a, b) => b.date.localeCompare(a.date))
 // Homepage left column: newest News stories that have a cover image.
 export const HOME_NEWS_COUNT = 4
 export const homeNewsArticles = (count = HOME_NEWS_COUNT) =>
   articlesInSection('news').filter((a) => a.thumb).slice(0, count)
 // Homepage right column: a hand-picked list, in this order.
 export const FEATURED_SLUGS = [
+  'security-briefs-ep-001-phishing-the-hook-that-steals-your-data',
   'bleuprint-the-metro-detroit-tool-for-getting-found-and-chosen',
   'jonathan-james-c0mrade-nasa-pentagon-hacker',
   'how-to-spot-a-phish-before-you-click',

@@ -29,6 +29,7 @@ export default function App() {
           <Route path="/analysis" element={<SectionPage slug="analysis" />} />
           <Route path="/tools" element={<SectionPage slug="tools" />} />
           <Route path="/guides" element={<SectionPage slug="guides" />} />
+          <Route path="/awareness-training" element={<SectionPage slug="awareness-training" />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
