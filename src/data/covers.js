@@ -48,9 +48,9 @@ export const SEO_COVERS = {
   entraHealth: {
     filePrefix: 'cover-entra-connect-health-1536',
     width: 1536,
-    height: 1024,
+    height: 864,
     type: 'image/webp',
-    alt: 'Cover collage with the label \u201cNews / Security / Identity\u201d and the headline \u201cEntra Connect Health: Admin emails & tenant data exposed\u201d on torn black and rust paper, a vintage monitor labeled \u201cConnect Health Monitoring\u201d showing a heartbeat line that breaks off into a dashed rust line, index cards labeled Admin Contact, Technical Contact, Tenant ID, Initial Domain, Directory Sync and License Tier with their details blacked out, a cobalt circle, halftone clouds and server racks, and an agent-registration certificate stamped \u201cExpired\u201d.',
+    alt: 'Cover collage with the Microsoft logo, the headline \u201cEntra Connect Health Flaw\u201d and the line \u201cExposed Admin Emails and Tenant Data,\u201d a cracked tablet screen labeled Microsoft Entra Connect Health with cards for Admin Emails and Tenant Data and a red warning triangle, torn rust-red paper, clouds, and a building along the bottom.',
   },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',

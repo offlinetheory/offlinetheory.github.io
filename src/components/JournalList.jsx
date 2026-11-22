@@ -17,7 +17,7 @@ export default function JournalList() {
             <li key={a.slug}>
               <Link to={`/article/${a.slug}`} className="journal__item">
                 <img
-                  className="journal__thumb" src={t.src} srcSet={t.srcSet} sizes="80px"
+                  className="journal__thumb" style={t.objectPosition ? { objectPosition: t.objectPosition } : undefined} src={t.src} srcSet={t.srcSet} sizes="80px"
                   width="80" height="62" alt={t.alt} loading="lazy" decoding="async"
                 />
                 <span className="journal__text">
