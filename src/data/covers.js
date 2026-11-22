@@ -8,7 +8,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Collage illustration: a vintage telephone switchboard with unplugged cords hanging from its jacks, a black rotary phone with the receiver off the hook in front of a stack of blank envelopes, and a clock with no numerals overlapping a rust-orange circle, with a cobalt circle and a rust bar on cream paper.',
+    alt: 'Cover collage with the headline “What the Microsoft 365 Outage Actually Broke, and What to Do Now,” a “News / Outages / Productivity” label, a laptop showing a Microsoft 365 service-outage screen, floating Outlook, Teams and cloud app icons, a Microsoft office building, a rust-orange sun in the clouds, and a checklist reading “What broke / Impact / What to do now,” with the last item checked.',
   },
   jonathanJames: {
     filePrefix: 'cover-jonathan-james-1448',
