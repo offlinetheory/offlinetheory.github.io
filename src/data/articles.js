@@ -100,6 +100,7 @@ export const ARTICLES = [
   // ── Latest (homepage right column) ──────────────────────────────────
   {
     slug: 'a-closer-look-at-the-latest-zero-day',
+    hideFromSection: true,
       placeholder: false,
     title: 'A Closer Look at the Latest Zero-Day',
     section: 'news',
@@ -939,6 +940,7 @@ export const ARTICLES = [
   // ── Section depth ───────────────────────────────────────────────────
   {
     slug: 'ransomware-groups-shift-to-data-extortion',
+    hideFromSection: true,
       placeholder: false,
     title: 'Ransomware Groups Shift to Pure Data Extortion',
     section: 'news',
@@ -955,6 +957,7 @@ export const ARTICLES = [
   },
   {
     slug: 'passkeys-reach-the-mainstream',
+    hideFromSection: true,
       placeholder: false,
     title: 'Passkeys Quietly Reach the Mainstream',
     section: 'news',
@@ -971,6 +974,7 @@ export const ARTICLES = [
   },
   {
     slug: 'regulators-target-data-brokers',
+    hideFromSection: true,
       placeholder: false,
     title: 'Regulators Turn Their Attention to Data Brokers',
     section: 'news',
