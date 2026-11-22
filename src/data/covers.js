@@ -22,7 +22,7 @@ export const SEO_COVERS = {
     width: 1536,
     height: 1024,
     type: 'image/webp',
-    alt: 'Collage illustration: a vintage megaphone in front of a cobalt circle, with torn papers and blank envelopes bursting toward a rust-orange field, a broken padlock with its shackle in pieces, and a generic unbranded payment card with only a chip, taped onto cream paper.',
+    alt: 'Cover collage with the headline “Chase, Visa and Mastercard Data Leaked Through Their Vendors,” a “News / Security / Data Breach” label, branded Chase, Visa and Mastercard payment cards, a “Vendor Breach” warning with a barcode, a torn card form with blank name and card-number fields, and a hooded figure behind a laptop showing a padlock on a red screen, with a globe and a building in the background.',
   },
   fbiNcic: {
     filePrefix: 'cover-fbi-ncic-1536',
