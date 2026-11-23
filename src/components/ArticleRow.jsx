@@ -21,7 +21,7 @@ export default function ArticleRow({ article: a, index, headingLevel = 3 }) {
           <p className="article-row__dek">{a.dek}</p>
           <span className="meta article-row__read">{a.readTime} min read <Arrow /></span>
         </span>
-        {t && <img className="article-row__thumb" style={t.objectPosition ? { objectPosition: t.objectPosition } : undefined} src={t.src} srcSet={t.srcSet} sizes="160px" width="160" height="128" alt="" loading="lazy" decoding="async" />}
+        {t && <img className={`article-row__thumb${t.wide ? ' article-row__thumb--wide' : ''}`} style={t.objectPosition ? { objectPosition: t.objectPosition } : undefined} src={t.src} srcSet={t.srcSet} sizes="160px" width="160" height="128" alt="" loading="lazy" decoding="async" />}
       </Link>
     </article>
   )
