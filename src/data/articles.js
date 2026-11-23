@@ -123,6 +123,7 @@ export const ARTICLES = [
   {
     slug: 'open-source-security-tools-worth-using',
       placeholder: false,
+    hideFromSection: true,
     title: 'Open-Source Security Tools Worth Using',
     section: 'tools',
     category: 'Tools',
@@ -172,6 +173,7 @@ export const ARTICLES = [
     section: 'tools',
     category: 'Tools',
     placeholder: false,
+    hideFromSection: true,
     author: 'Jamiah McQuiller',
     date: '2026-11-14',
     readTime: 8,
@@ -1009,6 +1011,7 @@ export const ARTICLES = [
   {
     slug: 'review-hardware-security-keys-2026',
       placeholder: false,
+    hideFromSection: true,
     title: 'Review: Hardware Security Keys in 2026',
     section: 'tools',
     category: 'Review',
@@ -1025,6 +1028,7 @@ export const ARTICLES = [
   {
     slug: 'a-minimal-privacy-browser-setup',
       placeholder: false,
+    hideFromSection: true,
     title: 'A Minimal Privacy Browser Setup',
     section: 'tools',
     category: 'Recommendations',
