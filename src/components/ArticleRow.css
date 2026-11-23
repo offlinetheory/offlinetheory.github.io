@@ -10,6 +10,10 @@
 .article-row__dek { font: 400 16px/1.5 var(--font-serif); color: #2d2b28; max-width: 62ch; }
 .article-row__read { display: inline-flex; align-items: center; gap: 9px; margin-top: 4px; }
 .article-row__thumb { width: 160px; height: 128px; object-fit: cover; filter: grayscale(1); }
+/* Wide cover art (3:2, 16:9, 4:3) would lose its edges in the 5:4 thumb
+   box under cover — the Bleuprint title was cut off. Show the whole
+   cover instead; the letterbox blends into the page ground. */
+.article-row__thumb--wide { object-fit: contain; }
 .article-row__link:hover .article-row__title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 @media (max-width: 640px) {
   .article-row.has-thumb .article-row__link,
