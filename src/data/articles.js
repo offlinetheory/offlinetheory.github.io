@@ -1331,13 +1331,6 @@ export const ARTICLES = [
         'Report suspicious messages to your IT or security team.',
       ] },
       { type: 'p', text: ['For the longer version, with texts, calls, QR codes and what to do if you already clicked, read ', { text: 'How to Spot a Phish Before You Click', href: '/article/how-to-spot-a-phish-before-you-click' }, '.'] },
-      { type: 'h2', text: 'Transcript' },
-      { type: 'p', text: 'You receive an email. It looks familiar. Maybe it\u2019s Microsoft, your bank, or even someone you work with. It says there\u2019s a problem with your account. And it needs your attention now.' },
-      { type: 'p', text: 'This is phishing. A form of social engineering where attackers impersonate trusted organizations to trick people into revealing sensitive information, opening malicious attachments, or visiting fraudulent websites.' },
-      { type: 'p', text: 'Once you enter your credentials, an attacker may capture them and attempt to access your real account. From there, they could expose sensitive information, impersonate you, or use your account to target others.' },
-      { type: 'p', text: 'Watch for unusual sender addresses. Unexpected attachments. Links that don\u2019t lead where they claim. And messages that pressure you to act immediately. Familiar logos don\u2019t guarantee legitimate messages.' },
-      { type: 'p', text: 'Don\u2019t click first and investigate later. Visit the organization\u2019s official website directly. Verify unexpected requests through a trusted channel. Use multifactor authentication, and report suspicious messages to your IT or security team.' },
-      { type: 'p', text: 'Because the easiest way into an account isn\u2019t always through a computer. Sometimes, it\u2019s through a person.' },
       { type: 'quote', text: 'Stay offline. Stay informed.' },
       { type: 'downloads', label: 'Downloads', items: [
         { text: 'Vertical cut for Reels and TikTok (1080 \u00d7 1920, captions burned in, MP4)', href: 'media/security-briefs/ep001/ep001-the-hook-that-steals-your-data-vertical.mp4' },
