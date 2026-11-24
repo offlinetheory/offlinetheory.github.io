@@ -1,4 +1,5 @@
 import { useMeta } from '../hooks/useMeta.js'
+import PdfFlipbook from '../components/PdfFlipbook.jsx'
 import './AboutPage.css'
 
 export default function AboutPage() {
@@ -8,14 +9,7 @@ export default function AboutPage() {
   })
   return (
     <div className="about">
-      <iframe
-        className="heyzine-embed"
-        allowFullScreen
-        allow="autoplay; fullscreen; clipboard-write"
-        scrolling="no"
-        src="https://heyzine.com/flip-book/fdeff5e42f.html"
-        title="Offline Theory — About magazine"
-      />
+      <PdfFlipbook />
     </div>
   )
 }

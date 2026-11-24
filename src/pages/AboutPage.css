@@ -1,12 +1,6 @@
-/* Heyzine flip-book embed on the About page, inside the normal site
-   layout (header + footer). Height fills the space between them:
-   header ~66px + footer ~60px, with a small buffer so the page
-   itself does not scroll. */
-.about .heyzine-embed {
-  display: block;
+/* About page: the PDF flip-book (Miah's own Canva pages) sits inside the
+   normal site layout (header + footer). The flip-book component owns its
+   own sizing; this file only keeps the page wrapper. */
+.about {
   width: 100%;
-  height: calc(100vh - 140px);
-  height: calc(100dvh - 140px);
-  border: 1px solid lightgray;
-  box-sizing: border-box;
 }
