@@ -1,5 +1,5 @@
-import AboutMagazine from '../components/AboutMagazine.jsx'
 import { useMeta } from '../hooks/useMeta.js'
+import './AboutPage.css'
 
 export default function AboutPage() {
   useMeta({
@@ -8,7 +8,14 @@ export default function AboutPage() {
   })
   return (
     <div className="about">
-      <AboutMagazine />
+      <iframe
+        className="heyzine-embed"
+        allowFullScreen
+        allow="autoplay; fullscreen; clipboard-write"
+        scrolling="no"
+        src="https://heyzine.com/flip-book/fdeff5e42f.html"
+        title="Offline Theory — About magazine"
+      />
     </div>
   )
 }
