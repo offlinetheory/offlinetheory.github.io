@@ -1,30 +1,12 @@
-/* Magazine-only About experience: the magazine is the whole page.
-   Warm ivory ground, magazine centred and scaled to the viewport.
-   color-scheme: light keeps Safari from darkening the page when the
-   phone is in dark mode — this is a printed magazine on ivory paper. */
-.mag-page {
-  background: var(--bg, #f7f5f0);
-  color-scheme: light;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 0;
-}
-
-.mag-page .about {
-  width: 100%;
-}
-
-/* Heyzine flip-book embed: fills the viewport (the About page is
-   magazine-only, no header/footer). Height accounts for .mag-page's
-   8px top + bottom padding so the page itself does not scroll. */
+/* Heyzine flip-book embed on the About page, inside the normal site
+   layout (header + footer). Height fills the space between them:
+   header ~66px + footer ~60px, with a small buffer so the page
+   itself does not scroll. */
 .about .heyzine-embed {
   display: block;
   width: 100%;
-  height: calc(100vh - 16px);
-  height: calc(100dvh - 16px);
+  height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
   border: 1px solid lightgray;
   box-sizing: border-box;
 }
