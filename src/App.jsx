@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
@@ -9,10 +9,6 @@ import AboutPage from './pages/AboutPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import PrivacyPage from './pages/PrivacyPage.jsx'
 import NotFound from './pages/NotFound.jsx'
-
-// Lazy: the map pulls in d3-geo + world geometry (~100 kB), so it loads
-// only when a reader visits /threat-map.
-const ThreatMap = lazy(() => import('./pages/ThreatMap.jsx'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -37,14 +33,6 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
-          <Route
-            path="/threat-map"
-            element={(
-              <Suspense fallback={null}>
-                <ThreatMap />
-              </Suspense>
-            )}
-          />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -53,4 +41,3 @@ export default function App() {
     </>
   )
 }
-
