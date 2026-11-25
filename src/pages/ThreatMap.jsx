@@ -3,6 +3,8 @@ import { geoGraticule, geoNaturalEarth1, geoPath } from 'd3-geo'
 import { feature } from 'topojson-client'
 import worldTopo from 'world-atlas/countries-110m.json'
 import { useMeta } from '../hooks/useMeta.js'
+import InfoBar from '../components/InfoBar.jsx'
+import Newsletter from '../components/Newsletter.jsx'
 import './ThreatMap.css'
 
 /**
@@ -10,11 +12,13 @@ import './ThreatMap.css'
  * layout of the Radware Live Threat Map screenshot Miah supplied:
  * brand block top-left, red callout button top-centre, LIVE / REFRESH
  * buttons top-right, ATTACK TYPES legend and THREAT ALERTS panels down
- * the left over the map, a full-bleed dark map with teal outlines and
- * coloured country fills, a right rail (statistics interval, top
- * attackers, top attacked, attack vectors, application violations,
- * scanned ports), and a coloured multi-row timeline strip along the
- * bottom with a COLLAPSE control. A thin footer bar ends the page.
+ * the left over the map, a full-bleed white map with a black grid and dark
+ * country outlines and coloured country washes, a right rail (statistics
+ * interval, top attackers, top attacked, attack vectors, application
+ * violations, scanned ports), and a coloured multi-row timeline strip
+ * along the bottom with a COLLAPSE control. The homepage footer band
+ * (InfoBar + Newsletter, on paper) ends the page; the global Footer nav
+ * row renders below it from App.jsx.
  *
  * Nothing of Radware's is copied: no Radware name, logo, report text,
  * "Contact Sales", or copyright line, and none of Radware's numbers or
@@ -44,16 +48,21 @@ import './ThreatMap.css'
  * Honest substitutions, labelled on the page: the "top network attack
  * vectors" panel is the most-probed services from DShield's top ports,
  * shown as a share of those ports' reports — there is no free live
- * feed of flood-type vector volumes. Countries are coloured by the
- * dominant category among their own reported data: red = scanning
- * sources (DShield), purple = breach targets (Recent Breaches),
- * yellow = ransomware victims (leak listings that name a country);
- * exploited flaws have no geography in any feed, so they colour no
- * country. Arcs trace the ranked order of the most-reported sources —
- * motion, not claimed attack routes. The timeline rows trace the real
- * DShield daily sensor-report trend of the last 7 days; the feeds
- * publish no per-category history, so every row shows that same real
- * trend in its own colour, and the strip says so.
+ * feed of flood-type vector volumes. Countries wear a translucent
+ * wash by the dominant category among their own reported data: teal
+ * for the big scanning sources (DShield), purple for breach targets
+ * (Recent Breaches), red for ransomware victims (leak listings that
+ * name a country); exploited flaws have no geography in any feed, so
+ * they colour no country. The wash is a map tint only — the legend
+ * keeps the four category colours. The traffic is dense on purpose:
+ * arcs run between the most-reported sources and out to the
+ * breach-target and ransomware-victim countries, so the map reads
+ * busy like the Radware screenshot Miah sent — but every endpoint is
+ * a real country from our own feeds, and the arcs are motion, not
+ * claimed attack routes. The timeline rows trace the real DShield
+ * daily sensor-report trend of the last 7 days; the feeds publish no
+ * per-category history, so every row shows that same real trend in its
+ * own colour, and the strip says so.
  *
  * Feeds that are NOT on this page, and why: abuse.ch Feodo Tracker
  * has effectively stopped updating (last blocklist update March 2026),
@@ -83,6 +92,19 @@ const CATEGORIES = [
   { key: 'breaches', label: 'Breaches', color: '#8b5cf6', note: 'Disclosed incidents and regulator filings.' },
 ]
 const CAT_BY_KEY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]))
+
+// Map washes — the translucent country tints, as in the Radware
+// screenshot Miah sent: teal for the big scanning-source countries,
+// purple for breach targets, red for ransomware victims. These are
+// map tints only; the legend keeps the four category colours above.
+// The dense traffic web is violet, with red arcs to ransomware-victim
+// countries — the look of the reference screenshot.
+const MAP_WASH = {
+  scanning: '#2fb3a3',
+  ransomware: '#e5484d',
+  breaches: '#8b5cf6',
+}
+const ARC_VIOLET = '#8b7cf6'
 
 const PORT_NAMES = {
   21: 'FTP', 22: 'SSH', 23: 'Telnet', 25: 'SMTP', 53: 'DNS', 80: 'HTTP',
@@ -203,7 +225,7 @@ function flagEmoji(code) {
   return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
 }
 
-const MAP_BASE_FILL = '#0a1418'
+const MAP_BASE_FILL = '#ECE9E2'
 
 const MAP_W = 1200
 const MAP_H = 620
@@ -249,24 +271,37 @@ function arcPath(a, b) {
   return `M ${a[0]} ${a[1]} Q ${cx} ${cy} ${b[0]} ${b[1]}`
 }
 
-// One waveform row of the timeline strip: the real DShield daily
-// sensor-report trend of the last 7 days, drawn as an area chart in
-// the category's colour. Every row traces the same real trend — the
-// feeds publish no per-category history — and the strip says so.
+// One waveform row of the timeline strip, Radware's form: a dense comb
+// of thin vertical spikes whose heights follow the real DShield daily
+// sensor-report trend. The 7 daily values are linearly interpolated to
+// ~140 sample points, so the shape is the real trend — no intraday
+// spikes are invented, and every row traces the same real trend (the
+// feeds publish no per-category history).
 function Waveform({ values, color }) {
   const w = 700
-  const h = 40
+  const h = 30
   const max = Math.max(1, ...values)
-  const pts = values.map((v, i) => [
-    (i / Math.max(1, values.length - 1)) * w,
-    h - 3 - (v / max) * (h - 8),
-  ])
-  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
-  const area = `${line} L ${w} ${h} L 0 ${h} Z`
+  const at = (t) => {
+    if (values.length === 0) return 0
+    if (values.length === 1) return values[0]
+    const pos = t * (values.length - 1)
+    const i = Math.min(values.length - 2, Math.floor(pos))
+    const f = pos - i
+    return values[i] * (1 - f) + values[i + 1] * f
+  }
+  const n = 140
+  const spikes = []
+  for (let i = 0; i < n; i += 1) {
+    const t = n === 1 ? 0 : i / (n - 1)
+    const v = at(t) / max
+    const x = (t * w).toFixed(1)
+    const y = (h - 2 - v * (h - 6)).toFixed(1)
+    spikes.push(`M ${x} ${h - 1} L ${x} ${y}`)
+  }
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="gtw__wave" aria-hidden="true">
-      <path d={area} fill={color} opacity="0.16" />
-      <path d={line} fill="none" stroke={color} strokeWidth="1.6" />
+      <rect x="0" y="0" width={w} height={h} fill={color} opacity="0.07" />
+      <path d={spikes.join(' ')} fill="none" stroke={color} strokeWidth="1" opacity="0.9" />
     </svg>
   )
 }
@@ -294,10 +329,12 @@ export default function ThreatMap() {
   const [updatedAt, setUpdatedAt] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
   const [hovered, setHovered] = useState(null)
+  const [chip, setChip] = useState(null)
   const [interval, setInterval] = useState('1 hour')
   const [railCollapsed, setRailCollapsed] = useState(false)
   const [timelineCollapsed, setTimelineCollapsed] = useState(false)
   const mounted = useRef(true)
+  const mapWrapRef = useRef(null)
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
@@ -415,12 +452,28 @@ export default function ThreatMap() {
   const path = useMemo(() => geoPath(projection), [projection])
   const graticulePath = useMemo(() => path(geoGraticule()), [path])
 
+  // Hover chip: the country's name in a small teal chip pinned to the
+  // cursor on the map itself, like the "Canada" chip in the Radware
+  // screenshot — in addition to the readout line above the map.
+  const onCountryHover = (e, info, name) => {
+    const rect = mapWrapRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    setChip({
+      name: info?.country || name,
+      x: Math.min(x + 14, rect.width - 120),
+      y: Math.max(y - 16, 8),
+    })
+    if (info) setHovered(info)
+  }
+
   // Dominant category per country, from that country's own live data:
   // ransomware victims first (leak listings naming a country), then
   // breach targets (Recent Breaches geography), then scanning sources
   // (DShield). Exploited flaws have no geography in any feed, so they
   // colour no country.
-  const { countryPaths, nodes, arcs } = useMemo(() => {
+  const { countryPaths, nodes, arcs, targets } = useMemo(() => {
     const totals = new Map()
     for (const s of data.sources) {
       const cur = totals.get(s.countryCode) || { country: s.country, code: s.countryCode, reports: 0, sources: 0 }
@@ -450,7 +503,7 @@ export default function ThreatMap() {
     for (const [code, c] of totals) {
       const num = COUNTRY_NUMERIC[code]
       const cat = categoryOf(code)
-      if (num && cat) infoById.set(num, { ...c, category: cat, fill: CAT_BY_KEY[cat].color })
+      if (num && cat) infoById.set(num, { ...c, category: cat, fill: MAP_WASH[cat] })
     }
     // Breach-target and ransomware-victim countries that filed no
     // top source still get their category colour.
@@ -460,7 +513,7 @@ export default function ThreatMap() {
       const cat = categoryOf(code)
       if (num && cat) {
         const name = (data.rbGeo?.targets || []).find((t) => NAME_TO_CODE[t.country] === code)?.country || code
-        infoById.set(num, { country: name, code, reports: 0, sources: 0, category: cat, fill: CAT_BY_KEY[cat].color })
+        infoById.set(num, { country: name, code, reports: 0, sources: 0, category: cat, fill: MAP_WASH[cat] })
       }
     }
     const countryPaths = COUNTRIES.features.map((f, i) => {
@@ -471,9 +524,10 @@ export default function ThreatMap() {
           key={i}
           d={path(f) || undefined}
           className="gtw__country"
-          style={{ fill: info ? info.fill : MAP_BASE_FILL, fillOpacity: info ? 0.62 : 1 }}
+          style={{ fill: info ? info.fill : MAP_BASE_FILL, fillOpacity: info ? 0.42 : 1 }}
           onMouseEnter={() => info && setHovered(info)}
-          onMouseLeave={() => setHovered(null)}
+          onMouseMove={(e) => onCountryHover(e, info, name)}
+          onMouseLeave={() => { setHovered(null); setChip(null) }}
           onFocus={() => info && setHovered(info)}
           onBlur={() => setHovered(null)}
         >
@@ -481,7 +535,7 @@ export default function ThreatMap() {
             {info
               ? info.reports > 0
                 ? `${name} — ${CAT_BY_KEY[info.category].label} · ${info.reports.toLocaleString('en-US')} reports from ${info.sources} source${info.sources === 1 ? '' : 's'}`
-                : `${name} — ${CAT_BY_KEY[info.category].label}`
+              : `${name} — ${CAT_BY_KEY[info.category].label}`
               : name}
           </title>
         </path>
@@ -491,28 +545,58 @@ export default function ThreatMap() {
     const nodes = data.sources.map((s) => {
       const [x, y] = projection([s.lon, s.lat]) || [0, 0]
       const r = 2.5 + (Math.sqrt(s.reports / maxReports) * 5)
-      return { ...s, x, y, r, category: 'scanning' }
+      return { ...s, id: s.ip, x, y, r, category: 'scanning' }
     })
-    // Arcs trace the ranked order of the most-reported sources (1 → 2 → 3 …),
-    // plus a web from the top source to every other. They are motion, not
-    // claimed attack routes: DShield reports where the sources are, not
-    // where each packet was aimed. Arc colour is the category of the
-    // country the arc lands on.
+    // Target points: the centroids of the breach-target and
+    // ransomware-victim countries (real countries from our own feeds,
+    // not top sources, so they have no node dot yet). Arcs run to them
+    // from the top sources, so the map reads busy like the Radware
+    // screenshot — every endpoint is still a real country from our data.
+    const featureById = new Map(COUNTRIES.features.map((f) => [String(f.id), f]))
+    const centroidOf = (code) => {
+      const feat = featureById.get(COUNTRY_NUMERIC[code] || '')
+      if (!feat) return null
+      const c = path.centroid(feat)
+      return Number.isFinite(c[0]) && Number.isFinite(c[1]) ? c : null
+    }
+    const targets = []
+    for (const code of [...attackedCodes, ...leakCodes]) {
+      if (totals.has(code) || targets.some((t) => t.code === code)) continue
+      const c = centroidOf(code)
+      if (!c) continue
+      const cat = categoryOf(code)
+      if (!cat) continue
+      targets.push({
+        id: `t:${code}`,
+        code,
+        category: cat,
+        color: MAP_WASH[cat],
+        x: c[0],
+        y: c[1],
+      })
+    }
+    // Arcs run between every pair of most-reported sources and from
+    // every source out to the breach-target and ransomware-victim
+    // countries — a dense web, like the Radware screenshot. They are
+    // motion, not claimed attack routes: DShield reports where the
+    // sources are, not where each packet was aimed. Arcs are violet,
+    // except arcs landing on a ransomware-victim country, which are red.
     const arcs = []
     const seen = new Set()
     const addArc = (a, b) => {
-      if (!a || !b || a.ip === b.ip) return
-      const key = `${a.ip}>${b.ip}`
+      if (!a || !b || a.id === b.id) return
+      if (a.countryCode && a.countryCode === b.code) return
+      const key = `${a.id}>${b.id}`
       if (seen.has(key)) return
       seen.add(key)
-      arcs.push({ key, d: arcPath([a.x, a.y], [b.x, b.y]), color: CAT_BY_KEY[b.category].color })
+      const color = b.category === 'ransomware' ? MAP_WASH.ransomware : ARC_VIOLET
+      arcs.push({ key, d: arcPath([a.x, a.y], [b.x, b.y]), color })
     }
     for (let i = 0; i < nodes.length; i += 1) {
-      addArc(nodes[i], nodes[i + 1])
-      addArc(nodes[i], nodes[i + 2])
+      for (let j = i + 1; j < nodes.length; j += 1) addArc(nodes[i], nodes[j])
+      for (const t of targets) addArc(nodes[i], t)
     }
-    for (let i = 1; i < nodes.length; i += 1) addArc(nodes[0], nodes[i])
-    return { countryPaths, nodes, arcs }
+    return { countryPaths, nodes, arcs, targets }
   }, [data.sources, data.rbGeo, data.rbLeaks, path, projection])
 
   const countries = useMemo(() => {
@@ -543,7 +627,32 @@ export default function ThreatMap() {
       {/* --- The stage: full-bleed dark map + right rail --- */}
       <div className="gtw__stage">
         <div className="gtw__mapcol">
-          <div className="gtw__mapwrap" aria-label="World map of most-reported attacking source addresses">
+          {/* Slim counters strip across the top of the map column — the
+              live figures that used to sit as 2×2 tiles in the rail. */}
+          <div className="gtw__counters" aria-label="Live figures">
+            <div className="gtw__counter">
+              <span className="gtw__counter-num">{todayReports != null ? todayReports.toLocaleString('en-US') : '—'}</span>
+              <span className="label">Sensor reports today</span>
+              <span className="gtw__counter-src">Scanning · SANS DShield</span>
+            </div>
+            <div className="gtw__counter">
+              <span className="gtw__counter-num">{data.rbIndex ? data.rbIndex.ransomware_7d.toLocaleString('en-US') : '—'}</span>
+              <span className="label">Ransomware claims · 7 days</span>
+              <span className="gtw__counter-src">Leak-site listings · Recent Breaches</span>
+            </div>
+            <div className="gtw__counter">
+              <span className="gtw__counter-num">{data.kev ? data.kev.totalKnownExploited.toLocaleString('en-US') : '—'}</span>
+              <span className="label">Flaws confirmed exploited</span>
+              <span className="gtw__counter-src">CISA Known Exploited Vulnerabilities</span>
+            </div>
+            <div className="gtw__counter">
+              <span className="gtw__counter-num">{data.rbIndex ? data.rbIndex.count_24h.toLocaleString('en-US') : '—'}</span>
+              <span className="label">Breach disclosures · 24 hours</span>
+              <span className="gtw__counter-src">Recent Breaches index</span>
+            </div>
+          </div>
+
+          <div className="gtw__mapwrap" ref={mapWrapRef} aria-label="World map of most-reported attacking source addresses">
             <svg
               className="gtw__svg"
               viewBox={`0 0 ${MAP_W} ${MAP_H}`}
@@ -553,7 +662,7 @@ export default function ThreatMap() {
             >
               <defs>
                 <pattern id="gtw-grid" width="36" height="36" patternUnits="userSpaceOnUse">
-                  <path d="M 36 0 H 0 V 36" fill="none" stroke="#0e2a2e" strokeWidth="0.5" />
+                  <path d="M 36 0 H 0 V 36" fill="none" stroke="#1f1f1f" strokeWidth="0.5" />
                 </pattern>
               </defs>
               <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
@@ -562,7 +671,7 @@ export default function ThreatMap() {
               {arcs.map((a) => (
                 <path key={a.key} d={a.d} className="gtw__arc" style={{ stroke: a.color }} />
               ))}
-              {arcs.slice(0, 8).map((a, i) => (
+              {arcs.slice(0, 14).map((a, i) => (
                 <circle key={`mover-${a.key}`} r="2.2" className="gtw__mover" style={{ fill: a.color }}>
                   <animateMotion dur={`${5 + (i % 4)}s`} repeatCount="indefinite" path={a.d} />
                 </circle>
@@ -573,7 +682,17 @@ export default function ThreatMap() {
                   <circle cx={n.x} cy={n.y} r={n.r} className="gtw__dot" style={{ fill: CAT_BY_KEY[n.category].color }} />
                 </g>
               ))}
+              {targets.map((t) => (
+                <circle key={t.id} cx={t.x} cy={t.y} r="2.5" className="gtw__mover" style={{ fill: t.color }} />
+              ))}
             </svg>
+
+            {/* Hover chip: the country's name, pinned to the cursor. */}
+            {chip && (
+              <span className="gtw__hover-chip" style={{ left: chip.x, top: chip.y }} aria-hidden="true">
+                {chip.name}
+              </span>
+            )}
 
             {/* Brand block, top-left over the map */}
             <div className="gtw__brand">
@@ -676,14 +795,6 @@ export default function ThreatMap() {
               <div className="gtw__timeline-main">
                 <div className="gtw__timeline-head">
                   <h3 className="gtw__panel-title">Sensor reports — last 7 days · DShield</h3>
-                  <button
-                    type="button"
-                    className="gtw__timeline-collapse"
-                    onClick={() => setTimelineCollapsed(true)}
-                    aria-label="Collapse timeline"
-                  >
-                    ✕ Collapse
-                  </button>
                 </div>
                 <div className="gtw__timeline-marks" aria-hidden="true">
                   {data.timeline.map((t) => (
@@ -700,18 +811,28 @@ export default function ThreatMap() {
                   ))}
                 </div>
                 <p className="gtw__timeline-note">
-                  One row per category. The feeds publish no per-category history, so each row traces the same real
-                  DShield daily trend — the shape is the internet&rsquo;s, not a simulation. Today: {todayReports != null ? `${todayReports.toLocaleString('en-US')} reports` : '—'} · 7-day peak {maxTimeline.toLocaleString('en-US')}.
+                  One row per category, each tracing the real DShield daily sensor-report trend — the feeds publish no
+                  per-category history. Today: {todayReports != null ? `${todayReports.toLocaleString('en-US')} reports` : '—'} · 7-day peak {maxTimeline.toLocaleString('en-US')}.
                 </p>
               </div>
-              <ul className="gtw__timeline-legend" aria-label="Attack types shown on the timeline">
-                {CATEGORIES.map((c) => (
-                  <li key={c.key} style={{ color: c.color }}>
-                    <span className="gtw__legend-dot" style={{ background: c.color }} aria-hidden="true" />
-                    {c.label}
-                  </li>
-                ))}
-              </ul>
+              <div className="gtw__timeline-side">
+                <button
+                  type="button"
+                  className="gtw__timeline-collapse"
+                  onClick={() => setTimelineCollapsed(true)}
+                  aria-label="Collapse timeline"
+                >
+                  ✕ Collapse
+                </button>
+                <ul className="gtw__timeline-legend" aria-label="Attack types shown on the timeline">
+                  {CATEGORIES.map((c) => (
+                    <li key={c.key} style={{ color: c.color }}>
+                      <span className="gtw__legend-dot" style={{ background: c.color }} aria-hidden="true" />
+                      {c.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
           {errors.dshield && (
@@ -741,31 +862,6 @@ export default function ThreatMap() {
             </label>
           </div>
 
-          <section className="gtw__panel" aria-label="Live figures">
-            <div className="gtw__figures">
-              <div className="gtw__figure">
-                <span className="gtw__figure-num">{todayReports != null ? todayReports.toLocaleString('en-US') : '—'}</span>
-                <span className="label">Sensor reports today</span>
-                <span className="gtw__figure-src">Scanning · SANS DShield</span>
-              </div>
-              <div className="gtw__figure">
-                <span className="gtw__figure-num">{data.rbIndex ? data.rbIndex.ransomware_7d.toLocaleString('en-US') : '—'}</span>
-                <span className="label">Ransomware claims · 7 days</span>
-                <span className="gtw__figure-src">Leak-site listings · Recent Breaches</span>
-              </div>
-              <div className="gtw__figure">
-                <span className="gtw__figure-num">{data.kev ? data.kev.totalKnownExploited.toLocaleString('en-US') : '—'}</span>
-                <span className="label">Flaws confirmed exploited</span>
-                <span className="gtw__figure-src">CISA Known Exploited Vulnerabilities</span>
-              </div>
-              <div className="gtw__figure">
-                <span className="gtw__figure-num">{data.rbIndex ? data.rbIndex.count_24h.toLocaleString('en-US') : '—'}</span>
-                <span className="label">Breach disclosures · 24 hours</span>
-                <span className="gtw__figure-src">Recent Breaches index</span>
-              </div>
-            </div>
-          </section>
-
           <section className="gtw__panel" aria-labelledby="attackers-h">
             <h2 id="attackers-h" className="gtw__panel-title">Top attackers</h2>
             {countries.length === 0 && !errors.dshield && <p className="gtw__empty">Loading…</p>}
@@ -780,7 +876,7 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Source countries of the most-reported addresses, by share of the top five&rsquo;s reports. Source: DShield.</p>
+            <p className="gtw__aside-note">Source countries of the most-reported addresses, by share of the top five’s reports. Source: DShield.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="attacked-h">
@@ -816,7 +912,7 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Most-probed services, as a share of the most-probed ports&rsquo; reports. There is no free live feed of flood-type vector volumes, so the vectors are shown by probed port. Source: DShield.</p>
+            <p className="gtw__aside-note">Most-probed services, as a share of the most-probed ports’ reports. There is no free live feed of flood-type vector volumes, so the vectors are shown by probed port. Source: DShield.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="violations-h">
@@ -857,23 +953,21 @@ export default function ThreatMap() {
         </aside>
       </div>
 
-      {/* --- Thin footer bar: copyright, data credit, honesty notes --- */}
-      <footer className="gtw__footer">
-        <span>© 2026 Offline Theory — an independent publication.</span>
-        <span className="gtw__footer-data">Data: SANS Internet Storm Center · Recent Breaches · CISA KEV · NIST NVD · ipwho.is</span>
-        <span className="gtw__footer-note">
-          Arcs are motion, not claimed attack routes. Countries are coloured by the dominant category among their
-          reported sources — red scanning sources, purple breach targets with no top source, yellow ransomware victims.
+      {/* --- Site footer: the homepage footer band (InfoBar + Newsletter),
+          on paper at the bottom of the dark map page. The global Footer
+          nav row renders below it from App.jsx. The data credit stays
+          here as a small line in the band. --- */}
+      <div className="gtw__site-footer">
+        <InfoBar />
+        <Newsletter />
+        <p className="gtw__site-footer-credit">
+          Data: SANS Internet Storm Center · Recent Breaches · CISA KEV · NIST NVD · ipwho.is
+          {' — '}
+          Arcs are motion, not claimed attack routes. Countries wear a translucent wash by the dominant category among
+          their reported sources — teal top scanning sources, purple breach targets with no top source, red ransomware victims.
           Attack vectors are most-probed services by port; application violations are CWE types in the last 48 hours of NVD CVEs.
-        </span>
-        <span className="gtw__footer-links">
-          <a href="/">Offline Theory</a>
-          {' · '}
-          <a href="/about">About</a>
-          {' · '}
-          <a href="/privacy">Privacy</a>
-        </span>
-      </footer>
+        </p>
+      </div>
     </div>
   )
 }
