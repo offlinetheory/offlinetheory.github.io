@@ -1,11 +1,11 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-25T22:34:35.979Z",
+  "generatedAt": "2026-11-25T23:08:07.437Z",
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-25T22:34:35.979Z",
+      "fetchedAt": "2026-11-25T23:08:07.437Z",
       "feeds": {
         "topips": "ok",
         "top10": "ok",
