@@ -1,22 +1,69 @@
-/* Live Threat Map — Offline Theory editorial treatment.
-   Palette: aged paper, ink, rust, cobalt. Flat, print-like, no neon. */
+/* GLOBAL THREAT WATCH — light monochrome editorial.
+   An aged-paper magazine spread inside Offline Theory: Didone masthead,
+   tiny uppercase technical labels, thin rules. The map panel alone is
+   a black Radware-style spread — black ground, grey-shaded countries,
+   white arcs and dots, no colour. Headings and labels are upright
+   serif — no italics in headings; only the italic serif deck stays
+   italic. */
 
-.threat-map {
-  --rust: #b94e32;
-  --cobalt: #3447a5;
-  --paper: #f2ebdd;
-  --beige: #e6dfd3;
-  --gray: #8d8981;
+.gtw {
+  --gtw-black: #f2ede3;
+  --gtw-panel: #e9e2d2;
+  --gtw-paper: #171614;
+  --gtw-muted: #6e6860;
+  --gtw-faint: #8d8981;
+  --gtw-rule: #cfc7b4;
+  --gtw-red: #d42b2b;
+  background: var(--gtw-black);
+  color: var(--gtw-paper);
+  margin: 0 calc(-1 * var(--margin));
+  padding: 0 var(--margin) 0;
 }
 
-/* --- Live status strip --- */
-.threat-map__status {
+.gtw a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.gtw a:hover { color: #000; }
+
+/* Headings and labels: upright serif, never italic. */
+.gtw h1, .gtw h2, .gtw h3, .gtw__title { font-style: normal; }
+.gtw .label { font-family: var(--font-headline); font-weight: 700; font-style: normal; }
+
+/* --- Masthead --- */
+.gtw__masthead {
+  padding: 40px 0 26px;
+  border-bottom: 1px solid var(--gtw-paper);
+}
+
+.gtw__masthead-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--gtw-muted);
+}
+
+.gtw__title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(56px, 9.5vw, 148px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 22px 0 18px -0.02em;
+}
+
+.gtw__dek {
+  font: italic 400 clamp(18px, 1.8vw, 24px)/1.4 var(--font-serif);
+  color: #3a352d;
+  max-width: 52ch;
+}
+
+.gtw__status {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 18px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--ink);
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gtw-rule);
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
@@ -24,284 +71,504 @@
   text-transform: uppercase;
 }
 
-.threat-map__live-dot {
+.gtw__live-dot {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--rust);
+  background: var(--gtw-red);
   flex: 0 0 auto;
-  animation: threat-map-blink 2.4s ease-in-out infinite;
+  animation: gtw-blink 2.4s ease-in-out infinite;
 }
 
-.threat-map__live-dot.is-loading { background: var(--gray); animation: none; }
+.gtw__live-dot.is-loading { background: var(--gtw-faint); animation: none; }
 
-@keyframes threat-map-blink {
+@keyframes gtw-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.25; }
 }
 
-.threat-map__infocon { color: var(--cobalt); }
-.threat-map__status-note { color: var(--gray); font-weight: 500; }
+.gtw__infocon { color: var(--gtw-paper); }
+.gtw__status-note { color: var(--gtw-faint); font-weight: 500; }
 
-.threat-map__refresh { margin-left: auto; }
-
-/* --- Map panel --- */
-.threat-map__map-panel {
-  border-bottom: 1px solid var(--ink);
-  padding: 22px 0 18px;
+.gtw__refresh {
+  margin-left: auto;
+  background: transparent;
+  color: var(--gtw-paper);
+  border: 1px solid var(--gtw-paper);
+  font: 600 10px/1 var(--font-sans);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  padding: 0 18px;
+  height: 34px;
+  cursor: pointer;
+  border-radius: 0;
 }
 
-.threat-map__map-head {
+.gtw__refresh:hover { background: var(--gtw-paper); color: var(--gtw-black); }
+.gtw__refresh[disabled] { opacity: 0.55; cursor: progress; }
+
+/* --- Headline figures --- */
+.gtw__figures {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--gtw-paper);
+}
+
+.gtw__figure {
+  padding: 20px 22px 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gtw__figure + .gtw__figure {
+  border-left: 1px solid var(--gtw-rule);
+  padding-left: 22px;
+}
+
+.gtw__figure-num {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(30px, 3.4vw, 52px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.gtw__figure .label { color: var(--gtw-paper); }
+
+.gtw__figure-src {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gtw-faint);
+}
+
+/* --- The spread: left rail / map / right rail --- */
+.gtw__spread {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr) 304px;
+  gap: 0 34px;
+  padding: 26px 0 8px;
+}
+
+.gtw__rail--left { border-right: 1px solid var(--gtw-rule); padding-right: 26px; }
+.gtw__rail--right { border-left: 1px solid var(--gtw-rule); padding-left: 26px; }
+
+.gtw__panel-title {
+  display: block;
+  border-bottom: 1px solid var(--gtw-paper);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  color: var(--gtw-paper);
+}
+
+.gtw__panel-title--inline { margin-bottom: 0; border-bottom: 0; padding-bottom: 0; }
+
+.gtw__rail section { margin-bottom: 30px; }
+
+.gtw__legend li {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--gtw-rule);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.gtw__legend li:last-child { border-bottom: 0; }
+
+.gtw__legend strong {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.gtw__legend-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--gtw-muted);
+  line-height: 1.45;
+}
+
+.gtw__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex: 0 0 auto;
+}
+
+.gtw__legend-dot--red { background: var(--gtw-red); }
+
+/* The legend describes the map's markers, so its dots are white on the
+   paper rail, matching the white dots on the black map. */
+.gtw__legend-dot--white { background: #ffffff; box-shadow: 0 0 0 1px #171614; }
+
+.gtw__aside-note {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--gtw-muted);
+  line-height: 1.55;
+}
+
+.gtw__aside-note a { color: var(--gtw-paper); }
+
+.gtw__empty { color: var(--gtw-faint); font-size: 14px; }
+
+.gtw__error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--gtw-red);
+  color: #a32020;
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+/* --- Live wire --- */
+.gtw__wire-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gtw-rule);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.gtw__wire-list li:last-child { border-bottom: 0; }
+
+.gtw__wire-list a {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gtw__wire-text { display: block; margin-top: 3px; color: #3a352d; }
+
+.gtw__wire-list .meta { display: block; margin-top: 4px; color: var(--gtw-faint); }
+
+/* --- Map: Radware's composition, strictly black and white. ---
+   A full-bleed black panel inside the paper spread: black ground, faint
+   grid, countries shaded in graded greys (lightest = most reports),
+   thin light borders, white arcs and dots. No colour anywhere in here —
+   the red of the rest of the page stops at the panel's edge. */
+.gtw__map-panel {
+  min-width: 0;
+  background: #050505;
+  color: #f2ede3;
+  padding: 16px 18px 20px;
+  /* Don't stretch to the rails' full height — without this, the black
+     panel leaves a tall empty void under the map note. */
+  align-self: start;
+}
+
+.gtw__map-head {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 6px 20px;
   align-items: baseline;
-  margin-bottom: 10px;
+  border-bottom: 1px solid #2e2e2e;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
 }
 
-.threat-map__map-head .meta { color: var(--gray); }
+.gtw__map-panel .gtw__panel-title { color: #f2ede3; border-bottom-color: #2e2e2e; }
 
-.threat-map__svg {
+.gtw__map-meta { color: #9a9a9a; }
+
+.gtw__map-hover {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #cfcfcf;
+  min-height: 16px;
+  margin-bottom: 6px;
+}
+
+.gtw__svg {
   width: 100%;
   height: auto;
   display: block;
-  background: var(--paper);
-  border: 1px solid var(--ink);
+  background: #050505;
 }
 
-.threat-map__graticule {
+.gtw__graticule {
   fill: none;
-  stroke: #d8d0c0;
+  stroke: #2e2e2e;
   stroke-width: 0.6;
 }
 
-.threat-map__country {
-  fill: var(--beige);
-  stroke: var(--ink);
-  stroke-width: 0.45;
+.gtw__country {
+  stroke: #7a7a7a;
+  stroke-width: 0.5;
   stroke-linejoin: round;
+  cursor: pointer;
 }
 
-.threat-map__arc {
+.gtw__country:hover,
+.gtw__country:focus {
+  stroke: #ffffff;
+  stroke-width: 1.2;
+  outline: none;
+}
+
+.gtw__arc {
   fill: none;
-  stroke: var(--cobalt);
-  stroke-width: 1.4;
-  stroke-dasharray: 5 7;
-  opacity: 0.75;
-  animation: threat-map-dash 2.8s linear infinite;
+  stroke: #e8e8e8;
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0.5;
+  animation: gtw-dash 2.8s linear infinite;
 }
 
-@keyframes threat-map-dash {
-  to { stroke-dashoffset: -24; }
+@keyframes gtw-dash {
+  to { stroke-dashoffset: -20; }
 }
 
-.threat-map__pulse {
-  fill: var(--rust);
-  opacity: 0.28;
-  animation: threat-map-pulse 2.6s ease-out infinite;
+.gtw__mover { fill: #ffffff; }
+
+.gtw__pulse {
+  fill: #ffffff;
+  opacity: 0.3;
+  animation: gtw-pulse 2.6s ease-out infinite;
   transform-box: fill-box;
   transform-origin: center;
 }
 
-@keyframes threat-map-pulse {
-  0% { transform: scale(0.35); opacity: 0.45; }
+@keyframes gtw-pulse {
+  0% { transform: scale(0.35); opacity: 0.5; }
   100% { transform: scale(1.15); opacity: 0; }
 }
 
-.threat-map__dot {
-  fill: var(--rust);
-  stroke: var(--paper);
+.gtw__dot {
+  fill: #ffffff;
+  stroke: #050505;
   stroke-width: 1.2;
 }
 
-.threat-map__node-label {
+.gtw__node-label {
   font-family: var(--font-mono);
   font-size: 10px;
-  fill: var(--ink);
+  fill: #c9c9c9;
   letter-spacing: 0.02em;
 }
 
-.threat-map__map-note {
+.gtw__map-note {
   margin-top: 12px;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--gray);
+  color: #a8a8a8;
   max-width: 75ch;
 }
 
-.threat-map__error {
+.gtw__map-panel .gtw__error {
+  border-color: #f2ede3;
+  color: #e8e2d4;
+}
+
+/* --- Timeline strip: a dark strip along the bottom of the map,
+   Radware-style, with the NOW marker at the right. --- */
+.gtw__timeline {
+  margin: 14px -18px 0;
+  border-top: 1px solid #262626;
+  padding: 12px 18px 14px;
+  position: relative;
+  background: #050505;
+}
+
+.gtw__timeline .gtw__panel-title {
+  color: #f2ede3;
+  border-bottom-color: #333333;
+}
+
+.gtw__timeline .gtw__empty { color: #8f8f8f; }
+
+.gtw__timeline-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 110px;
   margin-top: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--rust);
-  color: var(--rust);
-  font-family: var(--font-sans);
-  font-size: 13px;
 }
 
-.threat-map__empty { color: var(--gray); font-size: 14px; }
-
-/* --- Ledger: three columns --- */
-.threat-map__ledger {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0 36px;
-  border-bottom: 1px solid var(--ink);
-  padding: 22px 0;
+.gtw__timeline-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 100%;
+  min-width: 0;
 }
 
-.threat-map__ledger section + section {
-  border-left: 1px solid var(--ink);
-  padding-left: 36px;
+.gtw__timeline-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #8f8f8f;
+  white-space: nowrap;
 }
 
-.threat-map__ledger .col-label,
-.threat-map__alerts .col-label,
-.threat-map__method .col-label {
+.gtw__timeline-fill {
+  width: 100%;
+  max-width: 34px;
+  background: #4a4a4a;
   display: block;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
 }
 
-.threat-map__ranked li {
+.gtw__timeline-bar:last-child .gtw__timeline-fill { background: #ffffff; }
+
+.gtw__timeline-day {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #8f8f8f;
+  white-space: nowrap;
+}
+
+.gtw__timeline-now {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* --- Right-rail rankings --- */
+.gtw__bars li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gtw-rule);
+  font-size: 14px;
+}
+
+.gtw__bars li:last-child { border-bottom: 0; }
+
+.gtw__bars-label { font-weight: 600; }
+
+.gtw__bars-track {
+  grid-column: 1 / -1;
+  display: block;
+  height: 7px;
+  background: #ddd6c4;
+}
+
+.gtw__bars-fill {
+  display: block;
+  height: 100%;
+  background: var(--gtw-paper);
+}
+
+.gtw__bars-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  grid-row: 1;
+  grid-column: 2;
+  color: var(--gtw-muted);
+}
+
+.gtw__ranked li {
   display: grid;
   grid-template-columns: 26px 1fr;
   column-gap: 8px;
   align-items: baseline;
   padding: 7px 0;
-  border-bottom: 1px solid #d8d0c0;
+  border-bottom: 1px solid var(--gtw-rule);
   font-size: 14px;
 }
 
-.threat-map__ranked li:last-child { border-bottom: 0; }
+.gtw__ranked li:last-child { border-bottom: 0; }
 
-.threat-map__ip {
+.gtw__actor {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
-.threat-map__ranked-place {
+.gtw__ranked-place {
   grid-column: 2;
-  color: var(--gray);
+  color: var(--gtw-muted);
   font-size: 13px;
 }
 
-.threat-map__ranked-num {
+.gtw__ranked-num {
   grid-column: 2;
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.threat-map__bars li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid #d8d0c0;
-  font-size: 14px;
-}
-
-.threat-map__bars li:last-child { border-bottom: 0; }
-
-.threat-map__bars-label { font-weight: 600; }
-
-.threat-map__bars-track {
-  grid-column: 1 / -1;
-  display: block;
-  height: 8px;
-  background: var(--beige);
-  border: 1px solid var(--ink);
-}
-
-.threat-map__bars-fill {
-  display: block;
-  height: 100%;
-  background: var(--rust);
-}
-
-.threat-map__bars-fill--cobalt { background: var(--cobalt); }
-
-.threat-map__bars-num {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  grid-row: 1;
-  grid-column: 2;
-}
-
-.aside-note {
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--gray);
-  line-height: 1.5;
+  color: var(--gtw-muted);
 }
 
 /* --- Alerts: two columns --- */
-.threat-map__alerts {
+.gtw__alerts {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 36px;
-  border-bottom: 1px solid var(--ink);
-  padding: 22px 0;
+  border-top: 1px solid var(--gtw-paper);
+  padding: 26px 0;
 }
 
-.threat-map__alerts section + section {
-  border-left: 1px solid var(--ink);
+.gtw__alerts section + section {
+  border-left: 1px solid var(--gtw-rule);
   padding-left: 36px;
 }
 
-.threat-map__kev-count {
+.gtw__kev-count {
   font-family: var(--font-serif);
   font-size: 17px;
   line-height: 1.45;
+  color: #3a352d;
 }
 
-.threat-map__kev-count strong { font-family: var(--font-headline); }
+.gtw__kev-count strong { font-family: var(--font-headline); color: var(--gtw-paper); }
 
-.threat-map__snapshot-note {
+.gtw__snapshot-note {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--gray);
+  color: var(--gtw-muted);
 }
 
-.threat-map__alerts-list { margin-top: 12px; }
+.gtw__alerts-list { margin-top: 12px; }
 
-.threat-map__alerts-list li {
+.gtw__alerts-list li {
   padding: 10px 0;
-  border-bottom: 1px solid #d8d0c0;
+  border-bottom: 1px solid var(--gtw-rule);
   font-size: 14px;
   line-height: 1.45;
 }
 
-.threat-map__alerts-list li:last-child { border-bottom: 0; }
+.gtw__alerts-list li:last-child { border-bottom: 0; }
 
-.threat-map__alerts-list a {
+.gtw__alerts-list a {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
   margin-right: 8px;
 }
 
-.threat-map__alerts-text {
+.gtw__alerts-text {
   display: block;
   margin-top: 3px;
+  color: #3a352d;
 }
 
-.threat-map__alerts-list .meta {
+.gtw__alerts-list .meta {
   display: block;
   margin-top: 4px;
-  color: var(--gray);
+  color: var(--gtw-faint);
 }
 
-.threat-map__severity {
+.gtw__severity {
   display: inline-block;
   font-family: var(--font-sans);
   font-size: 9px;
@@ -309,43 +576,76 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding: 2px 6px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--gtw-paper);
   margin-left: 4px;
   vertical-align: 1px;
+  color: var(--gtw-paper);
 }
 
-.threat-map__severity--critical { background: var(--rust); border-color: var(--rust); color: #fff; }
-.threat-map__severity--high { background: var(--ink); color: var(--paper); }
-.threat-map__severity--medium { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+.gtw__severity--critical { background: var(--gtw-red); border-color: var(--gtw-red); color: #fff; }
+.gtw__severity--high { background: var(--gtw-paper); color: var(--gtw-black); }
+.gtw__severity--medium { background: transparent; }
 
 /* --- Method note --- */
-.threat-map__method {
-  padding: 22px 0 8px;
+.gtw__method {
+  padding: 26px 0 30px;
+  border-top: 1px solid var(--gtw-paper);
 }
 
-.threat-map__method p {
+.gtw__method p {
   max-width: 78ch;
   font-size: 15px;
   line-height: 1.6;
   margin-bottom: 12px;
+  color: #3a352d;
 }
 
-.threat-map__method-links a {
+.gtw__method-links a {
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
+.gtw__credit {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--gtw-faint);
+}
+
+/* --- Inverted newsletter band: a black band on the paper page,
+   the mirror of the paper band on the old black page. --- */
+.gtw__paper-band {
+  background: #171614;
+  color: #f2ede3;
+  margin: 0 calc(-1 * var(--margin));
+  padding: 6px var(--margin) 10px;
+}
+
+.gtw__paper-band a { color: inherit; }
+
 /* --- Responsive --- */
+@media (max-width: 1100px) {
+  .gtw__spread { grid-template-columns: 1fr; gap: 26px 0; }
+  .gtw__rail--left { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--gtw-rule); padding-bottom: 8px; }
+  .gtw__rail--right { border-left: 0; padding-left: 0; }
+  .gtw__map-panel { order: -1; }
+  .gtw__figures { grid-template-columns: 1fr 1fr; }
+  .gtw__figure:nth-child(3) { border-left: 0; padding-left: 0; }
+  .gtw__figure:nth-child(n+3) { border-top: 1px solid var(--gtw-rule); }
+}
+
 @media (max-width: 900px) {
-  .threat-map__ledger { grid-template-columns: 1fr; gap: 26px 0; }
-  .threat-map__ledger section + section { border-left: 0; padding-left: 0; border-top: 1px solid var(--ink); padding-top: 22px; }
-  .threat-map__alerts { grid-template-columns: 1fr; gap: 26px 0; }
-  .threat-map__alerts section + section { border-left: 0; padding-left: 0; border-top: 1px solid var(--ink); padding-top: 22px; }
-  .threat-map__refresh { margin-left: 0; }
-  .threat-map__node-label { display: none; }
+  .gtw__alerts { grid-template-columns: 1fr; gap: 26px 0; }
+  .gtw__alerts section + section { border-left: 0; padding-left: 0; border-top: 1px solid var(--gtw-rule); padding-top: 26px; }
+  .gtw__refresh { margin-left: 0; }
+  .gtw__node-label { display: none; }
+}
+
+@media (max-width: 640px) {
+  .gtw__figures { grid-template-columns: 1fr 1fr; }
+  .gtw__figure { padding: 16px 14px 14px 0; }
+  .gtw__figure + .gtw__figure { padding-left: 14px; }
+  .gtw__masthead { padding-top: 28px; }
 }
