@@ -1,7 +1,7 @@
 /* LIVE CYBER THREAT MAP — the Radware Live Threat Map layout, in colour.
-   Full-bleed white map (aged paper ground) with a black grid and dark
-   country outlines; translucent country washes by attack category; a dense
-   violet arc web; ATTACK TYPES and THREAT ALERTS panels overlaid down the
+   Full-bleed dark map with teal outlines and a faint grid; translucent
+   country washes by attack category; a dense violet arc web of solid
+   lines; ATTACK TYPES and THREAT ALERTS panels overlaid down the
    left; LIVE / REFRESH buttons top-right and a red callout top-centre; a
    slim counters strip across the top of the map column; a condensed,
    scrollable right rail with statistics interval, rankings and a big-number
@@ -106,7 +106,7 @@
   min-height: 0;
   height: clamp(560px, calc(100vh - 320px), 840px);
   overflow: hidden;
-  background: var(--bg);
+  background: #04090c;
 }
 
 .gtw__svg {
@@ -115,17 +115,17 @@
   width: 100%;
   height: 100%;
   display: block;
-  background: var(--bg);
+  background: #04090c;
 }
 
 .gtw__graticule {
   fill: none;
-  stroke: #1f1f1f;
+  stroke: #12333a;
   stroke-width: 0.6;
 }
 
 .gtw__country {
-  stroke: #262626;
+  stroke: #2aa198;
   stroke-width: 0.5;
   stroke-linejoin: round;
   cursor: pointer;
@@ -133,7 +133,7 @@
 
 .gtw__country:hover,
 .gtw__country:focus {
-  stroke: #080808;
+  stroke: #ffffff;
   stroke-width: 1.2;
   outline: none;
 }
@@ -141,14 +141,8 @@
 .gtw__arc {
   fill: none;
   stroke-width: 0.8;
-  stroke-dasharray: 4 6;
   opacity: 0.5;
-  animation: gtw-dash 2.8s linear infinite;
   pointer-events: none;
-}
-
-@keyframes gtw-dash {
-  to { stroke-dashoffset: -20; }
 }
 
 .gtw__mover { opacity: 0.95; pointer-events: none; }
@@ -168,14 +162,11 @@
 }
 
 .gtw__dot {
-  stroke: #ffffff;
+  stroke: #04090c;
   stroke-width: 1.2;
 }
 
-/* Brand block, top-left over the map — our name, not Radware's.
-   Dark ink on the white map, with a soft paper glow so it reads over
-   the washes and arcs. The brand keeps its dark colours on mobile too:
-   stacked, it sits inside the (paper) map wrapper, not on the dark page. */
+/* Brand block, top-left over the map — our name, not Radware's. */
 .gtw__brand {
   position: absolute;
   top: 16px;
@@ -184,7 +175,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  text-shadow: 0 1px 4px rgba(247, 245, 240, 0.9);
+  text-shadow: 0 1px 6px rgba(4, 9, 12, 0.9);
 }
 
 .gtw__brand-name {
@@ -193,7 +184,7 @@
   font-size: 30px;
   line-height: 1;
   letter-spacing: -0.01em;
-  color: #080808;
+  color: #ffffff;
 }
 
 .gtw__brand-sub {
@@ -201,13 +192,13 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: #080808;
+  color: var(--gtw-ink);
 }
 
 .gtw__brand-note {
   font-family: var(--font-sans);
   font-size: 11px;
-  color: var(--gray);
+  color: var(--gtw-muted);
 }
 
 .gtw__brand-status {
@@ -220,7 +211,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gray);
+  color: var(--gtw-muted);
 }
 
 .gtw__live-dot {
@@ -239,8 +230,8 @@
   50% { opacity: 0.25; }
 }
 
-.gtw__infocon { color: var(--gray); }
-.gtw__infocon strong { color: #080808; }
+.gtw__infocon { color: var(--gtw-muted); }
+.gtw__infocon strong { color: var(--gtw-ink); }
 
 /* Red callout button, top-centre — refreshes the live feeds. */
 .gtw__cta {
@@ -309,26 +300,25 @@
   top: 74px;
   right: 18px;
   z-index: 3;
-  background: rgba(247, 245, 240, 0.94);
-  border: 1px solid rgba(8, 8, 8, 0.3);
+  background: rgba(4, 12, 16, 0.82);
+  border: 1px solid var(--gtw-rule);
   padding: 6px 10px;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: #080808;
+  color: #cfdeda;
   margin: 0;
 }
 
 /* Hover chip: the country's name pinned to the cursor on the map,
-   like the teal "Canada" chip in the Radware screenshot — now a light
-   chip with dark teal text, so it reads on the white map. */
+   like the teal "Canada" chip in the Radware screenshot. */
 .gtw__hover-chip {
   position: absolute;
   z-index: 5;
   pointer-events: none;
-  background: var(--bg);
+  background: #0e3a3f;
   border: 1px solid var(--gtw-teal-dim);
-  color: #0e3a3f;
+  color: #5eead4;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
@@ -336,13 +326,11 @@
   padding: 4px 10px;
   border-radius: 4px;
   white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Left column over the map — light paper panels, Radware's left side.
-   Scrolls within the map height when the feed is long. The panels are
-   light with dark text so they read on the white map; the rail panels
-   stay dark. */
+/* Left column over the map — teal-bordered panels, Radware's left side.
+   Scrolls within the map height when the feed is long. */
 .gtw__overlay {
   position: absolute;
   left: 0;
@@ -352,32 +340,19 @@
   width: 302px;
   overflow-y: auto;
   padding: 0 14px 18px;
-  background: linear-gradient(to right, rgba(247, 245, 240, 0.94) 0%, rgba(247, 245, 240, 0.82) 78%, rgba(247, 245, 240, 0) 100%);
+  background: linear-gradient(to right, rgba(4, 9, 12, 0.9) 0%, rgba(4, 9, 12, 0.74) 78%, rgba(4, 9, 12, 0) 100%);
   scrollbar-width: thin;
   scrollbar-color: #1f8a7d transparent;
 }
 
 .gtw__overlay .gtw__panel {
-  background: rgba(247, 245, 240, 0.95);
+  background: var(--gtw-panel-trans);
   border: 1px solid var(--gtw-teal-faint);
   padding: 12px 14px 14px;
   margin-bottom: 12px;
-  color: var(--ink);
 }
 
 .gtw__overlay .gtw__panel:last-child { margin-bottom: 0; }
-
-/* Inside the light overlay panels, the teal title and the muted notes
-   need their darker variants to stay legible on paper. */
-.gtw__overlay .gtw__panel-title { color: var(--gtw-teal-dim); }
-.gtw__overlay .gtw__legend-note,
-.gtw__overlay .gtw__aside-note { color: var(--gray); }
-.gtw__overlay .gtw__empty { color: var(--gray); }
-.gtw__overlay .gtw__error { color: #a32020; }
-.gtw__overlay .gtw__wire-text { color: var(--ink); }
-.gtw__overlay .gtw__wire-list .meta { color: var(--gray); }
-.gtw__overlay .gtw__wire-icon { color: var(--gtw-teal-dim); }
-.gtw__overlay a:hover { color: var(--ink); }
 
 .gtw__legend li {
   display: flex;
@@ -579,47 +554,6 @@
 
 .gtw__rail .gtw__panel { border-bottom: 1px solid var(--gtw-rule); padding-bottom: 12px; }
 .gtw__rail .gtw__panel:last-child { border-bottom: 0; padding-bottom: 0; }
-
-/* Slim counters strip across the top of the map column — the live
-   figures, moved out of the rail so the rail stays Radware-tight. */
-.gtw__counters {
-  flex: 0 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 36px;
-  padding: 12px 18px;
-  background: var(--gtw-panel);
-  border-bottom: 1px solid var(--gtw-rule);
-}
-
-.gtw__counter {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.gtw__counter-num {
-  font-family: var(--font-headline);
-  font-weight: 900;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: #ffffff;
-}
-
-.gtw__counter .label {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--gtw-ink);
-}
-
-.gtw__counter-src {
-  font-family: var(--font-sans);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gtw-faint);
-}
 
 /* Big-number port tiles — Radware's mosaic: the top port is the hero. */
 .gtw__port-grid {
@@ -864,6 +798,7 @@
     padding: 0;
     order: 6;
   }
+  .gtw__overlay .gtw__panel { background: var(--gtw-panel); }
   .gtw__collapse-tab { display: none; }
   /* Stacked layout: the rail is a normal block again, full height. */
   .gtw__rail { height: auto; min-height: 0; overflow-y: visible; border-top: 1px solid var(--gtw-rule); }
