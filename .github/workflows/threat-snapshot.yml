@@ -1,0 +1,31 @@
+name: Refresh threat-map snapshot
+
+# Fetches the CISA Known Exploited Vulnerabilities catalog (which browsers
+# cannot fetch directly — no CORS headers) and commits a small summary JSON
+# the Live Threat Map page reads same-origin. Commits only when the data
+# actually changed, so most runs are no-ops.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build KEV snapshot
+        run: node scripts/build-threat-snapshot.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "Offline Theory snapshot bot"
+          git config user.email "snapshot@offlinetheory.github.io"
+          git add public/data/kev-snapshot.json
+          git diff --cached --quiet || git commit -m "Threat map: refresh KEV snapshot"
+          git push
