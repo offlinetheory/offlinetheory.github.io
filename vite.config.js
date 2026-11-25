@@ -150,11 +150,6 @@ function staticRoutes() {
           desc: s.description,
         })),
         { route: 'about', title: 'About', desc: aboutDesc },
-        {
-          route: 'threat-map',
-          title: 'Live Cyber Threat Map',
-          desc: 'Live Cyber Threat Map — a live map of the attacks the internet is seeing right now: most-reported source addresses, most-targeted countries, ransomware leak listings, exploited vulnerabilities and newly published CVEs, from free public feeds.',
-        },
         { route: 'privacy', title: 'Privacy policy', desc: 'How OFFLINE THEORY collects and uses information, including the newsletter, hosting, and affiliate links.' },
         { route: 'search', title: 'Search', desc: searchDesc },
         ...ARTICLES.map((a) => {
