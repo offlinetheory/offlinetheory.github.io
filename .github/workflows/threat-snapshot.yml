@@ -1,12 +1,14 @@
 name: Refresh threat-map snapshot
 
 # Fetches the CISA Known Exploited Vulnerabilities catalog (which browsers
-# cannot fetch directly — no CORS headers) and the SANS DShield top
-# attacking source IPs (geolocated server-side, because ipwho.is
-# rate-limits per-visitor lookups and the live map's traffic arcs stopped
-# drawing), and commits small summary JSONs the Live Threat Map page reads
-# same-origin. Commits only when the data actually changed, so most runs
-# are no-ops.
+# cannot fetch directly — no CORS headers), the SANS DShield feeds
+# (topips.txt, top10.txt, block.txt — geolocated server-side, because
+# ipwho.is rate-limits per-visitor lookups), and abuse.ch ThreatFox IOCs
+# (get_iocs; requires the THREATFOX_AUTH_KEY repository secret — without it
+# ThreatFox is skipped and reported not_configured), and commits small
+# summary JSONs the Live Threat Map page reads same-origin. DShield feeds
+# are fetched at most once per hour (this schedule). Commits only when the
+# data actually changed, so most runs are no-ops.
 on:
   schedule:
     - cron: '17 * * * *'
@@ -24,11 +26,14 @@ jobs:
         with:
           node-version: 20
       - name: Build snapshots
+        env:
+          THREATFOX_AUTH_KEY: ${{ secrets.THREATFOX_AUTH_KEY }}
         run: node scripts/build-threat-snapshot.mjs
       - name: Commit if changed
         run: |
           git config user.name "Offline Theory snapshot bot"
           git config user.email "snapshot@offlinetheory.github.io"
           git add public/data/kev-snapshot.json public/data/sources-snapshot.json
+          [ -f public/data/threatfox-snapshot.json ] && git add public/data/threatfox-snapshot.json
           git diff --cached --quiet || git commit -m "Threat map: refresh snapshots"
           git push
