@@ -1,0 +1,153 @@
+{
+  "source": "CISA Known Exploited Vulnerabilities catalog",
+  "sourceUrl": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+  "generatedAt": "2026-11-25T13:05:28.011Z",
+  "catalogDate": "2026-11-24T17:47:46.199Z",
+  "totalKnownExploited": 1795,
+  "addedLast7Days": 9,
+  "addedLast30Days": 37,
+  "topVendors": [
+    {
+      "vendor": "Microsoft",
+      "count": 391
+    },
+    {
+      "vendor": "Cisco",
+      "count": 104
+    },
+    {
+      "vendor": "Apple",
+      "count": 96
+    },
+    {
+      "vendor": "Adobe",
+      "count": 83
+    },
+    {
+      "vendor": "Google",
+      "count": 77
+    }
+  ],
+  "recent": [
+    {
+      "cveID": "CVE-2026-132224",
+      "vendorProject": "Optimizely",
+      "product": "Web Experimentation",
+      "vulnerabilityName": "Optimizely Web Experimentation External Control of Critical State Data Vulnerability",
+      "dateAdded": "2026-11-24",
+      "dueDate": "2026-11-27",
+      "shortDescription": "Optimizely Web Experimentation contains an external control of critical state data vulnerability in its account signup flow that could allow an attacker to impersonate existing customer users and modify Project JavaScript. Successful exploitation can result in attacker-controlled JavaScript being distributed through Optimizely-hosted assets and executed in browsers visiting affected customer websites.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-131914",
+      "vendorProject": "Idunno",
+      "product": "AntiCsrf",
+      "vulnerabilityName": "Idunno AntiCsrf Deserialization of Untrusted Data Vulnerability",
+      "dateAdded": "2026-11-24",
+      "dueDate": "2026-11-27",
+      "shortDescription": "Idunno AntiCsrf contains a deserialization of untrusted data vulnerability that allows an unauthenticated remote attacker to execute arbitrary code via object injection. The impacted product(s) could be end-of-life (EoL) and/or end-of-service (EoS). Users are advised to discontinue use and/or transition to a supported version.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-132165",
+      "vendorProject": "Drupal",
+      "product": "Core",
+      "vulnerabilityName": "Drupal Core Remote Code Execution Vulnerability",
+      "dateAdded": "2026-11-24",
+      "dueDate": "2026-11-27",
+      "shortDescription": "Drupal Core contains a not failing securely vulnerability that could allow an unauthenticated attacker to take over an existing site or execute arbitrary code via the Drupal installer. Under specific conditions, the attacker can use install.php to attempt to reinstall Drupal on the site.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-133968",
+      "vendorProject": "Project MONAI",
+      "product": "MONAI Label",
+      "vulnerabilityName": "Project MONAI MONAI Label Path Traversal Vulnerability",
+      "dateAdded": "2026-11-23",
+      "dueDate": "2026-11-26",
+      "shortDescription": "Project MONAI MONAI Label contains a path traversal vulnerability that allows an unauthenticated remote attacker to write arbitrary files outside the intended datastore directory, potentially resulting in remote code execution.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-134624",
+      "vendorProject": "N-able",
+      "product": "MailAssure",
+      "vulnerabilityName": "N-able MailAssure (SpamExperts) Server-Side Request Forgery (SSRF) Vulnerability",
+      "dateAdded": "2026-11-23",
+      "dueDate": "2026-11-26",
+      "shortDescription": "N-able MailAssure (SpamExperts) contains a server-side request forgery vulnerability in the LDAP synchronization connection check that allows an authenticated API user to connect to arbitrary internal hosts and ports, determine which are reachable, and send crafted data to internal services.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-129448",
+      "vendorProject": "Apache",
+      "product": "Roller",
+      "vulnerabilityName": "Apache Roller Deserialization of Untrusted Data Vulnerability",
+      "dateAdded": "2026-11-20",
+      "dueDate": "2026-11-23",
+      "shortDescription": "Apache Roller contains a deserialization of untrusted data vulnerability that allows an unauthenticated remote attacker to execute arbitrary code via the XML-RPC endpoint, which accepts and deserializes vendor extension types before authentication. This CVE covers the same underlying vulnerability as CVE-2026-82384 but applies to a broader range of affected versions.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-123890",
+      "vendorProject": "Broadcom",
+      "product": "VMware vCenter",
+      "vulnerabilityName": "VMWare vCenter Authentication Bypass Using an Alternate Path or Channel Vulnerability",
+      "dateAdded": "2026-11-20",
+      "dueDate": "2026-11-23",
+      "shortDescription": "Broadcom VMware vCenter contains an authentication bypass using an alternate path or channel vulnerability in the VMware Directory Service that allows an unauthenticated attacker with network access to vCenter to bypass authentication and gain unauthorized access to the system.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2025-42884",
+      "vendorProject": "SAP",
+      "product": "NetWeaver",
+      "vulnerabilityName": "SAP NetWeaver Improper Neutralization of Special Elements in Data Query Logic Vulnerability",
+      "dateAdded": "2026-11-20",
+      "dueDate": "2026-11-23",
+      "shortDescription": "SAP NetWeaver Enterprise Portal contains an improper neutralization of special elements in data query logic vulnerability that allows an unauthenticated attacker to disclose or modify server information via injected JNDI environment properties or a URL used during JNDI lookup operations.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-76466",
+      "vendorProject": "Cisco",
+      "product": "Expressway Series",
+      "vulnerabilityName": "Cisco Expressway Series Use of Hard-coded Credentials Vulnerability",
+      "dateAdded": "2026-11-20",
+      "dueDate": "2026-11-23",
+      "shortDescription": "Cisco Expressway Series contains a use of hard-coded credentials vulnerability that allows an unauthenticated, remote attacker with persistent cookies and network access to execute commands as root on a clustered device via the database service.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2024-10441",
+      "vendorProject": "Synology",
+      "product": "DiskStation Manager (DSM)",
+      "vulnerabilityName": "Synology DiskStation Manager (DSM) Improper Encoding or Escaping of Output Vulnerability",
+      "dateAdded": "2026-11-18",
+      "dueDate": "2026-11-21",
+      "shortDescription": "Synology DSM contains an improper encoding or escaping of output vulnerability in the system plugin daemon in Synology BeeStation OS (BSM) that could allow a remote attacker to execute arbitrary code via unspecified vectors.",
+      "knownRansomwareCampaignUse": "Known"
+    },
+    {
+      "cveID": "CVE-2026-40217",
+      "vendorProject": "BerriAI",
+      "product": "LiteLLM",
+      "vulnerabilityName": "BerriAI LiteLLM Unprotected Alternate Channel Vulnerability",
+      "dateAdded": "2026-11-18",
+      "dueDate": "2026-12-02",
+      "shortDescription": "BerriAI LiteLLM contains an unprotected alternate channel vulnerability that could allow remote attackers to execute arbitrary code via bytecode rewriting at the /guardrails/test_custom_code URI.",
+      "knownRansomwareCampaignUse": "Unknown"
+    },
+    {
+      "cveID": "CVE-2026-90817",
+      "vendorProject": "Vanderbilt University",
+      "product": "Research Electronic Data Capture (REDCap)",
+      "vulnerabilityName": "Vanderbilt University Research Electronic Data Capture (REDCap) Code Injection Vulnerability",
+      "dateAdded": "2026-11-18",
+      "dueDate": "2026-11-21",
+      "shortDescription": "Vanderbilt University Research Electronic Data Capture (REDCap) contains a code injection vulnerability which could allow an unauthenticated attacker to execute arbitrary code on the server. An attacker could exploit this via crafted HTTP requests that access an unintended controller route from a public survey context and supply a crafted file-path or stream parameter during data import processing. Exploitation requires knowledge of a valid public survey hash.",
+      "knownRansomwareCampaignUse": "Unknown"
+    }
+  ]
+}
