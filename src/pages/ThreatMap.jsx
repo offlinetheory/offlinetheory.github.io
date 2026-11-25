@@ -12,10 +12,10 @@ import './ThreatMap.css'
  * layout of the Radware Live Threat Map screenshot Miah supplied:
  * brand block top-left, red callout button top-centre, LIVE / REFRESH
  * buttons top-right, ATTACK TYPES legend and THREAT ALERTS panels down
- * the left over the map, a full-bleed white map with a black grid and dark
- * country outlines and coloured country washes, a right rail (statistics
- * interval, top attackers, top attacked, attack vectors, application
- * violations, scanned ports), and a coloured multi-row timeline strip
+ * the left over the map, a full-bleed dark map with teal outlines and
+ * coloured country washes, a right rail (statistics interval, top
+ * attackers, top attacked, attack vectors, application violations,
+ * scanned ports), and a coloured multi-row timeline strip
  * along the bottom with a COLLAPSE control. The homepage footer band
  * (InfoBar + Newsletter, on paper) ends the page; the global Footer nav
  * row renders below it from App.jsx.
@@ -30,8 +30,13 @@ import './ThreatMap.css'
  * (all CORS-open, no key):
  *  - SANS Internet Storm Center (DShield) — most-reported attacking
  *    source IPs, most-targeted ports, InfoCon, and a 7-day daily
- *    summary of sensor reports.
- *  - ipwho.is — geolocates those source IPs (lat/lon + country).
+ *    summary of sensor reports. The source IPs' locations come from an
+ *    hourly server-side snapshot (public/data/sources-snapshot.json):
+ *    the snapshot job geolocates DShield's top 12 source IPs via
+ *    ipwho.is once an hour, because ipwho.is rate-limits per-visitor
+ *    lookups and the live map's arcs stopped drawing. Only if the
+ *    snapshot is missing or empty does the page geolocate live in the
+ *    visitor's browser via ipwho.is.
  *  - NIST NVD API — vulnerabilities published or modified in the last
  *    48 hours; the top weakness types (CWE) in those CVEs fill the
  *    "top application violations" panel.
@@ -80,6 +85,7 @@ const ISC = 'https://isc.sans.edu/api'
 const RB = 'https://recentbreaches.com/api'
 const NVD = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
 const KEV_SNAPSHOT = `${import.meta.env.BASE_URL}data/kev-snapshot.json`
+const SOURCES_SNAPSHOT = `${import.meta.env.BASE_URL}data/sources-snapshot.json`
 const REFRESH_MS = 5 * 60 * 1000
 const FETCH_TIMEOUT_MS = 15000
 
@@ -225,7 +231,7 @@ function flagEmoji(code) {
   return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
 }
 
-const MAP_BASE_FILL = '#ECE9E2'
+const MAP_BASE_FILL = '#0a1418'
 
 const MAP_W = 1200
 const MAP_H = 620
@@ -340,8 +346,31 @@ export default function ThreatMap() {
     if (isRefresh) setRefreshing(true)
     const nextErrors = {}
     const timelineDays = [6, 5, 4, 3, 2, 1, 0].map((d) => dateStrDaysAgo(d))
+
+    // Source locations come from the hourly server-side snapshot first
+    // (scripts/build-threat-snapshot.mjs geolocates DShield's top 12
+    // source IPs via ipwho.is once an hour and commits the result, so
+    // visitors never hit ipwho.is's per-visitor rate limit — that limit
+    // is what left the map with no arcs and Top Attackers stuck on
+    // "Loading…"). Only if the snapshot fetch fails or comes back empty
+    // does the page fall back to the live topips + ipwho.is flow.
+    let snapshotSources = null
+    try {
+      const snap = await fetchJson(SOURCES_SNAPSHOT)
+      if (Array.isArray(snap?.sources) && snap.sources.length > 0) {
+        snapshotSources = snap.sources.filter(
+          (s) => typeof s.lat === 'number' && typeof s.lon === 'number',
+        )
+        if (snapshotSources.length === 0) snapshotSources = null
+      }
+    } catch {
+      snapshotSources = null
+    }
+
     const [topIps, topPorts, infocon, kevSnap, nvd, rbIndex, rbGeo, rbLeaks, timelineRes] = await Promise.all([
-      fetchJson(`${ISC}/topips/records/25?json`).catch((e) => { nextErrors.dshield = e.message; return null }),
+      snapshotSources
+        ? Promise.resolve(null)
+        : fetchJson(`${ISC}/topips/records/25?json`).catch((e) => { nextErrors.dshield = e.message; return null }),
       fetchJson(`${ISC}/topports/records/10?json`).catch((e) => { nextErrors.dshield = e.message; return null }),
       fetchJson(`${ISC}/infocon?json`).catch(() => null),
       fetchJson(KEV_SNAPSHOT).catch((e) => { nextErrors.kev = e.message; return null }),
@@ -355,7 +384,18 @@ export default function ThreatMap() {
     ])
 
     let sources = []
-    if (Array.isArray(topIps)) {
+    if (snapshotSources) {
+      sources = snapshotSources.map((s) => ({
+        ip: s.ip,
+        reports: Number(s.reports) || 0,
+        targets: Number(s.targets) || 0,
+        country: s.country,
+        countryCode: s.countryCode,
+        city: s.city || null,
+        lat: s.lat,
+        lon: s.lon,
+      }))
+    } else if (Array.isArray(topIps)) {
       const top = topIps.slice(0, 12)
       const located = await Promise.allSettled(
         top.map((s) => fetchJson(`https://ipwho.is/${encodeURIComponent(s.source)}`)),
@@ -535,7 +575,7 @@ export default function ThreatMap() {
             {info
               ? info.reports > 0
                 ? `${name} — ${CAT_BY_KEY[info.category].label} · ${info.reports.toLocaleString('en-US')} reports from ${info.sources} source${info.sources === 1 ? '' : 's'}`
-              : `${name} — ${CAT_BY_KEY[info.category].label}`
+                : `${name} — ${CAT_BY_KEY[info.category].label}`
               : name}
           </title>
         </path>
@@ -627,31 +667,6 @@ export default function ThreatMap() {
       {/* --- The stage: full-bleed dark map + right rail --- */}
       <div className="gtw__stage">
         <div className="gtw__mapcol">
-          {/* Slim counters strip across the top of the map column — the
-              live figures that used to sit as 2×2 tiles in the rail. */}
-          <div className="gtw__counters" aria-label="Live figures">
-            <div className="gtw__counter">
-              <span className="gtw__counter-num">{todayReports != null ? todayReports.toLocaleString('en-US') : '—'}</span>
-              <span className="label">Sensor reports today</span>
-              <span className="gtw__counter-src">Scanning · SANS DShield</span>
-            </div>
-            <div className="gtw__counter">
-              <span className="gtw__counter-num">{data.rbIndex ? data.rbIndex.ransomware_7d.toLocaleString('en-US') : '—'}</span>
-              <span className="label">Ransomware claims · 7 days</span>
-              <span className="gtw__counter-src">Leak-site listings · Recent Breaches</span>
-            </div>
-            <div className="gtw__counter">
-              <span className="gtw__counter-num">{data.kev ? data.kev.totalKnownExploited.toLocaleString('en-US') : '—'}</span>
-              <span className="label">Flaws confirmed exploited</span>
-              <span className="gtw__counter-src">CISA Known Exploited Vulnerabilities</span>
-            </div>
-            <div className="gtw__counter">
-              <span className="gtw__counter-num">{data.rbIndex ? data.rbIndex.count_24h.toLocaleString('en-US') : '—'}</span>
-              <span className="label">Breach disclosures · 24 hours</span>
-              <span className="gtw__counter-src">Recent Breaches index</span>
-            </div>
-          </div>
-
           <div className="gtw__mapwrap" ref={mapWrapRef} aria-label="World map of most-reported attacking source addresses">
             <svg
               className="gtw__svg"
@@ -662,7 +677,7 @@ export default function ThreatMap() {
             >
               <defs>
                 <pattern id="gtw-grid" width="36" height="36" patternUnits="userSpaceOnUse">
-                  <path d="M 36 0 H 0 V 36" fill="none" stroke="#1f1f1f" strokeWidth="0.5" />
+                  <path d="M 36 0 H 0 V 36" fill="none" stroke="#0e2a2e" strokeWidth="0.5" />
                 </pattern>
               </defs>
               <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
@@ -876,7 +891,7 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Source countries of the most-reported addresses, by share of the top five’s reports. Source: DShield.</p>
+            <p className="gtw__aside-note">Source countries of the most-reported addresses, by share of the top five&rsquo;s reports. Source: DShield.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="attacked-h">
@@ -912,7 +927,7 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Most-probed services, as a share of the most-probed ports’ reports. There is no free live feed of flood-type vector volumes, so the vectors are shown by probed port. Source: DShield.</p>
+            <p className="gtw__aside-note">Most-probed services, as a share of the most-probed ports&rsquo; reports. There is no free live feed of flood-type vector volumes, so the vectors are shown by probed port. Source: DShield.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="violations-h">
