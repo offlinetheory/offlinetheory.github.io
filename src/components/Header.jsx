@@ -32,9 +32,13 @@ export default function Header() {
           <ul>
             {NAV.map((item) => (
               <li key={item.to}>
-                <NavLink to={item.to} className={({ isActive }) => (isActive ? 'is-active' : undefined)}>
-                  {item.label}
-                </NavLink>
+                {item.external ? (
+                  <a href={item.to}>{item.label}</a>
+                ) : (
+                  <NavLink to={item.to} className={({ isActive }) => (isActive ? 'is-active' : undefined)}>
+                    {item.label}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>
