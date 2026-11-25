@@ -1,7 +1,23 @@
 {
-  "source": "SANS Internet Storm Center (DShield) top attacking source IPs, geolocated via ipwho.is",
-  "sourceUrl": "https://isc.sans.edu/api/topips/records/25?json",
-  "generatedAt": "2026-11-25T17:48:57.339Z",
+  "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
+  "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
+  "generatedAt": "2026-11-25T22:34:35.979Z",
+  "providers": {
+    "dshield": {
+      "status": "ok",
+      "fetchedAt": "2026-11-25T22:34:35.979Z",
+      "feeds": {
+        "topips": "ok",
+        "top10": "ok",
+        "block": "ok",
+        "dailySources": "ok"
+      }
+    },
+    "threatfox": {
+      "status": "see threatfox-snapshot.json",
+      "fetchedAt": null
+    }
+  },
   "sources": [
     {
       "ip": "13.94.254.200",
@@ -10,8 +26,11 @@
       "city": "Amsterdam",
       "lat": 52.374028,
       "lon": 4.8896881,
+      "provider": "DShield",
       "reports": 319739,
-      "targets": 1
+      "targets": 1,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "194.224.249.214",
@@ -20,8 +39,11 @@
       "city": "San Sebastian de los Reyes",
       "lat": 40.5555503,
       "lon": -3.6273326,
+      "provider": "DShield",
       "reports": 309508,
-      "targets": 1
+      "targets": 1,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "52.157.207.201",
@@ -30,8 +52,11 @@
       "city": "Amsterdam",
       "lat": 52.374028,
       "lon": 4.8896881,
+      "provider": "DShield",
       "reports": 194780,
-      "targets": 1
+      "targets": 1,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "89.248.163.109",
@@ -40,8 +65,11 @@
       "city": "Amsterdam",
       "lat": 52.374028,
       "lon": 4.8896881,
+      "provider": "DShield",
       "reports": 96279,
-      "targets": 150
+      "targets": 150,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "143.244.186.35",
@@ -50,8 +78,11 @@
       "city": "San Jose",
       "lat": 37.3393947,
       "lon": -121.8949575,
+      "provider": "DShield",
       "reports": 92007,
-      "targets": 8
+      "targets": 8,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "18.116.198.191",
@@ -60,8 +91,11 @@
       "city": "Columbus",
       "lat": 39.9611755,
       "lon": -82.9987943,
+      "provider": "DShield",
       "reports": 59907,
-      "targets": 1
+      "targets": 1,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "152.89.198.163",
@@ -70,8 +104,11 @@
       "city": "Reutov",
       "lat": 55.7627321,
       "lon": 37.8630297,
+      "provider": "DShield",
       "reports": 41378,
-      "targets": 478
+      "targets": 478,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "152.89.198.103",
@@ -80,8 +117,11 @@
       "city": "Reutov",
       "lat": 55.7627321,
       "lon": 37.8630297,
+      "provider": "DShield",
       "reports": 41346,
-      "targets": 479
+      "targets": 479,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "152.89.198.187",
@@ -90,8 +130,11 @@
       "city": "Reutov",
       "lat": 55.7627321,
       "lon": 37.8630297,
+      "provider": "DShield",
       "reports": 41332,
-      "targets": 477
+      "targets": 477,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "185.122.204.71",
@@ -100,8 +143,11 @@
       "city": "Moscow",
       "lat": 55.7520384,
       "lon": 37.6178147,
+      "provider": "DShield",
       "reports": 41221,
-      "targets": 479
+      "targets": 479,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "176.113.115.104",
@@ -110,8 +156,11 @@
       "city": "Frankfurt am Main",
       "lat": 50.1155207,
       "lon": 8.6841662,
+      "provider": "DShield",
       "reports": 41164,
-      "targets": 486
+      "targets": 486,
+      "firstSeen": null,
+      "lastSeen": null
     },
     {
       "ip": "91.240.118.59",
@@ -120,8 +169,279 @@
       "city": "Hong Kong",
       "lat": 22.2783219,
       "lon": 114.174691,
+      "provider": "DShield",
       "reports": 41148,
-      "targets": 476
+      "targets": 476,
+      "firstSeen": null,
+      "lastSeen": null
     }
-  ]
+  ],
+  "topIpsTxt": [
+    {
+      "source": "23.94.68.19",
+      "hostname": "23-94-68-19-host.colocrossing.com."
+    },
+    {
+      "source": "79.124.62.230",
+      "hostname": "hosting-by.4cloud.mobi."
+    },
+    {
+      "source": "204.76.203.212",
+      "hostname": "hosted-by.pfcloud.io."
+    },
+    {
+      "source": "79.124.62.134",
+      "hostname": "hosting-by.4cloud.mobi."
+    },
+    {
+      "source": "207.180.192.205",
+      "hostname": "m11005.contaboserver.net."
+    },
+    {
+      "source": "79.124.62.126",
+      "hostname": "hosting-by.4cloud.mobi."
+    },
+    {
+      "source": "207.180.192.206",
+      "hostname": "m11006.contaboserver.net."
+    },
+    {
+      "source": "5.189.160.21",
+      "hostname": "m4321.contaboserver.net."
+    },
+    {
+      "source": "176.65.148.243",
+      "hostname": "hosted-by.pfcloud.io."
+    },
+    {
+      "source": "173.249.33.72",
+      "hostname": "m11372.contaboserver.net."
+    },
+    {
+      "source": "193.46.255.51",
+      "hostname": "hostingmailto200.statics.servermail.org."
+    },
+    {
+      "source": "173.249.4.73",
+      "hostname": "m5483.contaboserver.net."
+    },
+    {
+      "source": "89.248.163.200",
+      "hostname": "recyber.net."
+    },
+    {
+      "source": "177.129.99.94",
+      "hostname": "mail.oticasvisao.net.br."
+    },
+    {
+      "source": "194.180.49.218",
+      "hostname": "TIMEOUT"
+    }
+  ],
+  "top10Sources": [
+    "23.94.68.19",
+    "79.124.62.230",
+    "204.76.203.212",
+    "79.124.62.134",
+    "207.180.192.205",
+    "79.124.62.126",
+    "207.180.192.206",
+    "5.189.160.21",
+    "176.65.148.243",
+    "173.249.33.72",
+    "193.46.255.51",
+    "173.249.4.73",
+    "89.248.163.200",
+    "177.129.99.94",
+    "194.180.49.218"
+  ],
+  "blocklist": {
+    "count": 20,
+    "ranges": [
+      {
+        "network": "150.129.10.0/24",
+        "startIp": "150.129.10.0",
+        "endIp": "150.129.10.255",
+        "reports": 316,
+        "asn": "LITESERVER",
+        "country": "NL",
+        "abuse": "ripe@liteserver.nl"
+      },
+      {
+        "network": "64.62.197.0/24",
+        "startIp": "64.62.197.0",
+        "endIp": "64.62.197.255",
+        "reports": 315,
+        "asn": "HURRICANE",
+        "country": "US",
+        "abuse": "abuse@he.net"
+      },
+      {
+        "network": "199.165.159.0/24",
+        "startIp": "199.165.159.0",
+        "endIp": "199.165.159.255",
+        "reports": 310,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "77.239.124.0/24",
+        "startIp": "77.239.124.0",
+        "endIp": "77.239.124.255",
+        "reports": 306,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "66.132.195.0/24",
+        "startIp": "66.132.195.0",
+        "endIp": "66.132.195.255",
+        "reports": 304,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "195.182.16.0/24",
+        "startIp": "195.182.16.0",
+        "endIp": "195.182.16.255",
+        "reports": 302,
+        "asn": "OT2-AS",
+        "country": "UA",
+        "abuse": "abuse@omegatelecom.ua"
+      },
+      {
+        "network": "66.132.186.0/24",
+        "startIp": "66.132.186.0",
+        "endIp": "66.132.186.255",
+        "reports": 298,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "172.110.223.0/24",
+        "startIp": "172.110.223.0",
+        "endIp": "172.110.223.255",
+        "reports": 297,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "198.235.24.0/24",
+        "startIp": "198.235.24.0",
+        "endIp": "198.235.24.255",
+        "reports": 297,
+        "asn": "GOOGLE-CLOUD-PLATFORM",
+        "country": "US",
+        "abuse": "None"
+      },
+      {
+        "network": "91.196.152.0/24",
+        "startIp": "91.196.152.0",
+        "endIp": "91.196.152.255",
+        "reports": 294,
+        "asn": "ATT-INTERNET4",
+        "country": "US",
+        "abuse": "abuse@att.net"
+      },
+      {
+        "network": "156.225.1.0/24",
+        "startIp": "156.225.1.0",
+        "endIp": "156.225.1.255",
+        "reports": 294,
+        "asn": "OCTL-AS-AP",
+        "country": "OceanBlue",
+        "abuse": "Cloud"
+      },
+      {
+        "network": "66.132.172.0/24",
+        "startIp": "66.132.172.0",
+        "endIp": "66.132.172.255",
+        "reports": 292,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "216.25.90.0/24",
+        "startIp": "216.25.90.0",
+        "endIp": "216.25.90.255",
+        "reports": 291,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "217.60.242.0/24",
+        "startIp": "217.60.242.0",
+        "endIp": "217.60.242.255",
+        "reports": 291,
+        "asn": "TCI",
+        "country": "IR",
+        "abuse": "LIRadmin@tci.ir"
+      },
+      {
+        "network": "154.80.128.0/24",
+        "startIp": "154.80.128.0",
+        "endIp": "154.80.128.255",
+        "reports": 289,
+        "asn": "SH2206-AP",
+        "country": "UNIT",
+        "abuse": "A17,9F"
+      },
+      {
+        "network": "193.47.62.0/24",
+        "startIp": "193.47.62.0",
+        "endIp": "193.47.62.255",
+        "reports": 289,
+        "asn": "ASN-QUADRANET-GLOBAL",
+        "country": "US",
+        "abuse": "support@quadranet.com"
+      },
+      {
+        "network": "66.132.224.0/24",
+        "startIp": "66.132.224.0",
+        "endIp": "66.132.224.255",
+        "reports": 288,
+        "asn": null,
+        "country": null,
+        "abuse": null
+      },
+      {
+        "network": "151.243.11.0/24",
+        "startIp": "151.243.11.0",
+        "endIp": "151.243.11.255",
+        "reports": 288,
+        "asn": "RASANA",
+        "country": "IR",
+        "abuse": "abuse@rasana.net"
+      },
+      {
+        "network": "45.156.128.0/24",
+        "startIp": "45.156.128.0",
+        "endIp": "45.156.128.255",
+        "reports": 287,
+        "asn": "AS-BITSIGHT",
+        "country": "PT",
+        "abuse": ">>UNKNOWN<<"
+      },
+      {
+        "network": "185.107.80.0/24",
+        "startIp": "185.107.80.0",
+        "endIp": "185.107.80.255",
+        "reports": 287,
+        "asn": "NFORCE",
+        "country": "NL",
+        "abuse": "abuse@nforce.com"
+      }
+    ]
+  },
+  "dailySources": {
+    "bytes": 149378787,
+    "note": "Bulk feed (~149 MB) — availability checked only, body not downloaded."
+  }
 }
