@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-11-26T22:34:07.779Z",
+  "intervals": {
+    "1h": [
+      {
+        "generatedAt": "2026-11-26T22:34:03.838Z",
+        "path": "data/history/cloudflare/1h/20261126T223403838Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T20:30:00Z"
+      }
+    ],
+    "6h": [
+      {
+        "generatedAt": "2026-11-26T22:34:04.190Z",
+        "path": "data/history/cloudflare/6h/20261126T223404190Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T20:30:00Z"
+      }
+    ],
+    "24h": [
+      {
+        "generatedAt": "2026-11-26T22:34:04.698Z",
+        "path": "data/history/cloudflare/24h/20261126T223404698Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T20:30:00Z"
+      }
+    ],
+    "7d": [
+      {
+        "generatedAt": "2026-11-26T22:34:05.077Z",
+        "path": "data/history/cloudflare/7d/20261126T223405077Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T20:30:00Z"
+      }
+    ]
+  }
+}
