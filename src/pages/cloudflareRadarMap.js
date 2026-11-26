@@ -92,6 +92,7 @@ export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path
     countryCodeById.set(targetId, pair.targetCountryAlpha2)
     arcs.push({
       key: `${pair.originCountryAlpha2}:${pair.targetCountryAlpha2}:${index}`,
+      pathId: `gtw-cf-arc-${index}`,
       d: pairArcPath(origin, target, path),
       value,
       originId,
@@ -131,4 +132,113 @@ export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path
   }
 
   return { arcs, roles, countryCodeById, countryFeatureById: featuresById }
+}
+
+export const CLOUDFLARE_INTERVALS = ['1h', '6h', '24h', '7d']
+export const CLOUDFLARE_INTERVAL_LABELS = { '1h': '1h', '6h': '6h', '24h': '24h', '7d': '7d' }
+
+export function cloudflareIntervalUrl(baseUrl, interval) {
+  const safeInterval = CLOUDFLARE_INTERVALS.includes(interval) ? interval : '24h'
+  return `${baseUrl}data/cloudflare-attack-pairs-${safeInterval}.json`
+}
+
+/**
+ * Rank Cloudflare origin or target countries by the sum of their pair
+ * values. Pure: uses only provider-supplied pair values, invents nothing.
+ * Returns [{ code, name, total }] sorted by total descending.
+ */
+export function rankCloudflareCountries(pairs, side) {
+  const key = side === 'target' ? 'targetCountryAlpha2' : 'originCountryAlpha2'
+  const nameKey = side === 'target' ? 'targetCountryName' : 'originCountryName'
+  const totals = new Map()
+  for (const pair of Array.isArray(pairs) ? pairs : []) {
+    const value = Number(pair?.value)
+    if (!Number.isFinite(value) || value < 0 || value > 100) continue
+    const code = pair?.[key]
+    if (typeof code !== 'string' || code.length !== 2) continue
+    const entry = totals.get(code) || { code, name: pair?.[nameKey] || code, total: 0 }
+    entry.total += value
+    if (pair?.[nameKey]) entry.name = pair[nameKey]
+    totals.set(code, entry)
+  }
+  return [...totals.values()].sort((a, b) => b.total - a.total)
+}
+
+/** In/out pairs for one country (alpha-2), each sorted by value desc, top 5. */
+export function pairsForCountry(pairs, alpha2) {
+  const list = Array.isArray(pairs) ? pairs : []
+  const byValueDesc = (a, b) => Number(b.value) - Number(a.value)
+  return {
+    outbound: list.filter((p) => p?.originCountryAlpha2 === alpha2).sort(byValueDesc).slice(0, 5),
+    inbound: list.filter((p) => p?.targetCountryAlpha2 === alpha2).sort(byValueDesc).slice(0, 5),
+  }
+}
+
+/**
+ * Nearest retained historical snapshot at or before `timestamp` (ms).
+ * `entries` are manifest entries oldest→newest with a generatedAt ISO
+ * string. Returns the entry or null when none exists at/before the time.
+ */
+export function selectHistoricalSnapshot(entries, timestamp) {
+  if (!Array.isArray(entries) || !Number.isFinite(timestamp)) return null
+  let selected = null
+  for (const entry of entries) {
+    const generatedAt = Date.parse(entry?.generatedAt || '')
+    if (!Number.isFinite(generatedAt) || generatedAt > timestamp) continue
+    if (!selected || generatedAt >= Date.parse(selected.generatedAt)) selected = entry
+  }
+  return selected
+}
+
+/**
+ * Diff two pair lists by origin:target key. Returns only real,
+ * provider-supplied changes: pairs present in one list only, or with a
+ * changed value. `previousPairs === null` means "no prior snapshot" and
+ * yields null (no comparison is possible, not an empty diff).
+ */
+export function cloudflarePairChanges(currentPairs, previousPairs) {
+  if (!Array.isArray(previousPairs)) return null
+  const keyOf = (p) => `${p?.originCountryAlpha2}:${p?.targetCountryAlpha2}`
+  const prev = new Map()
+  for (const pair of previousPairs) {
+    if (pair?.originCountryAlpha2 && pair?.targetCountryAlpha2) prev.set(keyOf(pair), pair)
+  }
+  const current = new Map()
+  for (const pair of Array.isArray(currentPairs) ? currentPairs : []) {
+    if (pair?.originCountryAlpha2 && pair?.targetCountryAlpha2) current.set(keyOf(pair), pair)
+  }
+  const added = []
+  const removed = []
+  const changed = []
+  for (const [key, pair] of current) {
+    if (!prev.has(key)) added.push(pair)
+    else if (Math.abs(Number(pair.value) - Number(prev.get(key).value)) > 0.000001) {
+      changed.push({ ...pair, previousValue: Number(prev.get(key).value) })
+    }
+  }
+  for (const [key, pair] of prev) {
+    if (!current.has(key)) removed.push(pair)
+  }
+  return { added, removed, changed }
+}
+
+/**
+ * Travelling-pulse plan for the visible arcs: the top `maxPulses` arcs by
+ * reported value. Larger pairs move faster (shorter duration); durations
+ * are clamped to 3–9s. Pulses animate along real aggregate arcs only.
+ */
+export function arcPulsePlan(arcs, maxPulses = 12) {
+  const list = (Array.isArray(arcs) ? [...arcs] : [])
+    .filter((arc) => arc?.pathId && Number.isFinite(arc.value))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, Math.max(0, maxPulses))
+  const maxValue = Math.max(0, ...list.map((arc) => arc.value))
+  return list.map((arc) => ({
+    key: arc.key,
+    pathId: arc.pathId,
+    value: arc.value,
+    durationSec: maxValue > 0
+      ? Math.round((3 + (1 - arc.value / maxValue) * 6) * 10) / 10
+      : 9,
+  }))
 }

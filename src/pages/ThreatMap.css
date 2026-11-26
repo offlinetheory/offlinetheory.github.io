@@ -132,17 +132,25 @@
   stroke-width: 0.65;
 }
 
+/* Origin vs target highlighting: origins are solid bright white with a
+   heavier outline; targets are a darker mid-gray fill with a dashed
+   outline, so the two roles stay distinguishable in monochrome. */
 .gtw__cf-origin {
   fill: #FFFFFF;
   stroke: #FFFFFF;
-  stroke-width: 0.65;
+  stroke-width: 1.2;
 }
 
 .gtw__cf-target {
-  fill: #8A8A8A;
+  fill: #5A5A5A;
   stroke: #FFFFFF;
   stroke-width: 0.8;
   stroke-dasharray: 2 1.5;
+}
+
+.gtw__cf-pulse {
+  fill: #FFFFFF;
+  opacity: 0.9;
 }
 
 .gtw__cf-arc {
@@ -266,6 +274,29 @@
   background: rgba(5, 5, 5, 0.84);
   padding: 5px 7px;
   font: 10px var(--font-mono);
+}
+
+/* Historical-playback banners: stacked in one top-centre container below
+   the CTA, so the two messages never paint over each other or under the
+   bottom-right legend. */
+.gtw__map-history-statuses {
+  position: absolute;
+  left: 50%;
+  top: 70px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  width: max-content;
+  max-width: min(92%, 720px);
+}
+
+.gtw__map-history-statuses .gtw__map-history-status {
+  position: static;
+  max-width: 100%;
+  text-align: center;
 }
 
 .gtw__map-history-status {
@@ -665,6 +696,7 @@
 }
 
 .gtw__filter:not(.is-active) { opacity: 0.48; }
+.gtw__filter--no-source .gtw__legend-check { border-style: dashed; }
 .gtw__filter:focus-visible { outline: 1px solid #FFFFFF; outline-offset: 3px; }
 .gtw__filter small {
   display: block;
@@ -859,6 +891,30 @@
   color: var(--gtw-faint);
 }
 
+.gtw__interval-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.gtw__interval-button {
+  min-width: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--gtw-accent-faint);
+  background: #1A1A1A;
+  color: var(--gtw-ink);
+  font: 700 12px/1 var(--font-sans);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.gtw__interval-button:hover { background: #242424; }
+.gtw__interval-button.is-active {
+  background: #FFFFFF;
+  color: #050505;
+  border-color: #FFFFFF;
+}
+.gtw__interval-button:focus-visible { outline: 1px solid #FFFFFF; outline-offset: 2px; }
+
 .gtw__provider-freshness {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -931,7 +987,15 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
 }
+
+.gtw__port-tile:hover { background: #1A1A1A; }
+.gtw__port-tile:focus-visible { outline: 1px solid #FFFFFF; outline-offset: -1px; }
 
 .gtw__port-tile--hero {
   grid-column: span 2;
@@ -1256,6 +1320,7 @@
   .gtw__zoom-level { top: 178px; right: 160px; }
   .gtw__intel-panel { top: 214px; right: 12px; max-height: 360px; }
   .gtw__map-history-status { position: static; order: 5; max-width: 100%; }
+  .gtw__map-history-statuses { position: static; transform: none; order: 5; width: auto; max-width: 100%; align-items: stretch; }
   .gtw__map-activity-legend { position: static; align-self: flex-end; order: 5; }
   .gtw__overlay {
     position: static;
