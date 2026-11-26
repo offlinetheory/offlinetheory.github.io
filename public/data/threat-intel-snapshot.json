@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T05:21:42.091Z",
+  "generatedAt": "2026-11-26T05:29:39.075Z",
   "refreshIntervalMinutes": 15,
   "providers": {
     "dshield": {
@@ -9,37 +9,37 @@
       "attribution": "SANS Technology Institute / Internet Storm Center (DShield)",
       "license": "Commercial use is permitted with attribution; do not resell. See the provider’s published license terms.",
       "status": "live",
-      "fetchedAt": "2026-11-26T05:21:42.049Z",
+      "fetchedAt": "2026-11-26T05:29:39.042Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "Best effort; on HTTP 429 the job pauses for 5 minutes before retrying.",
       "subfeeds": {
         "source_locations": {
           "status": "live",
-          "fetchedAt": "2026-11-26T05:21:23.456Z",
+          "fetchedAt": "2026-11-26T05:29:19.694Z",
           "dataDate": null,
           "error": null
         },
         "top_ports": {
           "status": "live",
-          "fetchedAt": "2026-11-26T05:21:37.726Z",
+          "fetchedAt": "2026-11-26T05:29:33.904Z",
           "dataDate": "2026-11-25",
           "error": null
         },
         "infocon": {
           "status": "live",
-          "fetchedAt": "2026-11-26T05:21:37.984Z",
+          "fetchedAt": "2026-11-26T05:29:35.271Z",
           "dataDate": null,
           "error": null
         },
         "daily_summary": {
           "status": "live",
-          "fetchedAt": "2026-11-26T05:21:42.049Z",
+          "fetchedAt": "2026-11-26T05:29:39.042Z",
           "dataDate": "2026-11-26",
           "error": null
         }
       },
-      "sourceDataLastSuccessfulAt": "2026-11-26T05:21:23.456Z",
+      "sourceDataLastSuccessfulAt": "2026-11-26T05:29:19.694Z",
       "sourceDataDate": null
     },
     "threatfox": {
@@ -59,7 +59,7 @@
       "attribution": "NIST National Vulnerability Database (NVD)",
       "license": "Public NVD data; NIST does not endorse products or services.",
       "status": "live",
-      "fetchedAt": "2026-11-26T05:21:38.933Z",
+      "fetchedAt": "2026-11-26T05:29:36.618Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "One unauthenticated request per refresh; NVD unauthenticated limit is 5 requests per 30 seconds."
@@ -70,7 +70,7 @@
       "attribution": "CISA Known Exploited Vulnerabilities catalog",
       "license": "U.S. government work; source attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-26T05:21:22.825Z",
+      "fetchedAt": "2026-11-26T05:29:19.110Z",
       "error": null,
       "cacheIntervalMinutes": 15
     },
@@ -79,14 +79,24 @@
       "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
       "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
       "license": "Cloudflare Radar aggregated attack data; attribution provided.",
-      "status": "offline",
-      "fetchedAt": null,
-      "error": "Cloudflare Radar HTTP 200; success=true; errors=none; response keys=success,errors,result; result keys=top_0,meta; Cloudflare Radar response is missing valid upstream metadata",
-      "lastUpdated": null,
-      "dateRange": null,
-      "units": null,
-      "normalization": null,
-      "pairCount": 0,
+      "status": "live",
+      "fetchedAt": "2026-11-26T05:29:33.886Z",
+      "error": null,
+      "lastUpdated": "2026-11-26T03:30:00Z",
+      "dateRange": [
+        {
+          "startTime": "2026-11-25T05:00:00Z",
+          "endTime": "2026-11-26T05:00:00Z"
+        }
+      ],
+      "units": [
+        {
+          "name": "*",
+          "value": "requests"
+        }
+      ],
+      "normalization": "PERCENTAGE",
+      "pairCount": 50,
       "cacheIntervalMinutes": 15,
       "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan."
     },
@@ -105,7 +115,7 @@
       "url": "https://ipwho.is/",
       "attribution": "ipwho.is",
       "status": "live",
-      "fetchedAt": "2026-11-26T05:21:37.100Z",
+      "fetchedAt": "2026-11-26T05:29:33.421Z",
       "cacheIntervalMinutes": 60,
       "license": "Public IP geolocation lookups; only routable public IPs are sent.",
       "successfulLookups": 12,
