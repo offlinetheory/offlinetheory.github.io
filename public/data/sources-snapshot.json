@@ -1,12 +1,12 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-26T15:40:00.324Z",
+  "generatedAt": "2026-11-26T17:18:35.290Z",
   "dataDate": null,
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-26T15:40:00.749Z",
+      "fetchedAt": "2026-11-26T17:18:37.242Z",
       "dataDate": null,
       "feeds": {
         "topips": "ok",
@@ -18,7 +18,7 @@
     },
     "ip_geolocation": {
       "status": "ok",
-      "fetchedAt": "2026-11-26T15:40:14.692Z",
+      "fetchedAt": "2026-11-26T17:18:55.193Z",
       "successfulLookups": 12,
       "requestedLookups": 12,
       "error": null
