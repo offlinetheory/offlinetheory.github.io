@@ -281,6 +281,20 @@ function fmtUtcTimestamp(value) {
     : 'not supplied by source'
 }
 
+function formatCloudflareDateRange(dateRange) {
+  if (!Array.isArray(dateRange) || dateRange.length === 0) return 'not supplied'
+  return dateRange
+    .map((range) => `${fmtUtcTimestamp(range?.startTime)} – ${fmtUtcTimestamp(range?.endTime)}`)
+    .join(', ')
+}
+
+function formatCloudflareUnits(units) {
+  if (!Array.isArray(units) || units.length === 0) return 'not supplied'
+  return units
+    .map((unit) => `${unit?.name || 'unit'}: ${JSON.stringify(unit?.value) ?? 'not supplied'}`)
+    .join(', ')
+}
+
 const TIMELINE_TRACKS = [
   { key: 'dshield', label: 'DShield daily reports', resolution: 'day' },
   { key: 'dshieldPorts', label: 'DShield top ports', resolution: 'day' },
@@ -1186,7 +1200,7 @@ export default function ThreatMap() {
                         <dt>Reported percentage</dt><dd>{selectedCloudflareArc.value}%</dd>
                         <dt>Upstream updated</dt><dd>{fmtUtcTimestamp(data.cloudflareRadar.meta?.lastUpdated)}</dd>
                         <dt>Range / units</dt>
-                        <dd>{data.cloudflareRadar.meta?.dateRange || 'not supplied'} · {data.cloudflareRadar.meta?.units || 'not supplied'}</dd>
+                        <dd>{formatCloudflareDateRange(data.cloudflareRadar.meta?.dateRange)} · {formatCloudflareUnits(data.cloudflareRadar.meta?.units)}</dd>
                       </dl>
                       <p className="gtw__aside-note">This is an aggregated country pair, not an individual attack, packet, or DShield route.</p>
                     </>

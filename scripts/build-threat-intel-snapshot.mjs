@@ -204,12 +204,28 @@ export function normalizeCloudflareRadarResponse(response) {
     )
   }
   const meta = response.result.meta
+  const validDateRange = Array.isArray(meta?.dateRange) &&
+    meta.dateRange.length > 0 &&
+    meta.dateRange.every((range) => {
+      if (!range || typeof range !== 'object') return false
+      const startTime = parseTimestamp(range.startTime)
+      const endTime = parseTimestamp(range.endTime)
+      return startTime !== null && endTime !== null && startTime <= endTime
+    })
+  const validUnits = Array.isArray(meta?.units) &&
+    meta.units.every((unit) =>
+      unit &&
+      typeof unit === 'object' &&
+      typeof unit.name === 'string' &&
+      unit.name.trim() !== '' &&
+      Object.hasOwn(unit, 'value'),
+    )
   if (
     !meta ||
     typeof meta.lastUpdated !== 'string' ||
     !parseTimestamp(meta.lastUpdated) ||
-    meta.dateRange !== '1d' ||
-    typeof meta.units !== 'string' ||
+    !validDateRange ||
+    !validUnits ||
     typeof meta.normalization !== 'string' ||
     meta.normalization.toUpperCase() !== 'PERCENTAGE'
   ) {

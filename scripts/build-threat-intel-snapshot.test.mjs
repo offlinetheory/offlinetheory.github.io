@@ -129,8 +129,11 @@ const cloudflareResponse = {
   result: {
     meta: {
       lastUpdated: '2026-11-26T03:45:00Z',
-      dateRange: '1d',
-      units: 'percentage',
+      dateRange: [{
+        startTime: '2026-11-25T03:45:00Z',
+        endTime: '2026-11-26T03:45:00Z',
+      }],
+      units: [{ name: 'percentage', value: '%' }],
       normalization: 'PERCENTAGE',
     },
     top_0: [
@@ -164,6 +167,59 @@ test('normalizes Cloudflare Radar country pairs and preserves upstream response 
       result: { ...cloudflareResponse.result, top_0: [{ ...cloudflareResponse.result.top_0[0], value: 101 }] },
     }),
     /invalid country or percentage data/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarResponse({
+      ...cloudflareResponse,
+      result: {
+        ...cloudflareResponse.result,
+        meta: { ...cloudflareResponse.result.meta, dateRange: '1d' },
+      },
+    }),
+    /missing valid upstream metadata/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarResponse({
+      ...cloudflareResponse,
+      result: {
+        ...cloudflareResponse.result,
+        meta: { ...cloudflareResponse.result.meta, dateRange: [] },
+      },
+    }),
+    /missing valid upstream metadata/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarResponse({
+      ...cloudflareResponse,
+      result: {
+        ...cloudflareResponse.result,
+        meta: {
+          ...cloudflareResponse.result.meta,
+          dateRange: [{ startTime: 'not-a-timestamp', endTime: '2026-11-26T03:45:00Z' }],
+        },
+      },
+    }),
+    /missing valid upstream metadata/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarResponse({
+      ...cloudflareResponse,
+      result: {
+        ...cloudflareResponse.result,
+        meta: { ...cloudflareResponse.result.meta, units: 'percentage' },
+      },
+    }),
+    /missing valid upstream metadata/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarResponse({
+      ...cloudflareResponse,
+      result: {
+        ...cloudflareResponse.result,
+        meta: { ...cloudflareResponse.result.meta, units: [{ name: 'percentage' }] },
+      },
+    }),
+    /missing valid upstream metadata/,
   )
   assert.throws(
     () => normalizeCloudflareRadarResponse({
