@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "test:threat-intel": "node --test scripts/build-threat-intel-snapshot.test.mjs",
+    "test:threat-intel": "node --test scripts/build-threat-intel-snapshot.test.mjs scripts/cloudflare-radar-map.test.mjs scripts/threat-map-country-activity.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

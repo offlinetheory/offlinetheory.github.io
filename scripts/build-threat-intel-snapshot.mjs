@@ -6,10 +6,13 @@ const ROOT = process.cwd()
 const OUT = 'public/data/threat-intel-snapshot.json'
 const SOURCES_FILE = 'public/data/sources-snapshot.json'
 const KEV_FILE = 'public/data/kev-snapshot.json'
+const CLOUDFLARE_FILE = 'public/data/cloudflare-attack-pairs.json'
 const THREATFOX_FILE = 'public/data/threatfox-snapshot.json'
 const NVD_URL = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
+const CLOUDFLARE_RADAR_URL = 'https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks'
 const ISC_API = 'https://isc.sans.edu/api'
 const NVD_API_KEY = process.env.NVD_API_KEY || ''
+const CLOUDFLARE_RADAR_API_TOKEN = process.env.CLOUDFLARE_RADAR_API_TOKEN || ''
 const USER_AGENT = 'OfflineTheoryThreatIntel/1.0 (+https://offlinetheory.github.io/; contact offlinetheory@proton.me)'
 const THREATFOX_ENABLED = process.env.ENABLE_THREATFOX === 'true'
 const FETCH_TIMEOUT_MS = 20_000
@@ -39,6 +42,12 @@ const SOURCES = {
     url: 'https://www.cisa.gov/known-exploited-vulnerabilities-catalog',
     attribution: 'CISA Known Exploited Vulnerabilities catalog',
     license: 'U.S. government work; source attribution provided.',
+  },
+  cloudflare_radar: {
+    name: 'Cloudflare Radar',
+    url: CLOUDFLARE_RADAR_URL,
+    attribution: 'Cloudflare Radar — Aggregated Layer 7 attack intelligence.',
+    license: 'Cloudflare Radar aggregated attack data; attribution provided.',
   },
   recent_breaches: {
     name: 'Recent Breaches',
@@ -158,6 +167,195 @@ async function fetchJson(url, { headers = {}, method = 'GET', body, timeout = FE
     return await readJsonResponse(response, new URL(url).pathname)
   } finally {
     clearTimeout(timer)
+  }
+}
+
+async function fetchCloudflareRadar(url, { headers = {}, timeout = FETCH_TIMEOUT_MS } = {}) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeout)
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        accept: 'application/json',
+        'user-agent': USER_AGENT,
+        ...headers,
+      },
+    })
+    let body
+    try {
+      body = JSON.parse(await response.text())
+    } catch {
+      throw new Error(`Cloudflare Radar HTTP ${response.status}: invalid JSON response`)
+    }
+    return { httpStatus: response.status, body }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+export function normalizeCloudflareRadarResponse(response) {
+  if (response?.success !== true || !response.result || typeof response.result !== 'object') {
+    const errors = Array.isArray(response?.errors)
+      ? response.errors.map((error) => [error?.code, error?.message].filter(Boolean).join(': ')).filter(Boolean)
+      : []
+    throw new Error(
+      `Cloudflare Radar returned success=${String(response?.success)}${errors.length ? `; errors: ${errors.join('; ')}` : '; unexpected response structure'}`,
+    )
+  }
+  const meta = response.result.meta
+  if (
+    !meta ||
+    typeof meta.lastUpdated !== 'string' ||
+    !parseTimestamp(meta.lastUpdated) ||
+    meta.dateRange !== '1d' ||
+    typeof meta.units !== 'string' ||
+    typeof meta.normalization !== 'string' ||
+    meta.normalization.toUpperCase() !== 'PERCENTAGE'
+  ) {
+    throw new Error('Cloudflare Radar response is missing valid upstream metadata')
+  }
+  const rows = response.result.top_0
+  if (!Array.isArray(rows) || rows.length > 50) {
+    throw new Error('Cloudflare Radar response is missing the expected top_0 pair list')
+  }
+  const pairs = rows.map((row, index) => {
+    const value = suppliedNumber(row?.value)
+    if (
+      !row ||
+      typeof row !== 'object' ||
+      !/^[A-Z]{2}$/.test(row?.originCountryAlpha2 || '') ||
+      typeof row.originCountryName !== 'string' ||
+      row.originCountryName.trim() === '' ||
+      !/^[A-Z]{2}$/.test(row?.targetCountryAlpha2 || '') ||
+      typeof row.targetCountryName !== 'string' ||
+      row.targetCountryName.trim() === '' ||
+      value === null ||
+      value < 0 ||
+      value > 100
+    ) {
+      throw new Error(`Cloudflare Radar top_0 row ${index} has invalid country or percentage data`)
+    }
+    return {
+      originCountryAlpha2: row.originCountryAlpha2,
+      originCountryName: row.originCountryName,
+      targetCountryAlpha2: row.targetCountryAlpha2,
+      targetCountryName: row.targetCountryName,
+      value,
+    }
+  })
+  return {
+    meta: {
+      lastUpdated: meta.lastUpdated,
+      dateRange: meta.dateRange,
+      units: meta.units,
+      normalization: meta.normalization,
+    },
+    pairs,
+  }
+}
+
+function cloudflareResponseDescription(httpStatus, response) {
+  const errors = Array.isArray(response?.errors)
+    ? response.errors
+      .map((error) => [error?.code, error?.message].filter(Boolean).join(': '))
+      .filter(Boolean)
+      .map((error) => error.slice(0, 300))
+    : []
+  const responseKeys = response && typeof response === 'object' ? Object.keys(response) : []
+  const resultKeys = response?.result && typeof response.result === 'object'
+    ? Object.keys(response.result)
+    : []
+  return `Cloudflare Radar HTTP ${httpStatus}; success=${String(response?.success)}; errors=${errors.length ? errors.join('; ') : 'none'}; response keys=${responseKeys.join(',') || 'none'}; result keys=${resultKeys.join(',') || 'none'}`
+}
+
+function preserveCloudflareSnapshotIfUnchanged(current, previous) {
+  if (!previous) return current
+  const comparable = (snapshot) => JSON.stringify({
+    provider: {
+      status: snapshot.provider?.status,
+      lastUpdated: snapshot.provider?.lastUpdated,
+      error: snapshot.provider?.error,
+    },
+    meta: snapshot.meta,
+    pairs: snapshot.pairs,
+  })
+  if (comparable(current) !== comparable(previous)) return current
+  return {
+    ...current,
+    generatedAt: previous.generatedAt,
+    provider: {
+      ...current.provider,
+      fetchedAt: previous.provider?.fetchedAt || current.provider?.fetchedAt || null,
+    },
+  }
+}
+
+export async function collectCloudflareRadar(
+  previous,
+  {
+    token = CLOUDFLARE_RADAR_API_TOKEN,
+    request = fetchCloudflareRadar,
+    now = () => new Date(),
+  } = {},
+) {
+  const checkedAt = now().toISOString()
+  const url = new URL(CLOUDFLARE_RADAR_URL)
+  url.searchParams.set('dateRange', '1d')
+  url.searchParams.set('limit', '50')
+  url.searchParams.set('normalization', 'PERCENTAGE')
+  url.searchParams.set('format', 'JSON')
+  try {
+    if (!token) throw new Error('CLOUDFLARE_RADAR_API_TOKEN is not configured')
+    const response = await request(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const httpStatus = Number.isInteger(response?.httpStatus) ? response.httpStatus : 200
+    const payload = Number.isInteger(response?.httpStatus) ? response.body : response
+    if (httpStatus < 200 || httpStatus >= 300) {
+      throw new Error(cloudflareResponseDescription(httpStatus, payload))
+    }
+    let normalized
+    try {
+      normalized = normalizeCloudflareRadarResponse(payload)
+    } catch (error) {
+      throw new Error(`${cloudflareResponseDescription(httpStatus, payload)}; ${error.message}`)
+    }
+    const fetchedAt = now().toISOString()
+    return preserveCloudflareSnapshotIfUnchanged({
+      schemaVersion: 1,
+      generatedAt: fetchedAt,
+      provider: {
+        ...SOURCES.cloudflare_radar,
+        status: 'live',
+        fetchedAt,
+        lastUpdated: normalized.meta.lastUpdated,
+        pairCount: normalized.pairs.length,
+        error: null,
+        cacheIntervalMinutes: 15,
+        rateLimit: 'Cloudflare Radar API access and limits depend on the token and account plan.',
+      },
+      meta: normalized.meta,
+      pairs: normalized.pairs,
+    }, previous)
+  } catch (error) {
+    const hasCachedData = Boolean(previous?.meta && Array.isArray(previous.pairs))
+    return preserveCloudflareSnapshotIfUnchanged({
+      schemaVersion: 1,
+      generatedAt: checkedAt,
+      provider: {
+        ...SOURCES.cloudflare_radar,
+        status: !token ? 'not_configured' : hasCachedData ? 'stale' : 'offline',
+        fetchedAt: previous?.provider?.fetchedAt || null,
+        lastUpdated: previous?.meta?.lastUpdated || null,
+        pairCount: hasCachedData ? previous.pairs.length : 0,
+        error: error.message,
+        cacheIntervalMinutes: 15,
+        rateLimit: 'Cloudflare Radar API access and limits depend on the token and account plan.',
+      },
+      meta: hasCachedData ? previous.meta : null,
+      pairs: hasCachedData ? previous.pairs : [],
+    }, previous)
   }
 }
 
@@ -621,10 +819,13 @@ function buildEvents(dashboard) {
 async function main() {
   const previous = readJson(OUT)
   const sourcesSnapshot = readJson(SOURCES_FILE)
-  const [dshield, nvd] = await Promise.all([
+  const previousCloudflare = readJson(CLOUDFLARE_FILE)
+  const [dshield, nvd, cloudflare] = await Promise.all([
     collectDshield(previous),
     collectNvd(previous),
+    collectCloudflareRadar(previousCloudflare),
   ])
+  writeJson(CLOUDFLARE_FILE, cloudflare)
   const cachedKev = readJson(KEV_FILE)
   const previousKevFetchedAt = previous?.providers?.cisa_kev?.fetchedAt || null
   const useCachedKev = cachedKev && (
@@ -698,7 +899,7 @@ async function main() {
     recentBreaches: { index: null, geo: null, leaks: [] },
   }
   const events = buildEvents(dashboard)
-  const liveProviderCount = [dshield.status, nvd.status, kevStatus, threatFoxStatus]
+  const liveProviderCount = [dshield.status, nvd.status, kevStatus, threatFoxStatus, cloudflare.provider.status]
     .filter((status) => status === 'live' || status === 'partial').length
   if (liveProviderCount === 0) {
     throw new Error('No provider returned fresh data; leaving the previous threat-intel snapshot unchanged.')
@@ -737,6 +938,21 @@ async function main() {
         error: kev ? null : 'No CISA KEV snapshot is available.',
         cacheIntervalMinutes: 15,
       }),
+      cloudflare_radar: providerState(
+        'cloudflare_radar',
+        cloudflare.provider.status,
+        cloudflare.provider.fetchedAt,
+        {
+          error: cloudflare.provider.error,
+          lastUpdated: cloudflare.meta?.lastUpdated || null,
+          dateRange: cloudflare.meta?.dateRange || null,
+          units: cloudflare.meta?.units || null,
+          normalization: cloudflare.meta?.normalization || null,
+          pairCount: cloudflare.provider.pairCount ?? cloudflare.pairs.length,
+          cacheIntervalMinutes: 15,
+          rateLimit: cloudflare.provider.rateLimit,
+        },
+      ),
       recent_breaches: providerState('recent_breaches', 'disabled_license', null, {
         error: 'Not fetched or republished pending permission for the site’s intended use.',
         cacheIntervalMinutes: null,
@@ -777,7 +993,7 @@ async function main() {
     }
   }
   writeJson(OUT, snapshot)
-  console.log(`Wrote ${OUT}: ${events.length} normalized events; DShield ${dshield.status}, NVD ${nvd.status}, KEV ${kevStatus}, ThreatFox ${threatFoxStatus}.`)
+  console.log(`Wrote ${OUT}: ${events.length} normalized events; DShield ${dshield.status}, NVD ${nvd.status}, KEV ${kevStatus}, ThreatFox ${threatFoxStatus}, Cloudflare Radar ${cloudflare.provider.status}.`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

@@ -6,7 +6,9 @@ name: Refresh threat-map snapshot
 # ThreatFox IOCs are disabled
 # unless explicitly enabled after commercial-use eligibility is confirmed
 # or a paid subscription is obtained. The job also fetches NVD data and
-# publishes one normalized same-origin snapshot every 15 minutes. It runs
+# fetches Cloudflare Radar's aggregated Layer 7 origin-to-target country pairs,
+# and publishes same-origin snapshots every 15 minutes. GitHub Actions may
+# delay scheduled runs, so publication cadence is best effort. It runs
 # a Pages deployment only when the snapshot content or provider status changes.
 on:
   schedule:
@@ -41,13 +43,14 @@ jobs:
           ENABLE_THREATFOX: ${{ vars.ENABLE_THREATFOX }}
           THREATFOX_AUTH_KEY: ${{ secrets.THREATFOX_AUTH_KEY }}
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          CLOUDFLARE_RADAR_API_TOKEN: ${{ secrets.CLOUDFLARE_RADAR_API_TOKEN }}
         run: node scripts/build-threat-intel-snapshot.mjs
       - id: commit
         name: Commit if changed
         run: |
           git config user.name "Offline Theory snapshot bot"
           git config user.email "snapshot@offlinetheory.github.io"
-          git add public/data/threat-intel-snapshot.json public/data/sources-snapshot.json public/data/kev-snapshot.json
+          git add public/data/threat-intel-snapshot.json public/data/cloudflare-attack-pairs.json public/data/sources-snapshot.json public/data/kev-snapshot.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else

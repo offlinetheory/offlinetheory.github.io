@@ -5,6 +5,19 @@ import worldTopo from 'world-atlas/countries-110m.json'
 import { useMeta } from '../hooks/useMeta.js'
 import InfoBar from '../components/InfoBar.jsx'
 import Newsletter from '../components/Newsletter.jsx'
+import {
+  buildCountryActivity,
+  countryFillStyle,
+  LIVE_WINDOW_MS,
+  panMapTransform,
+  providerFreshness,
+  RECENT_WINDOW_MS,
+  sourceObservedAt,
+  STALE_WINDOW_MS,
+  sourcesInTimeWindow,
+  zoomMapTransform,
+} from './threatMapCountryActivity.js'
+import { buildCloudflareRadarMap } from './cloudflareRadarMap.js'
 import './ThreatMap.css'
 
 /**
@@ -24,7 +37,7 @@ import './ThreatMap.css'
  * "Contact Sales", or copyright line, and none of Radware's numbers or
  * category names. The categories are ours — Scanning, Ransomware,
  * Exploited Flaws, Breaches — and every
- * figure comes from our own live feeds.
+ * figure comes from our own published provider snapshots.
  *
  * Real data only — nothing simulated or invented. A single same-origin
  * snapshot is refreshed server-side every 15 minutes; credentials stay in
@@ -38,6 +51,8 @@ import './ThreatMap.css'
  *  - Recent Breaches is disabled pending permission for the site's intended use.
  *    (not fetched or republished).
  *    Data from this provider is not displayed while licensing is pending.
+ *  - Cloudflare Radar — aggregated Layer 7 origin-to-target country pairs,
+ *    kept separate from DShield's geolocated source-IP records.
  *  - CISA Known Exploited Vulnerabilities catalog — 15-minute snapshot,
  *    because CISA sends no CORS headers; it powers the "flaws
  *    confirmed exploited" counter only.
@@ -45,13 +60,14 @@ import './ThreatMap.css'
  * Honest substitutions, labelled on the page: the "top network attack
  * vectors" panel is the most-probed services from DShield's top ports,
  * shown as a share of those ports' reports — there is no free live
- * feed of flood-type vector volumes. Country outlines remain neutral;
- * source and target locations are derived from the available provider data.
- * The arcs connect reported source locations as visual motion, not
- * claimed attack routes, and use only locations supplied by the feeds.
+ * feed of flood-type vector volumes. Country fills and markers use
+ * reported DShield source locations. Cloudflare Radar separately supplies
+ * aggregated Layer 7 origin-to-target country pairs; these are not
+ * individual DShield source-to-destination routes.
  * The timeline shows DShield daily totals, NVD publications, KEV additions
  * and, when licensing is cleared, ThreatFox indicators using provider
- * timestamps where available.
+ * timestamps where available. Cloudflare upstream update time is displayed
+ * independently from the local snapshot refresh time.
  *
  * Feeds that are NOT on this page, and why: abuse.ch Feodo Tracker
  * has effectively stopped updating (last blocklist update March 2026),
@@ -65,6 +81,7 @@ import './ThreatMap.css'
  */
 
 const THREAT_INTEL_SNAPSHOT = `${import.meta.env.BASE_URL}data/threat-intel-snapshot.json`
+const CLOUDFLARE_RADAR_SNAPSHOT = `${import.meta.env.BASE_URL}data/cloudflare-attack-pairs.json`
 const REFRESH_MS = 5 * 60 * 1000
 const FETCH_TIMEOUT_MS = 15000
 const INITIAL_TIMELINE_TIME = Date.now()
@@ -136,6 +153,7 @@ const CWE_NAMES = {
 
 const LAND = feature(worldTopo, worldTopo.objects.land)
 const COUNTRIES = feature(worldTopo, worldTopo.objects.countries)
+const COUNTRY_FEATURE_IDS = new Set(COUNTRIES.features.map((country) => String(country.id)))
 
 // ISO 3166-1 numeric codes, keyed by the alpha-2 code ipwho.is returns.
 // Used to match provider-reported countries to map features.
@@ -244,21 +262,23 @@ function fmtTime(date) {
   return new Date(date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC' })
 }
 
-function fmtDayShort(isoDate) {
-  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+function formatTimelineTick(timestamp, span) {
+  const date = new Date(timestamp)
+  return span <= 48 * 60 * 60 * 1000
+    ? date.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 }
 
-function arcPath(a, b) {
-  // A gentle arc between two projected points, lifted above the straight line.
-  const mx = (a[0] + b[0]) / 2
-  const my = (a[1] + b[1]) / 2
-  const dx = b[0] - a[0]
-  const dy = b[1] - a[1]
-  const dist = Math.hypot(dx, dy) || 1
-  const lift = Math.min(90, dist * 0.22)
-  const cx = mx - (dy / dist) * lift
-  const cy = my - (dx / dist) * lift
-  return `M ${a[0]} ${a[1]} Q ${cx} ${cy} ${b[0]} ${b[1]}`
+function toLocalDateTimeInput(timestamp) {
+  const date = new Date(timestamp)
+  return new Date(timestamp - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+}
+
+function fmtUtcTimestamp(value) {
+  const timestamp = typeof value === 'number' ? value : Date.parse(value || '')
+  return Number.isFinite(timestamp)
+    ? new Date(timestamp).toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
+    : 'not supplied by source'
 }
 
 const TIMELINE_TRACKS = [
@@ -269,18 +289,16 @@ const TIMELINE_TRACKS = [
   { key: 'threatfox', label: 'ThreatFox indicators', resolution: 'hour' },
 ]
 
-const LIVE_WINDOW_MS = 20 * 60 * 1000
-const RECENT_WINDOW_MS = 60 * 60 * 1000
-const STALE_WINDOW_MS = 24 * 60 * 60 * 1000
-
-function providerFreshness(provider, now = Date.now()) {
-  const timestamp = Date.parse(provider?.fetchedAt || provider?.lastSuccessfulAt || '')
+function cloudflareFreshness(provider, now = Date.now()) {
+  if (provider?.status === 'not_configured') return 'NOT CONFIGURED'
+  if (provider?.status === 'offline' || provider?.status === 'unavailable') return 'OFFLINE'
+  if (provider?.status === 'stale') return 'STALE'
+  const timestamp = Date.parse(provider?.lastUpdated || '')
   if (!Number.isFinite(timestamp)) return 'OFFLINE'
   const age = Math.max(0, now - timestamp)
-  if (provider.status === 'live' && age <= LIVE_WINDOW_MS) return 'LIVE'
+  if (age <= LIVE_WINDOW_MS) return provider.status === 'live' ? 'LIVE' : 'RECENT'
   if (age <= RECENT_WINDOW_MS) return 'RECENT'
-  if (age <= STALE_WINDOW_MS) return 'STALE'
-  return 'OFFLINE'
+  return 'STALE'
 }
 
 function formatUtcTimestamp(value) {
@@ -306,7 +324,7 @@ function timelineSourceStatus(provider, events, now) {
   return events.length > 0 ? freshness : 'NO EVENTS'
 }
 
-function ActivityTrack({ events, start, end, resolution }) {
+function ActivityTrack({ events, start, end, resolution, cursor = null }) {
   const width = 1000
   const baseline = 23
   const maxHeight = 18
@@ -319,7 +337,8 @@ function ActivityTrack({ events, start, end, resolution }) {
       !Number.isFinite(event.value) ||
       event.value <= 0 ||
       event.timestamp < start ||
-      event.timestamp > end
+      event.timestamp > end ||
+      (cursor !== null && event.timestamp > cursor)
     ) continue
     const bucket = Math.floor(event.timestamp / bucketSize) * bucketSize
     buckets.set(bucket, (buckets.get(bucket) || 0) + event.value)
@@ -361,6 +380,7 @@ export default function ThreatMap() {
     violations: [],
     threatfox: [],
     threatfoxStatus: 'disabled_license',
+    cloudflareRadar: { meta: null, pairs: [], provider: null },
     infocon: null,
     kev: null,
     rbIndex: null,
@@ -371,25 +391,69 @@ export default function ThreatMap() {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(true)
+  const [detailedCountryFeatures, setDetailedCountryFeatures] = useState(null)
+  const [cloudflareGeometryError, setCloudflareGeometryError] = useState(null)
   const [updatedAt, setUpdatedAt] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
   const [hovered, setHovered] = useState(null)
   const [chip, setChip] = useState(null)
+  const [selectedIntel, setSelectedIntel] = useState(null)
+  const [attackFilters, setAttackFilters] = useState({
+    scanning: true,
+    ransomware: true,
+    exploited: true,
+    breaches: true,
+  })
+  const [mapTransform, setMapTransform] = useState({ x: 0, y: 0, scale: 1 })
+  const [isPanning, setIsPanning] = useState(false)
+  const [timeWindow, setTimeWindow] = useState(null)
+  const [playhead, setPlayhead] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [railCollapsed, setRailCollapsed] = useState(false)
   const [timelineCollapsed, setTimelineCollapsed] = useState(false)
   const mounted = useRef(true)
   const mapWrapRef = useRef(null)
+  const svgRef = useRef(null)
+  const panRef = useRef(null)
+  const suppressClickUntil = useRef(0)
+  const playheadRef = useRef(null)
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
     const nextErrors = {}
     try {
-      const snapshot = await fetchJson(THREAT_INTEL_SNAPSHOT)
+      const [snapshotResult, cloudflareResult] = await Promise.allSettled([
+        fetchJson(THREAT_INTEL_SNAPSHOT),
+        fetchJson(CLOUDFLARE_RADAR_SNAPSHOT),
+      ])
+      if (snapshotResult.status === 'rejected') throw snapshotResult.reason
+      const snapshot = snapshotResult.value
       if (!snapshot?.dashboard || !snapshot?.providers) {
         throw new Error('The threat-intel snapshot has an unexpected shape')
       }
 
       const dashboard = snapshot.dashboard
+      const cloudflareSnapshot = cloudflareResult.status === 'fulfilled' &&
+        Array.isArray(cloudflareResult.value?.pairs) &&
+        cloudflareResult.value?.provider
+        ? cloudflareResult.value
+        : null
+      let cloudflareProvider = cloudflareSnapshot?.provider || snapshot.providers.cloudflare_radar
+      if (!cloudflareSnapshot) {
+        nextErrors.cloudflare = cloudflareResult.status === 'rejected'
+          ? cloudflareResult.reason.message
+          : 'Cloudflare Radar snapshot has an unexpected response shape'
+        if (cloudflareProvider && cloudflareProvider.status !== 'not_configured') {
+          const hasSuccessfulDataset = Boolean(cloudflareProvider.lastUpdated || cloudflareProvider.fetchedAt)
+          cloudflareProvider = {
+            ...cloudflareProvider,
+            status: hasSuccessfulDataset ? 'stale' : 'offline',
+            error: nextErrors.cloudflare,
+          }
+        }
+      } else if (cloudflareProvider?.status !== 'live') {
+        nextErrors.cloudflare = cloudflareProvider?.error || `Provider status: ${cloudflareProvider?.status || 'unavailable'}`
+      }
       const providerMessage = (key) => {
         const provider = snapshot.providers[key]
         if (!provider || provider.status === 'live') return null
@@ -425,6 +489,9 @@ export default function ThreatMap() {
           city: source.city || null,
           lat: source.lat,
           lon: source.lon,
+          firstSeen: source.firstSeen || null,
+          lastSeen: source.lastSeen || null,
+          dataDate: source.dataDate || null,
         }))
 
       const ports = extractPortRecords(dashboard.ports)
@@ -509,13 +576,24 @@ export default function ThreatMap() {
         .filter(Boolean)
 
       if (!mounted.current) return
-      setData({
+      setData((current) => ({
+        ...current,
         sources,
         ports,
         violations,
         threatfox,
         threatfoxStatus: threatFoxStatus,
-        providers: snapshot.providers,
+        cloudflareRadar: cloudflareSnapshot
+          ? {
+            meta: cloudflareSnapshot.meta,
+            pairs: cloudflareSnapshot.pairs,
+            provider: cloudflareProvider,
+          }
+          : current.cloudflareRadar,
+        providers: {
+          ...snapshot.providers,
+          cloudflare_radar: cloudflareProvider || snapshot.providers.cloudflare_radar || current.providers?.cloudflare_radar,
+        },
         infocon: dashboard.infocon?.status || null,
         kev,
         rbIndex: dashboard.recentBreaches?.index || null,
@@ -528,7 +606,7 @@ export default function ThreatMap() {
           kev: kevEvents,
           threatfox: threatFoxEvents,
         },
-      })
+      }))
       setErrors(nextErrors)
       setUpdatedAt(snapshot.generatedAt ? new Date(snapshot.generatedAt) : null)
     } catch (error) {
@@ -558,6 +636,78 @@ export default function ThreatMap() {
   const path = useMemo(() => geoPath(projection), [projection])
   const graticulePath = useMemo(() => path(geoGraticule()), [path])
 
+  const svgPoint = (clientX, clientY) => {
+    const svg = svgRef.current
+    const matrix = svg?.getScreenCTM()
+    if (!svg || !matrix) return null
+    const point = svg.createSVGPoint()
+    point.x = clientX
+    point.y = clientY
+    return point.matrixTransform(matrix.inverse())
+  }
+
+  const zoomMap = (factor, focal = { x: MAP_W / 2, y: MAP_H / 2 }) => {
+    setMapTransform((current) => zoomMapTransform(current, factor, focal))
+  }
+
+  const onMapWheel = (event) => {
+    event.preventDefault()
+    const focal = svgPoint(event.clientX, event.clientY)
+    if (focal) zoomMap(event.deltaY < 0 ? 1.15 : 1 / 1.15, focal)
+  }
+
+  const onMapPointerDown = (event) => {
+    if (event.button !== 0) return
+    const point = svgPoint(event.clientX, event.clientY)
+    if (!point) return
+    panRef.current = {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      point,
+      moved: false,
+      country: event.target.closest?.('[data-country-id]')?.dataset || null,
+      sourceId: event.target.closest?.('[data-source-id]')?.dataset.sourceId || null,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const onMapPointerMove = (event) => {
+    const pan = panRef.current
+    if (!pan || pan.pointerId !== event.pointerId) return
+    const point = svgPoint(event.clientX, event.clientY)
+    if (!point) return
+    if (Math.hypot(event.clientX - pan.clientX, event.clientY - pan.clientY) > 3) {
+      pan.moved = true
+      setIsPanning(true)
+    }
+    if (pan.moved) {
+      setMapTransform((current) => panMapTransform(current, point.x - pan.point.x, point.y - pan.point.y))
+    }
+    pan.clientX = event.clientX
+    pan.clientY = event.clientY
+    pan.point = point
+  }
+
+  const onMapPointerUp = (event) => {
+    const pan = panRef.current
+    if (!pan || pan.pointerId !== event.pointerId) return
+    if (pan.moved) suppressClickUntil.current = performance.now() + 300
+    else if (pan.sourceId) setSelectedIntel({ type: 'source', id: pan.sourceId })
+    else if (pan.country?.countryId) {
+      setSelectedIntel({
+        type: 'country',
+        id: pan.country.countryId,
+        name: pan.country.countryName,
+      })
+    }
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    panRef.current = null
+    setIsPanning(false)
+  }
+
   // Pin the country's name to the cursor in addition to the map readout.
   const onCountryHover = (e, info, name) => {
     const rect = mapWrapRef.current?.getBoundingClientRect()
@@ -565,134 +715,120 @@ export default function ThreatMap() {
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     setChip({
-      name: info?.country || name,
-      x: Math.min(x + 14, rect.width - 120),
+      name: info?.activityType === 'source'
+        ? `${info.country} · ${info.reports.toLocaleString('en-US')} DShield reports · last observed ${info.lastObservedAt ? fmtUtcTimestamp(info.lastObservedAt) : `per-IP time unavailable; feed updated ${fmtUtcTimestamp(info.lastRefresh)}`}`
+        : `${name} · no verified DShield source activity`,
+      x: Math.max(8, Math.min(x + 14, rect.width - 350)),
       y: Math.max(y - 16, 8),
     })
     if (info) setHovered(info)
   }
 
-  // Provider-derived categories identify real source and target locations
-  // for hover descriptions; they do not alter the monochrome map styling.
-  const { countryPaths, nodes, arcs, targets } = useMemo(() => {
-    const totals = new Map()
-    for (const s of data.sources) {
-      const cur = totals.get(s.countryCode) || { country: s.country, code: s.countryCode, reports: 0, sources: 0 }
-      cur.reports += s.reports
-      cur.sources += 1
-      totals.set(s.countryCode, cur)
-    }
-    const leakCodes = new Set(
-      (data.rbLeaks || []).map((l) => NAME_TO_CODE[l.country]).filter(Boolean),
-    )
-    // Limit breach-target countries to the top five so the target layer
-    // remains focused on the strongest available provider records.
-    const attackedCodes = new Set(
-      ((data.rbGeo?.targets || []).slice(0, 5).map((t) => NAME_TO_CODE[t.country])).filter(Boolean),
-    )
-    // Preserve the source/target category used for hover descriptions and
-    // endpoint selection without changing the map's monochrome country fill.
-    const categoryOf = (code) => {
-      if (totals.has(code)) return 'scanning'
-      if (leakCodes.has(code)) return 'ransomware'
-      if (attackedCodes.has(code)) return 'breaches'
-      return null
-    }
-    const infoById = new Map()
-    for (const [code, c] of totals) {
-      const num = COUNTRY_NUMERIC[code]
-      const cat = categoryOf(code)
-      if (num && cat) infoById.set(num, { ...c, category: cat })
-    }
-    // Include real breach-target and ransomware-victim countries that
-    // filed no top source so their endpoints remain available.
-    for (const code of [...attackedCodes, ...leakCodes]) {
-      if (totals.has(code)) continue
-      const num = COUNTRY_NUMERIC[code]
-      const cat = categoryOf(code)
-      if (num && cat) {
-        const name = (data.rbGeo?.targets || []).find((t) => NAME_TO_CODE[t.country] === code)?.country || code
-        infoById.set(num, { country: name, code, reports: 0, sources: 0, category: cat })
-      }
-    }
+  const countrySourceFeed = data.providers?.dshield?.subfeeds?.source_locations
+  const countrySourceFreshness = providerFreshness(countrySourceFeed)
+  const countrySourceLastRefresh = countrySourceFeed?.fetchedAt || countrySourceFeed?.lastSuccessfulAt || null
+  const timelineNow = updatedAt?.getTime() ?? INITIAL_TIMELINE_TIME
+  const defaultTimelineStart = timelineNow - 6 * 24 * 60 * 60 * 1000
+  const timelineWindowStart = timeWindow?.start ?? defaultTimelineStart
+  const timelineWindowEnd = timeWindow?.end ?? timelineNow
+  const activeTimeWindow = { start: timelineWindowStart, end: timelineWindowEnd }
+  const historicalMapFilterActive = Boolean(timeWindow || playhead !== null)
+  const visibleSources = useMemo(() => {
+    if (!historicalMapFilterActive) return data.sources
+    return sourcesInTimeWindow(data.sources, timelineWindowStart, timelineWindowEnd, playhead ?? timelineWindowEnd)
+  }, [data.sources, historicalMapFilterActive, timelineWindowStart, timelineWindowEnd, playhead])
+  const sourceActivity = useMemo(
+    () => buildCountryActivity(visibleSources, COUNTRY_NUMERIC).activity,
+    [visibleSources],
+  )
+  const cloudflareNeedsDetailedGeometry = data.cloudflareRadar.pairs.some((pair) =>
+    !COUNTRY_FEATURE_IDS.has(COUNTRY_NUMERIC[pair.originCountryAlpha2]) ||
+    !COUNTRY_FEATURE_IDS.has(COUNTRY_NUMERIC[pair.targetCountryAlpha2]),
+  )
+  useEffect(() => {
+    if (!cloudflareNeedsDetailedGeometry) return undefined
+    let cancelled = false
+    import('world-atlas/countries-50m.json', { with: { type: 'json' } })
+      .then(({ default: detailedWorld }) => {
+        if (cancelled) return
+        setDetailedCountryFeatures(feature(detailedWorld, detailedWorld.objects.countries).features)
+        setCloudflareGeometryError(null)
+      })
+      .catch((error) => {
+        if (!cancelled) setCloudflareGeometryError(error.message)
+      })
+    return () => { cancelled = true }
+  }, [cloudflareNeedsDetailedGeometry])
+  const cloudflareCountryFeatures = detailedCountryFeatures || COUNTRIES.features
+  const cloudflareMapData = useMemo(
+    () => buildCloudflareRadarMap(
+      data.cloudflareRadar.pairs,
+      cloudflareCountryFeatures,
+      projection,
+      path,
+      COUNTRY_NUMERIC,
+    ),
+    [data.cloudflareRadar.pairs, cloudflareCountryFeatures, projection, path],
+  )
+
+  // Country fills use verified source records only; destination geography
+  // is unavailable from the currently permitted map feeds.
+  const { countryPaths, nodes } = useMemo(() => {
+    const visibleActivity = attackFilters.scanning ? sourceActivity : new Map()
     const countryPaths = COUNTRIES.features.map((f, i) => {
-      const info = infoById.get(String(f.id))
+      const countryId = String(f.id)
+      const info = sourceActivity.get(countryId)
+      const fillInfo = visibleActivity.get(countryId)
       const name = f.properties?.name || ''
+      const hoverInfo = {
+        ...(info || { country: name, reports: 0, sources: 0, activityType: 'none' }),
+        freshness: countrySourceFreshness,
+        lastRefresh: countrySourceLastRefresh,
+      }
       return (
         <path
           key={i}
           d={path(f) || undefined}
-          className="gtw__country"
-          onMouseEnter={() => info && setHovered(info)}
-          onMouseMove={(e) => onCountryHover(e, info, name)}
+          className={`gtw__country gtw__country--${fillInfo?.intensity || 'none'}${selectedIntel?.type === 'country' && selectedIntel.id === countryId ? ' is-selected' : ''}`}
+          style={countryFillStyle(visibleActivity, countryId)}
+          onMouseEnter={() => setHovered(hoverInfo)}
+          onMouseMove={(e) => onCountryHover(e, hoverInfo, name)}
           onMouseLeave={() => { setHovered(null); setChip(null) }}
-          onFocus={() => info && setHovered(info)}
+          onClick={() => {
+            if (performance.now() < suppressClickUntil.current) return
+            setSelectedIntel({ type: 'country', id: String(f.id), name })
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              setSelectedIntel({ type: 'country', id: String(f.id), name })
+            }
+          }}
+          onFocus={() => setHovered(hoverInfo)}
           onBlur={() => setHovered(null)}
+          role="button"
+          tabIndex={0}
+          data-country-id={countryId}
+          data-country-name={name}
+          aria-label={`Open ${name} country intelligence`}
         >
           <title>
             {info
-              ? info.reports > 0
-                ? `${name} — ${CAT_BY_KEY[info.category].label} · ${info.reports.toLocaleString('en-US')} reports from ${info.sources} source${info.sources === 1 ? '' : 's'}`
-                : `${name} — ${CAT_BY_KEY[info.category].label}`
-              : name}
+              ? `${name} — DShield source activity · ${info.reports.toLocaleString('en-US')} reports from ${info.sources} geolocated source IP${info.sources === 1 ? '' : 's'} · Last observed: ${info.lastObservedAt ? fmtUtcTimestamp(info.lastObservedAt) : `per-IP timestamp unavailable; feed updated ${fmtUtcTimestamp(countrySourceLastRefresh)}`}`
+              : `${name} — no verified DShield source activity (${countrySourceFreshness.toLowerCase()} snapshot)`}
           </title>
         </path>
       )
     })
-    const maxReports = Math.max(1, ...data.sources.map((s) => s.reports))
-    const nodes = data.sources.map((s) => {
+    const mapSources = attackFilters.scanning ? visibleSources : []
+    const maxReports = Math.max(1, ...mapSources.map((s) => s.reports))
+    const nodes = mapSources.map((s) => {
       const [x, y] = projection([s.lon, s.lat]) || [0, 0]
       const r = 2.5 + (Math.sqrt(s.reports / maxReports) * 5)
       return { ...s, id: s.ip, x, y, r, category: 'scanning' }
     })
-    // Target points: the centroids of the breach-target and
-    // ransomware-victim countries (real countries from our own feeds,
-    // not top sources, so they have no node dot yet). Arcs run to them
-    // from the top sources, so the map reads busy like the Radware
-    // screenshot — every endpoint is still a real country from our data.
-    const featureById = new Map(COUNTRIES.features.map((f) => [String(f.id), f]))
-    const centroidOf = (code) => {
-      const feat = featureById.get(COUNTRY_NUMERIC[code] || '')
-      if (!feat) return null
-      const c = path.centroid(feat)
-      return Number.isFinite(c[0]) && Number.isFinite(c[1]) ? c : null
-    }
-    const targets = []
-    for (const code of [...attackedCodes, ...leakCodes]) {
-      if (totals.has(code) || targets.some((t) => t.code === code)) continue
-      const c = centroidOf(code)
-      if (!c) continue
-      const cat = categoryOf(code)
-      if (!cat) continue
-      targets.push({
-        id: `t:${code}`,
-        code,
-        category: cat,
-        x: c[0],
-        y: c[1],
-      })
-    }
-    // Arcs run between every pair of most-reported sources and from
-    // every source out to the breach-target and ransomware-victim
-    // countries — a dense web. They are
-    // motion, not claimed attack routes: DShield reports where the
-    // sources are, not where each packet was aimed. Arcs are white.
-    const arcs = []
-    const seen = new Set()
-    const addArc = (a, b) => {
-      if (!a || !b || a.id === b.id) return
-      if (a.countryCode && a.countryCode === b.code) return
-      const key = `${a.id}>${b.id}`
-      if (seen.has(key)) return
-      seen.add(key)
-      arcs.push({ key, d: arcPath([a.x, a.y], [b.x, b.y]) })
-    }
-    for (let i = 0; i < nodes.length; i += 1) {
-      for (let j = i + 1; j < nodes.length; j += 1) addArc(nodes[i], nodes[j])
-      for (const t of targets) addArc(nodes[i], t)
-    }
-    return { countryPaths, nodes, arcs, targets }
-  }, [data.sources, data.rbGeo, data.rbLeaks, path, projection])
+    return { countryPaths, nodes }
+  }, [sourceActivity, attackFilters.scanning, visibleSources, countrySourceFreshness, countrySourceLastRefresh, selectedIntel, path, projection])
 
   const countries = useMemo(() => {
     const totals = new Map()
@@ -705,7 +841,6 @@ export default function ThreatMap() {
     return [...totals.values()].sort((a, b) => b.reports - a.reports).slice(0, 5)
   }, [data.sources])
 
-  const maxCountryReports = Math.max(1, ...countries.map((c) => c.reports))
   const sumCountryReports = Math.max(1, countries.reduce((sum, c) => sum + c.reports, 0))
   const maxPortRecords = Math.max(1, ...data.ports.map((p) => p.records))
   const totalReports = data.sources.reduce((sum, s) => sum + s.reports, 0)
@@ -713,13 +848,12 @@ export default function ThreatMap() {
   const sumTargetCount = Math.max(1, geoTargets.reduce((sum, t) => sum + t.count, 0))
   const topPortRecords = data.ports.reduce((sum, p) => sum + p.records, 0)
   const sumViolationCount = Math.max(1, data.violations.reduce((sum, v) => sum + v.count, 0))
-  const timelineNow = updatedAt?.getTime() ?? INITIAL_TIMELINE_TIME
-  const timelineStartDate = new Date(timelineNow)
-  timelineStartDate.setUTCHours(0, 0, 0, 0)
-  timelineStartDate.setUTCDate(timelineStartDate.getUTCDate() - 6)
-  const timelineStart = timelineStartDate.getTime()
-  const timelineTicks = Array.from({ length: 7 }, (_, i) => timelineStart + i * 24 * 60 * 60 * 1000)
+  const timelineStart = activeTimeWindow.start
+  const timelineEnd = activeTimeWindow.end
+  const timelineSpan = Math.max(1, timelineEnd - timelineStart)
+  const timelineTicks = Array.from({ length: 7 }, (_, i) => timelineStart + (timelineSpan * i) / 6)
   const providerData = data.providers || {}
+  const cloudflareStatus = cloudflareFreshness(providerData.cloudflare_radar)
   const dshieldFeeds = providerData.dshield?.subfeeds || {}
   const timelineProviders = {
     dshield: dshieldFeeds.daily_summary,
@@ -730,12 +864,63 @@ export default function ThreatMap() {
   }
   const timelineRows = TIMELINE_TRACKS.map((track) => {
     const events = data.timeline[track.key] || []
+    const eventsInWindow = events.filter((event) =>
+      event.timestamp >= timelineStart && event.timestamp <= timelineEnd,
+    )
     return {
       ...track,
       events,
-      status: timelineSourceStatus(timelineProviders[track.key], events, timelineNow),
+      status: timelineSourceStatus(timelineProviders[track.key], eventsInWindow, timelineNow),
     }
   })
+  const hasTimelineEvents = timelineRows.some((track) =>
+    track.events.some((event) => event.timestamp >= timelineStart && event.timestamp <= timelineEnd),
+  )
+
+  useEffect(() => {
+    if (!isPlaying) return undefined
+    const timer = setInterval(() => {
+      const next = Math.min(
+        timelineEnd,
+        (playheadRef.current ?? timelineStart) + Math.max(1000, timelineSpan / 40),
+      )
+      playheadRef.current = next
+      setPlayhead(next)
+      if (next >= timelineEnd) setIsPlaying(false)
+    }, 250)
+    return () => clearInterval(timer)
+  }, [isPlaying, timelineStart, timelineEnd, timelineSpan])
+
+  useEffect(() => {
+    if (!selectedIntel) return undefined
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setSelectedIntel(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [selectedIntel])
+
+  const updateTimelineBound = (bound, value) => {
+    const timestamp = Date.parse(value)
+    if (!Number.isFinite(timestamp)) return
+    const next = { ...activeTimeWindow, [bound]: timestamp }
+    if (next.start >= next.end || next.end > timelineNow) return
+    setTimeWindow(next)
+    playheadRef.current = null
+    setPlayhead(null)
+    setIsPlaying(false)
+  }
+
+  const toggleAttackFilter = (key) => {
+    setAttackFilters((current) => ({ ...current, [key]: !current[key] }))
+  }
+
+  const categoryCounts = {
+    scanning: visibleSources.length,
+    ransomware: data.rbLeaks.length,
+    exploited: data.kev?.recent?.length || 0,
+    breaches: (data.rbGeo?.targets || []).length,
+  }
   const freshnessItems = [
     { key: 'dshield-sources', label: 'DShield sources', provider: dshieldFeeds.source_locations },
     { key: 'dshield-ports', label: 'DShield ports', provider: dshieldFeeds.top_ports },
@@ -744,49 +929,285 @@ export default function ThreatMap() {
     { key: 'ipwho', label: 'ipwho.is geolocation', provider: providerData.ip_geolocation },
     { key: 'nvd', label: 'NIST NVD', provider: providerData.nvd },
     { key: 'kev', label: 'CISA KEV', provider: providerData.cisa_kev },
+    { key: 'cloudflare-radar', label: 'Cloudflare Radar', provider: providerData.cloudflare_radar },
     { key: 'threatfox', label: 'ThreatFox', provider: providerData.threatfox },
     { key: 'recent-breaches', label: 'Recent Breaches', provider: providerData.recent_breaches },
   ]
+  const selectedCountryInfo = selectedIntel?.type === 'country'
+    ? sourceActivity.get(selectedIntel.id)
+    : null
+  const selectedCountrySources = selectedIntel?.type === 'country'
+    ? visibleSources
+      .filter((source) => COUNTRY_NUMERIC[source.countryCode] === selectedIntel.id)
+      .sort((a, b) => b.reports - a.reports)
+      .slice(0, 8)
+    : []
+  const selectedCountryAlpha2 = selectedIntel?.type === 'country'
+    ? cloudflareMapData.countryCodeById.get(selectedIntel.id)
+    : null
+  const selectedOutboundPairs = selectedCountryAlpha2
+    ? data.cloudflareRadar.pairs
+      .filter((pair) => pair.originCountryAlpha2 === selectedCountryAlpha2)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+    : []
+  const selectedInboundPairs = selectedCountryAlpha2
+    ? data.cloudflareRadar.pairs
+      .filter((pair) => pair.targetCountryAlpha2 === selectedCountryAlpha2)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+    : []
+  const selectedSource = selectedIntel?.type === 'source'
+    ? data.sources.find((source) => source.ip === selectedIntel.id)
+    : null
+  const selectedCloudflareArc = selectedIntel?.type === 'cloudflare-pair'
+    ? cloudflareMapData.arcs.find((arc) => arc.key === selectedIntel.id)
+    : null
 
   return (
-    <div className={`gtw${railCollapsed ? ' gtw--rail-hidden' : ''}`}>
+    <div
+      className={`gtw${railCollapsed ? ' gtw--rail-hidden' : ''}`}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setSelectedIntel(null)
+      }}
+    >
       {/* --- The stage: full-bleed dark map + right rail --- */}
       <div className="gtw__stage">
         <div className="gtw__mapcol">
           <div className="gtw__mapwrap" ref={mapWrapRef} aria-label="World map of most-reported attacking source addresses">
             <svg
-              className="gtw__svg"
+              ref={svgRef}
+              onWheel={onMapWheel}
+              onPointerDown={onMapPointerDown}
+              onPointerMove={onMapPointerMove}
+              onPointerUp={onMapPointerUp}
+              onPointerCancel={onMapPointerUp}
+              className={`gtw__svg${isPanning ? ' is-panning' : ''}`}
               viewBox={`0 0 ${MAP_W} ${MAP_H}`}
               preserveAspectRatio="xMidYMid slice"
-              role="img"
-              aria-label="World map showing the locations of the most-reported attacking IP addresses, with arcs tracing them in ranked order."
+              role="group"
+              aria-label="Interactive world map of DShield-reported source locations. No destination routes are inferred."
             >
               <defs>
                 <pattern id="gtw-grid" width="36" height="36" patternUnits="userSpaceOnUse">
                   <path d="M 36 0 H 0 V 36" className="gtw__map-grid" />
                 </pattern>
               </defs>
-              <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
-              <path d={graticulePath || undefined} className="gtw__graticule" />
-              {countryPaths}
-              {arcs.map((a) => (
-                <path key={a.key} d={a.d} className="gtw__arc" />
-              ))}
-              {arcs.slice(0, 14).map((a, i) => (
-                <circle key={`mover-${a.key}`} r="2.2" className="gtw__mover">
-                  <animateMotion dur={`${5 + (i % 4)}s`} repeatCount="indefinite" path={a.d} />
-                </circle>
-              ))}
-              {nodes.map((n) => (
-                <g key={n.ip} className="gtw__node">
-                  <circle cx={n.x} cy={n.y} r={n.r + 6} className="gtw__pulse" />
-                  <circle cx={n.x} cy={n.y} r={n.r} className="gtw__dot" />
+              <g
+                className="gtw__map-layers"
+                transform={`translate(${mapTransform.x} ${mapTransform.y}) scale(${mapTransform.scale})`}
+                style={{ transition: isPanning ? 'none' : 'transform 180ms ease-out' }}
+              >
+                <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
+                <path d={graticulePath || undefined} className="gtw__graticule" />
+                {countryPaths}
+                <g className="gtw__cf-country-highlights" pointerEvents="none">
+                  {[...cloudflareMapData.roles].map(([countryId, role]) => {
+                    const country = cloudflareMapData.countryFeatureById.get(countryId)
+                    if (!country) return null
+                    const d = path(country) || undefined
+                    return (
+                      <g key={`radar-country-${countryId}`}>
+                        {role.originValue !== undefined && (
+                          <path
+                            d={d}
+                            className="gtw__cf-origin"
+                            fillOpacity={role.originOpacity}
+                          >
+                            <title>{`${country.properties?.name} · Cloudflare Radar origin country · ${role.originValue.toFixed(2)} summed pair share`}</title>
+                          </path>
+                        )}
+                        {role.targetValue !== undefined && (
+                          <path
+                            d={d}
+                            className="gtw__cf-target"
+                            fillOpacity={role.targetOpacity}
+                          >
+                            <title>{`${country.properties?.name} · Cloudflare Radar target country · ${role.targetValue.toFixed(2)} summed pair share`}</title>
+                          </path>
+                        )}
+                      </g>
+                    )
+                  })}
                 </g>
-              ))}
-              {targets.map((t) => (
-                <circle key={t.id} cx={t.x} cy={t.y} r="2.5" className="gtw__mover" />
-              ))}
+                {cloudflareMapData.arcs.map((arc) => (
+                  <g key={arc.key}>
+                    <path
+                      d={arc.d}
+                      className="gtw__cf-arc-hit"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Inspect aggregated Cloudflare Radar pair from ${arc.originCountryName} to ${arc.targetCountryName}, ${arc.value}%`}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
+                        }
+                      }}
+                    >
+                      <title>{`${arc.originCountryName} → ${arc.targetCountryName} · ${arc.value}%`}</title>
+                    </path>
+                    <path
+                      d={arc.d}
+                      className={`gtw__cf-arc${cloudflareStatus !== 'LIVE' && cloudflareStatus !== 'RECENT' ? ' gtw__cf-arc--static' : ''}${selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key ? ' is-selected' : ''}`}
+                      style={{
+                        strokeWidth: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
+                          ? Math.max(arc.strokeWidth, 3)
+                          : arc.strokeWidth,
+                        opacity: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
+                          ? 1
+                          : arc.opacity,
+                      }}
+                      aria-hidden="true"
+                    />
+                  </g>
+                ))}
+                {nodes.map((n) => (
+                  <g
+                    key={n.ip}
+                    className={`gtw__node${selectedIntel?.type === 'source' && selectedIntel.id === n.ip ? ' is-selected' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    data-source-id={n.ip}
+                    aria-label={`Inspect DShield source ${n.ip}, ${n.reports.toLocaleString('en-US')} reports, ${n.country}`}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      if (performance.now() < suppressClickUntil.current) return
+                      setSelectedIntel({ type: 'source', id: n.ip })
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        setSelectedIntel({ type: 'source', id: n.ip })
+                      }
+                    }}
+                  >
+                    <title>{`${n.ip} · ${n.country}${n.city ? `, ${n.city}` : ''} · ${n.reports.toLocaleString('en-US')} DShield reports`}</title>
+                    <circle cx={n.x} cy={n.y} r={n.r + 6} className="gtw__pulse" />
+                    <circle cx={n.x} cy={n.y} r={n.r} className="gtw__dot" />
+                  </g>
+                ))}
+              </g>
             </svg>
+
+            <div className="gtw__map-controls" aria-label="Map controls">
+              <button type="button" onClick={() => zoomMap(1.35)} aria-label="Zoom in">+</button>
+              <button type="button" onClick={() => zoomMap(1 / 1.35)} aria-label="Zoom out">−</button>
+              <button type="button" onClick={() => setMapTransform({ x: 0, y: 0, scale: 1 })}>Reset view</button>
+            </div>
+            <span className="gtw__zoom-level" aria-live="polite">{Math.round(mapTransform.scale * 100)}%</span>
+
+            {historicalMapFilterActive && (
+              <p className="gtw__map-history-status" role="status">
+                {visibleSources.length
+                  ? `Showing ${visibleSources.length} DShield locations with timestamps in the selected window.`
+                  : 'No timestamped DShield source locations exist for this time window; current snapshot locations are hidden.'}
+              </p>
+            )}
+
+            {selectedIntel && (
+              <aside className="gtw__intel-panel" role="dialog" aria-modal="false" aria-labelledby="gtw-intel-title">
+                <div className="gtw__intel-panel-head">
+                  <h2 id="gtw-intel-title">                  {selectedIntel.type === 'country'
+                    ? selectedIntel.name
+                    : selectedIntel.type === 'cloudflare-pair'
+                      ? 'Cloudflare Radar attack pair'
+                      : selectedSource?.ip || selectedIntel.id}</h2>
+                  <button type="button" onClick={() => setSelectedIntel(null)} aria-label="Close country intelligence panel">×</button>
+                </div>
+                {selectedIntel.type === 'country' ? (
+                  <>
+                    <dl>
+                      <dt>Source type</dt><dd>DShield geolocated source IP reports</dd>
+                      <dt>Verified report count</dt><dd>{(selectedCountryInfo?.reports || 0).toLocaleString('en-US')}</dd>
+                      <dt>Geolocated source IPs</dt><dd>{selectedCountryInfo?.sources || 0}</dd>
+                      <dt>Last observation</dt>
+                      <dd>{selectedCountryInfo?.lastObservedAt
+                        ? fmtUtcTimestamp(selectedCountryInfo.lastObservedAt)
+                        : `Not supplied per IP · feed refreshed ${fmtUtcTimestamp(countrySourceLastRefresh)}`}</dd>
+                      <dt>Feed status</dt><dd>{countrySourceFreshness}</dd>
+                    </dl>
+                    {selectedCountrySources.length > 0 ? (
+                      <ol className="gtw__intel-sources">
+                        {selectedCountrySources.map((source) => (
+                          <li key={source.ip}>
+                            <button type="button" onClick={() => setSelectedIntel({ type: 'source', id: source.ip })}>
+                              <span>{source.ip}{source.city ? ` · ${source.city}` : ''}</span>
+                              <strong>{source.reports.toLocaleString('en-US')} reports</strong>
+                            </button>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="gtw__aside-note">No verified DShield source locations for this country in the selected view.</p>
+                    )}
+                    <section className="gtw__intel-radar">
+                      <h3>Cloudflare Radar · aggregated Layer 7 · 1d</h3>
+                      {selectedCountryAlpha2 ? (
+                        <>
+                          <p>Outbound pairs in returned top 50: {selectedOutboundPairs.length}</p>
+                          <ul>
+                            {selectedOutboundPairs.map((pair) => (
+                              <li key={`out:${pair.targetCountryAlpha2}`}>
+                                <span>To {pair.targetCountryName}</span>
+                                <strong>{pair.value}%</strong>
+                              </li>
+                            ))}
+                          </ul>
+                          <p>Inbound pairs in returned top 50: {selectedInboundPairs.length}</p>
+                          <ul>
+                            {selectedInboundPairs.map((pair) => (
+                              <li key={`in:${pair.originCountryAlpha2}`}>
+                                <span>From {pair.originCountryName}</span>
+                                <strong>{pair.value}%</strong>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <p>No Cloudflare Radar pair was matched to this country in the returned data.</p>
+                      )}
+                      <small>Values are provider-reported percentages, not attack counts or individual packet records.</small>
+                    </section>
+                  </>
+                ) : selectedIntel.type === 'cloudflare-pair' ? (
+                  selectedCloudflareArc ? (
+                    <>
+                      <dl>
+                        <dt>Provider</dt><dd>Cloudflare Radar · aggregated Layer 7</dd>
+                        <dt>Origin</dt><dd>{selectedCloudflareArc.originCountryName} ({selectedCloudflareArc.originCountryAlpha2})</dd>
+                        <dt>Target</dt><dd>{selectedCloudflareArc.targetCountryName} ({selectedCloudflareArc.targetCountryAlpha2})</dd>
+                        <dt>Reported percentage</dt><dd>{selectedCloudflareArc.value}%</dd>
+                        <dt>Upstream updated</dt><dd>{fmtUtcTimestamp(data.cloudflareRadar.meta?.lastUpdated)}</dd>
+                        <dt>Range / units</dt>
+                        <dd>{data.cloudflareRadar.meta?.dateRange || 'not supplied'} · {data.cloudflareRadar.meta?.units || 'not supplied'}</dd>
+                      </dl>
+                      <p className="gtw__aside-note">This is an aggregated country pair, not an individual attack, packet, or DShield route.</p>
+                    </>
+                  ) : <p className="gtw__aside-note">This pair is no longer present in the latest Cloudflare Radar snapshot.</p>
+                ) : (
+                  selectedSource ? (
+                    <dl>
+                      <dt>Source type</dt><dd>DShield top source IP location</dd>
+                      <dt>Country / city</dt><dd>{selectedSource.country}{selectedSource.city ? ` · ${selectedSource.city}` : ''}</dd>
+                      <dt>Verified reports</dt><dd>{selectedSource.reports.toLocaleString('en-US')}</dd>
+                      <dt>Coordinates</dt><dd>{selectedSource.lat.toFixed(4)}, {selectedSource.lon.toFixed(4)}</dd>
+                      <dt>Last observation</dt>
+                      <dd>{sourceObservedAt(selectedSource) !== null
+                        ? fmtUtcTimestamp(sourceObservedAt(selectedSource))
+                        : `Not supplied per IP · feed refreshed ${fmtUtcTimestamp(countrySourceLastRefresh)}`}</dd>
+                      <dt>Feed status</dt><dd>{countrySourceFreshness}</dd>
+                    </dl>
+                  ) : <p className="gtw__aside-note">This source is no longer present in the latest snapshot.</p>
+                )}
+              </aside>
+            )}
 
             {/* Hover chip: the country's name, pinned to the cursor. */}
             {chip && (
@@ -827,11 +1248,25 @@ export default function ThreatMap() {
 
             <p className="gtw__map-hover" aria-live="polite">
               {hovered
-                ? hovered.reports > 0
-                  ? `${hovered.country} — ${CAT_BY_KEY[hovered.category].label} · ${hovered.reports.toLocaleString('en-US')} reports from ${hovered.sources} source${hovered.sources === 1 ? '' : 's'}`
-                  : `${hovered.country} — ${CAT_BY_KEY[hovered.category].label}`
+                ? hovered.activityType === 'source'
+                  ? `${hovered.country} — DShield source reports: ${hovered.reports.toLocaleString('en-US')} · ${hovered.sources} source IPs · last observed ${hovered.lastObservedAt ? fmtUtcTimestamp(hovered.lastObservedAt) : `per-IP time unavailable; feed updated ${fmtUtcTimestamp(hovered.lastRefresh)}`} · ${hovered.freshness}`
+                  : `${hovered.country} — no verified DShield source activity · source feed ${hovered.freshness} · updated ${fmtUtcTimestamp(hovered.lastRefresh)}`
                 : 'Hover a country for its figures'}
             </p>
+
+            <div className="gtw__map-activity-legend" aria-label="Country shading: verified DShield source activity">
+              <span className="gtw__map-activity-legend-title">DShield source reports · sqrt-scaled</span>
+              <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--highest" />Highest</span>
+              <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--high" />High</span>
+              <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--moderate" />Moderate</span>
+              <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--low" />Low</span>
+              <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--none" />No verified source activity</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--origin" />Cloudflare origins</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--target" />Cloudflare targets</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--arc" />Aggregated pair arcs</span>
+              <small>Cloudflare Radar — Aggregated Layer 7 attack intelligence.</small>
+              <small>DShield source counts are separate; arc dashes do not represent individual events.</small>
+            </div>
 
             {/* Left column over the map: attack types + threat alerts */}
             <div className="gtw__overlay" aria-label="Attack types and threat alerts">
@@ -840,11 +1275,30 @@ export default function ThreatMap() {
                 <ul className="gtw__legend">
                   {CATEGORIES.map((c) => (
                     <li key={c.key}>
-                      <span className="gtw__legend-check" style={{ borderColor: c.color, color: c.color }} aria-hidden="true">✓</span>
-                      <span><strong style={{ color: c.color }}>{c.label}</strong></span>
+                      <button
+                        type="button"
+                        className={`gtw__filter${attackFilters[c.key] ? ' is-active' : ''}`}
+                        aria-pressed={attackFilters[c.key]}
+                        onClick={() => toggleAttackFilter(c.key)}
+                      >
+                        <span className="gtw__legend-check" style={{ borderColor: c.color, color: c.color }} aria-hidden="true">
+                          {attackFilters[c.key] ? '✓' : ''}
+                        </span>
+                        <span>
+                          <strong style={{ color: c.color }}>{c.label}</strong>
+                          <small>
+                            {c.key === 'scanning'
+                              ? `${categoryCounts[c.key].toLocaleString('en-US')} verified DShield locations`
+                              : `${categoryCounts[c.key].toLocaleString('en-US')} provider records · no verified map coordinates`}
+                          </small>
+                        </span>
+                      </button>
                     </li>
                   ))}
                 </ul>
+                <p className="gtw__aside-note">
+                  Only DShield source locations are currently geolocated. KEV records and the disabled ransomware/breach feeds do not provide enabled map coordinates.
+                </p>
               </section>
 
               <section className="gtw__panel gtw__wire" aria-labelledby="wire-h">
@@ -895,15 +1349,15 @@ export default function ThreatMap() {
           {/* Timeline strip along the bottom of the map */}
           {timelineCollapsed ? (
             <div className="gtw__timeline gtw__timeline--collapsed">
-              <span className="gtw__timeline-collapsed-label">Threat activity — last 7 days · collapsed</span>
+              <span className="gtw__timeline-collapsed-label">Threat activity · selected window collapsed</span>
               <button type="button" className="gtw__timeline-show" onClick={() => setTimelineCollapsed(false)}>
                 Show timeline
               </button>
             </div>
           ) : (
-            <section className="gtw__timeline" aria-label="Threat activity timeline, last seven days">
+            <section className="gtw__timeline" aria-label="Interactive threat activity timeline">
               <div className="gtw__timeline-head">
-                <h3 className="gtw__panel-title">Threat activity — last 7 days</h3>
+                <h3 className="gtw__panel-title">Threat activity · selected source window</h3>
                 <button
                   type="button"
                   className="gtw__timeline-collapse"
@@ -913,6 +1367,77 @@ export default function ThreatMap() {
                   ✕ Collapse
                 </button>
               </div>
+              <div className="gtw__timeline-controls">
+                <label>
+                  From
+                  <input
+                    type="datetime-local"
+                    value={toLocalDateTimeInput(timelineStart)}
+                    max={toLocalDateTimeInput(timelineNow)}
+                    onChange={(event) => updateTimelineBound('start', event.target.value)}
+                  />
+                </label>
+                <label>
+                  To
+                  <input
+                    type="datetime-local"
+                    value={toLocalDateTimeInput(timelineEnd)}
+                    max={toLocalDateTimeInput(timelineNow)}
+                    onChange={(event) => updateTimelineBound('end', event.target.value)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTimeWindow(null)
+                    playheadRef.current = null
+                    setPlayhead(null)
+                    setIsPlaying(false)
+                  }}
+                  aria-label="Return map to the latest source snapshot"
+                >
+                  Latest snapshot
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isPlaying) {
+                      setIsPlaying(false)
+                    } else {
+                      if (playhead === null || playhead >= timelineEnd) {
+                        playheadRef.current = timelineStart
+                        setPlayhead(timelineStart)
+                      }
+                      if (!timeWindow) setTimeWindow(activeTimeWindow)
+                      setIsPlaying(true)
+                    }
+                  }}
+                  disabled={!hasTimelineEvents}
+                  aria-label={isPlaying ? 'Pause timeline playback' : 'Play timeline'}
+                >
+                  {isPlaying ? 'Pause' : 'Play'}
+                </button>
+                <input
+                  className="gtw__timeline-scrubber"
+                  type="range"
+                  min={timelineStart}
+                  max={timelineEnd}
+                  step={Math.max(1, Math.floor(timelineSpan / 500))}
+                  value={playhead ?? timelineStart}
+                  disabled={!hasTimelineEvents}
+                  aria-label="Timeline playback position"
+                  onChange={(event) => {
+                    setTimeWindow(activeTimeWindow)
+                    const timestamp = Number(event.target.value)
+                    playheadRef.current = timestamp
+                    setPlayhead(timestamp)
+                    setIsPlaying(false)
+                  }}
+                />
+                <time dateTime={new Date(playhead ?? timelineEnd).toISOString()}>
+                  {fmtUtcTimestamp(playhead ?? timelineEnd)}
+                </time>
+              </div>
               <div className="gtw__timeline-content">
                 <div className="gtw__timeline-main">
                   <div className="gtw__timeline-axis" aria-hidden="true">
@@ -921,13 +1446,16 @@ export default function ThreatMap() {
                         <span
                           key={tick}
                           className={`gtw__timeline-label${i === 0 ? ' gtw__timeline-label--first' : ''}${i === timelineTicks.length - 1 ? ' gtw__timeline-label--last' : ''}`}
-                          style={{ left: `${((tick - timelineStart) / (timelineNow - timelineStart)) * 100}%` }}
+                          style={{ left: `${((tick - timelineStart) / timelineSpan) * 100}%` }}
                         >
-                          {fmtDayShort(new Date(tick).toISOString().slice(0, 10))}
+                          {formatTimelineTick(tick, timelineSpan)}
                         </span>
                       ))}
+                      {playhead !== null && (
+                        <span className="gtw__timeline-playhead" style={{ left: `${((playhead - timelineStart) / timelineSpan) * 100}%` }} />
+                      )}
                     </div>
-                    <span className="gtw__timeline-now">NOW</span>
+                    <span className="gtw__timeline-now">{timelineEnd === timelineNow ? 'NOW' : 'END'}</span>
                   </div>
                   <div className="gtw__timeline-plot-layout">
                     <div className="gtw__timeline-plot">
@@ -935,7 +1463,7 @@ export default function ThreatMap() {
                         {timelineTicks.map((tick) => (
                           <span
                             key={tick}
-                            style={{ left: `${((tick - timelineStart) / (timelineNow - timelineStart)) * 100}%` }}
+                            style={{ left: `${((tick - timelineStart) / timelineSpan) * 100}%` }}
                           />
                         ))}
                       </div>
@@ -945,12 +1473,16 @@ export default function ThreatMap() {
                             <ActivityTrack
                               events={track.events}
                               start={timelineStart}
-                              end={timelineNow}
+                              end={timelineEnd}
                               resolution={track.resolution}
+                              cursor={playhead}
                             />
                           </div>
                         ))}
                       </div>
+                      {playhead !== null && (
+                        <span className="gtw__timeline-playhead gtw__timeline-playhead--plot" style={{ left: `${((playhead - timelineStart) / timelineSpan) * 100}%` }} />
+                      )}
                     </div>
                     <div className="gtw__timeline-now-plot" aria-hidden="true" />
                   </div>
@@ -966,7 +1498,7 @@ export default function ThreatMap() {
               </div>
               <p className="gtw__timeline-note">
                 DShield reports, ports and CISA KEV use provider-supplied daily dates; NVD and available ThreatFox use hourly timestamps.
-                Missing source timestamps are left blank rather than inferred.
+                DShield source-location records in this snapshot have no per-IP observation time, so historical selections hide those markers instead of presenting current locations as historical. Playback follows provider-timestamped timeline events; destination routes are not available.
               </p>
             </section>
           )}
@@ -984,20 +1516,41 @@ export default function ThreatMap() {
             <p className="gtw__interval-note">Provider snapshots refresh every 15 minutes. Freshness is shown per feed.</p>
             <ul className="gtw__provider-freshness" aria-label="Provider freshness">
               {freshnessItems.map(({ key, label, provider }) => {
-                const freshness = providerFreshness(provider)
-                const timestamp = provider?.fetchedAt || provider?.lastSuccessfulAt || null
+                const isCloudflare = key === 'cloudflare-radar'
+                const freshness = isCloudflare ? cloudflareFreshness(provider) : providerFreshness(provider)
+                const timestamp = isCloudflare
+                  ? provider?.lastUpdated || null
+                  : provider?.fetchedAt || provider?.lastSuccessfulAt || null
                 const dataDate = provider?.dataDate
+                const freshnessClass = freshness.toLowerCase().replaceAll(' ', '-')
                 const title = [
-                  timestamp ? `Last successful refresh: ${formatUtcTimestamp(timestamp)}` : 'No successful refresh recorded',
+                  timestamp
+                    ? isCloudflare
+                      ? `Cloudflare upstream lastUpdated: ${formatUtcTimestamp(timestamp)}`
+                      : `Last successful refresh: ${formatUtcTimestamp(timestamp)}`
+                    : isCloudflare
+                      ? 'No upstream lastUpdated timestamp'
+                      : 'No successful refresh recorded',
                   dataDate ? `Source data date: ${dataDate}` : null,
                   provider?.error || null,
                 ].filter(Boolean).join(' · ')
                 return (
-                  <li key={key} className={`gtw__provider-freshness-item gtw__provider-freshness-item--${freshness.toLowerCase()}`} title={title}>
+                  <li key={key} className={`gtw__provider-freshness-item gtw__provider-freshness-item--${freshnessClass}`} title={title}>
                     <span className="gtw__provider-freshness-name">{label}</span>
                     <strong>{freshness}</strong>
-                    {timestamp && <time dateTime={timestamp}>Last success · {formatUtcTimestamp(timestamp)}</time>}
+                    {timestamp && (
+                      <time dateTime={timestamp}>
+                        {isCloudflare ? 'Upstream update · ' : 'Last success · '}{formatUtcTimestamp(timestamp)}
+                      </time>
+                    )}
                     {dataDate && <span className="gtw__provider-freshness-date">Source date: {dataDate}</span>}
+                    {isCloudflare && Number.isInteger(provider?.pairCount) && (
+                      <span className="gtw__provider-freshness-date">{provider.pairCount} valid country pairs</span>
+                    )}
+                    {isCloudflare && provider?.error && <span className="gtw__provider-freshness-error">{provider.error}</span>}
+                    {isCloudflare && cloudflareNeedsDetailedGeometry && cloudflareGeometryError && (
+                      <span className="gtw__provider-freshness-error">Country geometry unavailable: {cloudflareGeometryError}</span>
+                    )}
                   </li>
                 )
               })}
