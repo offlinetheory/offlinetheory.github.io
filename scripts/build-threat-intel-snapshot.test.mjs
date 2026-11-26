@@ -1,12 +1,21 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import test from 'node:test'
 import {
+  buildCloudflareHistoryManifest,
+  cloudflareIntervalWindow,
+  collectCloudflareRadar,
+  collectCloudflareRadarInterval,
+  collectCloudflareRadarIntervals,
   dshieldPortEvent,
   dshieldSourceEvent,
-  collectCloudflareRadar,
   normalizeCloudflareRadarResponse,
   normalizeDshieldPorts,
   normalizeEvent,
+  validateCloudflareIntervalMeta,
+  writeCloudflareIntervalOutputs,
 } from './build-threat-intel-snapshot.mjs'
 
 test('normalizes DShield date-qualified topports rows from the provider response shape', () => {
@@ -246,8 +255,10 @@ test('requests the official Cloudflare Radar API with bearer auth and prescribed
   })
 
   assert.equal(requestUrl.pathname, '/client/v4/radar/attacks/layer7/top/attacks')
+  // 24h window ending at now floored to the nearest 15 minutes (03:46 -> 03:45).
   assert.deepEqual(Object.fromEntries(requestUrl.searchParams), {
-    dateRange: '1d',
+    dateStart: '2026-11-25T03:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
     limit: '50',
     normalization: 'PERCENTAGE',
     format: 'JSON',
@@ -263,6 +274,8 @@ test('requests the official Cloudflare Radar API with bearer auth and prescribed
 test('accepts a successful empty Cloudflare result without inventing pairs', async () => {
   const result = await collectCloudflareRadar(null, {
     token: 'test-secret',
+    // Fixture window ends 2026-11-26T03:45Z, so pin "now" to match it.
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
     request: async () => ({
       ...cloudflareResponse,
       result: { ...cloudflareResponse.result, top_0: [] },
@@ -346,4 +359,325 @@ test('records Cloudflare HTTP status, success field, errors, and response struct
   assert.match(result.provider.error, /9106: Missing Authorization header/)
   assert.match(result.provider.error, /response keys=success,errors,result/)
   assert.match(result.provider.error, /result keys=none/)
+})
+
+// --- Statistics intervals + historical retention ---
+
+// Clearly-marked fixture token: used ONLY as a stand-in Authorization value
+// in mocked requests. It must never appear in any file the builder writes.
+const FIXTURE_TOKEN = 'FIXTURE-TOKEN-DO-NOT-USE-7f3a9c2e'
+
+function cloudflareFixtureForWindow(dateStart, dateEnd, extraRowFields = {}) {
+  return {
+    success: true,
+    result: {
+      meta: {
+        lastUpdated: dateEnd,
+        dateRange: [{ startTime: dateStart, endTime: dateEnd }],
+        units: [{ name: 'percentage', value: '%' }],
+        normalization: 'PERCENTAGE',
+      },
+      top_0: [{
+        originCountryAlpha2: 'US',
+        originCountryName: 'United States',
+        targetCountryAlpha2: 'DE',
+        targetCountryName: 'Germany',
+        value: '12.5',
+        ...extraRowFields,
+      }],
+    },
+  }
+}
+
+// Mock request that answers every interval with a response whose meta
+// matches exactly the window that was requested.
+function matchingCloudflareRequest() {
+  return async (url) => {
+    const requested = new URL(url)
+    return cloudflareFixtureForWindow(
+      requested.searchParams.get('dateStart'),
+      requested.searchParams.get('dateEnd'),
+    )
+  }
+}
+
+test('computes each interval window from a fixed now with the end floored to 15 minutes', () => {
+  const now = new Date('2026-11-26T03:47:12.000Z')
+  assert.deepEqual(cloudflareIntervalWindow('1h', now), {
+    dateStart: '2026-11-26T02:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
+    durationMs: 60 * 60 * 1000,
+  })
+  assert.deepEqual(cloudflareIntervalWindow('6h', now), {
+    dateStart: '2026-11-25T21:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
+    durationMs: 6 * 60 * 60 * 1000,
+  })
+  assert.deepEqual(cloudflareIntervalWindow('24h', now), {
+    dateStart: '2026-11-25T03:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
+    durationMs: 24 * 60 * 60 * 1000,
+  })
+  assert.deepEqual(cloudflareIntervalWindow('7d', now), {
+    dateStart: '2026-11-19T03:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
+    durationMs: 7 * 24 * 60 * 60 * 1000,
+  })
+  assert.throws(() => cloudflareIntervalWindow('30d', now), /Unknown Cloudflare interval/)
+})
+
+test('validates a matching Cloudflare window and rejects a wrong-duration window', () => {
+  const window = { dateStart: '2026-11-26T02:45:00.000Z', dateEnd: '2026-11-26T03:45:00.000Z' }
+  assert.equal(validateCloudflareIntervalMeta({
+    lastUpdated: '2026-11-26T03:45:00Z',
+    dateRange: [{ startTime: '2026-11-26T02:45:00Z', endTime: '2026-11-26T03:45:00Z' }],
+  }, window), null)
+  assert.match(
+    validateCloudflareIntervalMeta({
+      lastUpdated: '2026-11-26T03:45:00Z',
+      dateRange: [{ startTime: '2026-11-25T03:45:00Z', endTime: '2026-11-26T03:45:00Z' }],
+    }, window),
+    /instead of the requested/,
+  )
+  assert.match(validateCloudflareIntervalMeta(null, window), /missing meta/)
+  assert.match(validateCloudflareIntervalMeta({}, window), /dateRange is missing/)
+})
+
+test('requests a distinct exact dateStart/dateEnd window per interval', async () => {
+  const seen = {}
+  const results = await collectCloudflareRadarIntervals({}, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:47:12.000Z'),
+    request: async (url, options) => {
+      const requested = new URL(url)
+      assert.equal(options.headers.Authorization, `Bearer ${FIXTURE_TOKEN}`)
+      seen[requested.searchParams.get('dateEnd') + '|' + requested.searchParams.get('dateStart')] = true
+      return cloudflareFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+      )
+    },
+  })
+
+  assert.deepEqual(Object.keys(seen).sort(), [
+    '2026-11-26T03:45:00.000Z|2026-11-19T03:45:00.000Z',
+    '2026-11-26T03:45:00.000Z|2026-11-25T03:45:00.000Z',
+    '2026-11-26T03:45:00.000Z|2026-11-25T21:45:00.000Z',
+    '2026-11-26T03:45:00.000Z|2026-11-26T02:45:00.000Z',
+  ])
+  for (const interval of ['1h', '6h', '24h', '7d']) {
+    assert.equal(results[interval].interval, interval)
+    assert.equal(results[interval].intervalStatus, 'live')
+    assert.equal(results[interval].intervalError, null)
+    assert.equal(results[interval].window.dateEnd, '2026-11-26T03:45:00.000Z')
+  }
+  assert.equal(results['1h'].window.dateStart, '2026-11-26T02:45:00.000Z')
+  assert.equal(results['7d'].window.dateStart, '2026-11-19T03:45:00.000Z')
+})
+
+test('marks an interval unavailable on window mismatch and never uses the wrong data', async () => {
+  // The mock always answers with a 24h window, even when 1h was requested.
+  const wrongWindow = async () => cloudflareFixtureForWindow('2026-11-25T03:45:00.000Z', '2026-11-26T03:45:00.000Z')
+  const result = await collectCloudflareRadarInterval('1h', null, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: wrongWindow,
+  })
+
+  assert.equal(result.intervalStatus, 'unavailable')
+  assert.equal(result.provider.status, 'offline')
+  assert.match(result.intervalError, /instead of the requested/)
+  assert.deepEqual(result.pairs, [])
+  assert.equal(result.meta, null)
+})
+
+test('marks an interval stale on window mismatch when previous data exists', async () => {
+  const previous = {
+    generatedAt: '2026-11-26T03:30:00.000Z',
+    provider: { status: 'live', fetchedAt: '2026-11-26T03:30:00.000Z' },
+    meta: cloudflareResponse.result.meta,
+    pairs: [{
+      originCountryAlpha2: 'US',
+      originCountryName: 'United States',
+      targetCountryAlpha2: 'DE',
+      targetCountryName: 'Germany',
+      value: 12.5,
+    }],
+  }
+  const result = await collectCloudflareRadarInterval('1h', previous, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async () => cloudflareFixtureForWindow('2026-11-25T03:45:00.000Z', '2026-11-26T03:45:00.000Z'),
+  })
+
+  assert.equal(result.intervalStatus, 'stale')
+  assert.equal(result.provider.status, 'stale')
+  assert.deepEqual(result.pairs, previous.pairs)
+  assert.deepEqual(result.meta, previous.meta)
+  assert.match(result.intervalError, /instead of the requested/)
+})
+
+test('handles a Cloudflare response with missing meta as unavailable without using its rows', async () => {
+  const result = await collectCloudflareRadarInterval('6h', null, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async () => ({
+      success: true,
+      result: {
+        top_0: [{
+          originCountryAlpha2: 'US',
+          originCountryName: 'United States',
+          targetCountryAlpha2: 'DE',
+          targetCountryName: 'Germany',
+          value: '12.5',
+        }],
+      },
+    }),
+  })
+
+  assert.equal(result.intervalStatus, 'unavailable')
+  assert.deepEqual(result.pairs, [])
+  assert.equal(result.meta, null)
+  assert.match(result.intervalError, /missing valid upstream metadata/)
+})
+
+test('one interval failing does not poison the others', async () => {
+  const results = await collectCloudflareRadarIntervals({}, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async (url) => {
+      const requested = new URL(url)
+      const duration = Date.parse(requested.searchParams.get('dateEnd')) - Date.parse(requested.searchParams.get('dateStart'))
+      if (duration === 6 * 60 * 60 * 1000) throw new Error('HTTP 500: 6h endpoint down')
+      return cloudflareFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+      )
+    },
+  })
+
+  assert.equal(results['1h'].intervalStatus, 'live')
+  assert.equal(results['6h'].intervalStatus, 'unavailable')
+  assert.equal(results['6h'].provider.status, 'offline')
+  assert.match(results['6h'].intervalError, /6h endpoint down/)
+  assert.equal(results['24h'].intervalStatus, 'live')
+  assert.equal(results['7d'].intervalStatus, 'live')
+  assert.equal(results['1h'].pairs[0].value, 12.5)
+})
+
+test('passes through only provider-returned pair fields and invents no values', async () => {
+  const result = await collectCloudflareRadarInterval('24h', null, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async (url) => {
+      const requested = new URL(url)
+      // Extra provider-side fields must be dropped, never carried into output.
+      return cloudflareFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+        { latitude: 52.52, longitude: 13.405, inventedField: 'must-not-appear' },
+      )
+    },
+  })
+
+  assert.deepEqual(Object.keys(result.pairs[0]).sort(), [
+    'originCountryAlpha2',
+    'originCountryName',
+    'targetCountryAlpha2',
+    'targetCountryName',
+    'value',
+  ])
+  assert.deepEqual(result.pairs, [{
+    originCountryAlpha2: 'US',
+    originCountryName: 'United States',
+    targetCountryAlpha2: 'DE',
+    targetCountryName: 'Germany',
+    value: 12.5,
+  }])
+})
+
+test('history manifest merges, sorts oldest to newest, and caps per interval', () => {
+  const manifest = buildCloudflareHistoryManifest(null, [
+    { interval: '24h', generatedAt: '2026-11-26T04:16:00.000Z', path: 'data/history/cloudflare/24h/c.json', pairCount: 50, lastUpdated: '2026-11-26T04:15:00Z' },
+    { interval: '24h', generatedAt: '2026-11-26T03:46:00.000Z', path: 'data/history/cloudflare/24h/a.json', pairCount: 50, lastUpdated: '2026-11-26T03:45:00Z' },
+    { interval: '24h', generatedAt: '2026-11-26T04:01:00.000Z', path: 'data/history/cloudflare/24h/b.json', pairCount: 50, lastUpdated: '2026-11-26T04:00:00Z' },
+  ], { retentionPerInterval: 2, generatedAt: '2026-11-26T04:16:00.000Z' })
+
+  assert.deepEqual(manifest.intervals['24h'].map((entry) => entry.path), [
+    'data/history/cloudflare/24h/b.json',
+    'data/history/cloudflare/24h/c.json',
+  ])
+  assert.deepEqual(Object.keys(manifest.intervals['24h'][0]).sort(), [
+    'generatedAt',
+    'lastUpdated',
+    'pairCount',
+    'path',
+  ])
+  assert.deepEqual(manifest.intervals['1h'], [])
+})
+
+test('writes per-interval files, legacy 24h copy, history snapshots and manifest, and prunes beyond the cap', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'threatmap-cf-'))
+  try {
+    const times = ['2026-11-26T03:46:00.000Z', '2026-11-26T04:01:00.000Z', '2026-11-26T04:16:00.000Z']
+    let lastOutcome
+    for (const time of times) {
+      const now = new Date(time)
+      const results = await collectCloudflareRadarIntervals({}, {
+        token: FIXTURE_TOKEN,
+        now: () => now,
+        request: matchingCloudflareRequest(),
+      })
+      lastOutcome = writeCloudflareIntervalOutputs(results, { root, now: () => now, retentionPerInterval: 2 })
+    }
+
+    for (const interval of ['1h', '6h', '24h', '7d']) {
+      const file = path.join(root, 'public/data', `cloudflare-attack-pairs-${interval}.json`)
+      const snapshot = JSON.parse(fs.readFileSync(file, 'utf8'))
+      assert.equal(snapshot.interval, interval)
+      assert.equal(snapshot.intervalStatus, 'live')
+      assert.equal(snapshot.intervalError, null)
+      assert.equal(snapshot.window.dateEnd, '2026-11-26T04:15:00.000Z')
+    }
+    assert.equal(
+      fs.readFileSync(path.join(root, 'public/data/cloudflare-attack-pairs.json'), 'utf8'),
+      fs.readFileSync(path.join(root, 'public/data/cloudflare-attack-pairs-24h.json'), 'utf8'),
+    )
+
+    const historyDir = path.join(root, 'public/data/history/cloudflare/24h')
+    const historyFiles = fs.readdirSync(historyDir).sort()
+    assert.deepEqual(historyFiles, ['20261126T040100000Z.json', '20261126T041600000Z.json'])
+    assert.equal(fs.existsSync(path.join(historyDir, '20261126T034600000Z.json')), false)
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public/data/history/cloudflare-manifest.json'), 'utf8'))
+    assert.equal(manifest.intervals['24h'].length, 2)
+    assert.deepEqual(manifest.intervals['24h'].map((entry) => entry.generatedAt), [
+      '2026-11-26T04:01:00.000Z',
+      '2026-11-26T04:16:00.000Z',
+    ])
+    assert.deepEqual(manifest.intervals['24h'][1], {
+      generatedAt: '2026-11-26T04:16:00.000Z',
+      path: 'data/history/cloudflare/24h/20261126T041600000Z.json',
+      pairCount: 1,
+      lastUpdated: '2026-11-26T04:15:00.000Z',
+    })
+    assert.equal(lastOutcome.pruned.filter((file) => file.includes('/24h/')).length, 1)
+
+    // No credential anywhere in anything the builder wrote.
+    const writtenFiles = []
+    const walk = (dir) => {
+      for (const name of fs.readdirSync(dir)) {
+        const full = path.join(dir, name)
+        if (fs.statSync(full).isDirectory()) walk(full)
+        else writtenFiles.push(full)
+      }
+    }
+    walk(path.join(root, 'public'))
+    assert.ok(writtenFiles.length > 0)
+    for (const file of writtenFiles) {
+      assert.equal(fs.readFileSync(file, 'utf8').includes(FIXTURE_TOKEN), false, `${file} leaks the fixture token`)
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+  }
 })

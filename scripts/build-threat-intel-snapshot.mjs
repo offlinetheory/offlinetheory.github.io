@@ -7,6 +7,18 @@ const OUT = 'public/data/threat-intel-snapshot.json'
 const SOURCES_FILE = 'public/data/sources-snapshot.json'
 const KEV_FILE = 'public/data/kev-snapshot.json'
 const CLOUDFLARE_FILE = 'public/data/cloudflare-attack-pairs.json'
+const CLOUDFLARE_INTERVAL_FILE = (interval) => `public/data/cloudflare-attack-pairs-${interval}.json`
+const CLOUDFLARE_HISTORY_DIR = 'public/data/history/cloudflare'
+const CLOUDFLARE_HISTORY_MANIFEST_FILE = 'public/data/history/cloudflare-manifest.json'
+export const CLOUDFLARE_INTERVALS = ['1h', '6h', '24h', '7d']
+const CLOUDFLARE_INTERVAL_DURATION_MS = {
+  '1h': 60 * 60 * 1000,
+  '6h': 6 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '7d': 7 * 24 * 60 * 60 * 1000,
+}
+export const CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL = 96
+const FIFTEEN_MINUTES_MS = 15 * 60 * 1000
 const THREATFOX_FILE = 'public/data/threatfox-snapshot.json'
 const NVD_URL = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
 const CLOUDFLARE_RADAR_URL = 'https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks'
@@ -57,19 +69,27 @@ const SOURCES = {
   },
 }
 
-function readJson(file) {
+function readJsonAt(root, file) {
   try {
-    return JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'))
+    return JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'))
   } catch (error) {
     if (error.code === 'ENOENT') return null
     throw error
   }
 }
 
-function writeJson(file, value) {
-  const fullPath = path.join(ROOT, file)
+function writeJsonAt(root, file, value) {
+  const fullPath = path.join(root, file)
   fs.mkdirSync(path.dirname(fullPath), { recursive: true })
   fs.writeFileSync(fullPath, `${JSON.stringify(value, null, 2)}\n`)
+}
+
+function readJson(file) {
+  return readJsonAt(ROOT, file)
+}
+
+function writeJson(file, value) {
+  writeJsonAt(ROOT, file, value)
 }
 
 function parseTimestamp(value) {
@@ -295,6 +315,10 @@ function preserveCloudflareSnapshotIfUnchanged(current, previous) {
     },
     meta: snapshot.meta,
     pairs: snapshot.pairs,
+    interval: snapshot.interval,
+    window: snapshot.window,
+    intervalStatus: snapshot.intervalStatus,
+    intervalError: snapshot.intervalError,
   })
   if (comparable(current) !== comparable(previous)) return current
   return {
@@ -307,7 +331,78 @@ function preserveCloudflareSnapshotIfUnchanged(current, previous) {
   }
 }
 
-export async function collectCloudflareRadar(
+export function floorToNearest15Minutes(date) {
+  const time = new Date(date).getTime()
+  return new Date(Math.floor(time / FIFTEEN_MINUTES_MS) * FIFTEEN_MINUTES_MS)
+}
+
+// Cloudflare Radar window for one statistics interval.
+// Verified against the official docs (developers.cloudflare.com, "Get top
+// layer 7 attack pairs"): dateStart/dateEnd are an accepted alternative to
+// dateRange, with no shorter maximum than dateRange (which allows up to
+// 364d), so an explicit 7-day window is used here too, keeping all four
+// intervals on the same exact-window mechanism instead of mixing dateRange
+// ('7d', relative to request time) with explicit windows. The API floors
+// each dateStart/dateEnd to the nearest 15 minutes before evaluation, so
+// windows whose durations only match before alignment may be rejected:
+// end is floored first and start is derived from that floored end, so both
+// endpoints are already 15-minute aligned and the duration survives
+// alignment exactly (every interval duration is a multiple of 15 minutes).
+export function cloudflareIntervalWindow(interval, now = new Date()) {
+  const durationMs = CLOUDFLARE_INTERVAL_DURATION_MS[interval]
+  if (!durationMs) throw new Error(`Unknown Cloudflare interval: ${interval}`)
+  const end = floorToNearest15Minutes(now)
+  const start = new Date(end.getTime() - durationMs)
+  return { dateStart: start.toISOString(), dateEnd: end.toISOString(), durationMs }
+}
+
+// Validates the window the API actually returned against the window that
+// was requested. Returns null when the response matches, otherwise a
+// human-readable reason. The API's returned dateRange end can lag the
+// requested end (dataset freshness), so the end check allows a bounded lag
+// — at least 1h, growing to 1/8 of the window for long windows — but the
+// duration must match within one 15-minute alignment bucket, the end must
+// never be in the future, and lastUpdated must parse and must not be after
+// the requested end (lastUpdated is a dataset timestamp and may lag the
+// window end, so it is only checked for parseability / not-in-future, not
+// for falling inside the window). Any mismatch means the data is NOT for
+// the requested interval and must never be substituted for it.
+export function validateCloudflareIntervalMeta(meta, window) {
+  if (!meta || typeof meta !== 'object') {
+    return 'Cloudflare Radar response is missing meta'
+  }
+  const range = Array.isArray(meta.dateRange) ? meta.dateRange[0] : null
+  const startTime = parseTimestamp(range?.startTime)
+  const endTime = parseTimestamp(range?.endTime)
+  if (!range || startTime === null || endTime === null) {
+    return 'Cloudflare Radar response meta.dateRange is missing or unparseable'
+  }
+  const requestedStart = Date.parse(window.dateStart)
+  const requestedEnd = Date.parse(window.dateEnd)
+  const requestedDuration = requestedEnd - requestedStart
+  const actualDuration = Date.parse(endTime) - Date.parse(startTime)
+  if (Math.abs(actualDuration - requestedDuration) > FIFTEEN_MINUTES_MS) {
+    return `Cloudflare Radar returned a ${actualDuration / 3600000}h window (${startTime}..${endTime}) instead of the requested ${requestedDuration / 3600000}h window (${window.dateStart}..${window.dateEnd})`
+  }
+  if (Date.parse(endTime) > requestedEnd + FIFTEEN_MINUTES_MS) {
+    return `Cloudflare Radar returned dateRange endTime ${endTime} after the requested end ${window.dateEnd}`
+  }
+  const endLagTolerance = Math.max(60 * 60 * 1000, Math.floor(requestedDuration / 8))
+  if (Date.parse(endTime) < requestedEnd - endLagTolerance) {
+    return `Cloudflare Radar returned dateRange endTime ${endTime}, more than ${endLagTolerance / 3600000}h before the requested end ${window.dateEnd}`
+  }
+  const lastUpdated = parseTimestamp(meta.lastUpdated)
+  if (lastUpdated === null) {
+    return 'Cloudflare Radar response meta.lastUpdated is missing or unparseable'
+  }
+  if (Date.parse(lastUpdated) > requestedEnd + FIFTEEN_MINUTES_MS) {
+    return `Cloudflare Radar returned lastUpdated ${lastUpdated} after the requested end ${window.dateEnd}`
+  }
+  return null
+}
+
+export async function collectCloudflareRadarInterval(
+  interval,
   previous,
   {
     token = CLOUDFLARE_RADAR_API_TOKEN,
@@ -315,9 +410,11 @@ export async function collectCloudflareRadar(
     now = () => new Date(),
   } = {},
 ) {
+  const window = cloudflareIntervalWindow(interval, now())
   const checkedAt = now().toISOString()
   const url = new URL(CLOUDFLARE_RADAR_URL)
-  url.searchParams.set('dateRange', '1d')
+  url.searchParams.set('dateStart', window.dateStart)
+  url.searchParams.set('dateEnd', window.dateEnd)
   url.searchParams.set('limit', '50')
   url.searchParams.set('normalization', 'PERCENTAGE')
   url.searchParams.set('format', 'JSON')
@@ -337,10 +434,21 @@ export async function collectCloudflareRadar(
     } catch (error) {
       throw new Error(`${cloudflareResponseDescription(httpStatus, payload)}; ${error.message}`)
     }
+    const windowError = validateCloudflareIntervalMeta(normalized.meta, window)
+    if (windowError) {
+      throw new Error(
+        `${windowError}; requested ${window.dateStart}..${window.dateEnd}; ` +
+        `returned dateRange ${JSON.stringify(normalized.meta.dateRange)} lastUpdated ${normalized.meta.lastUpdated}`,
+      )
+    }
     const fetchedAt = now().toISOString()
     return preserveCloudflareSnapshotIfUnchanged({
       schemaVersion: 1,
       generatedAt: fetchedAt,
+      interval,
+      window: { dateStart: window.dateStart, dateEnd: window.dateEnd },
+      intervalStatus: 'live',
+      intervalError: null,
       provider: {
         ...SOURCES.cloudflare_radar,
         status: 'live',
@@ -356,12 +464,17 @@ export async function collectCloudflareRadar(
     }, previous)
   } catch (error) {
     const hasCachedData = Boolean(previous?.meta && Array.isArray(previous.pairs))
+    const providerStatus = !token ? 'not_configured' : hasCachedData ? 'stale' : 'offline'
     return preserveCloudflareSnapshotIfUnchanged({
       schemaVersion: 1,
       generatedAt: checkedAt,
+      interval,
+      window: { dateStart: window.dateStart, dateEnd: window.dateEnd },
+      intervalStatus: hasCachedData ? 'stale' : 'unavailable',
+      intervalError: error.message,
       provider: {
         ...SOURCES.cloudflare_radar,
-        status: !token ? 'not_configured' : hasCachedData ? 'stale' : 'offline',
+        status: providerStatus,
         fetchedAt: previous?.provider?.fetchedAt || null,
         lastUpdated: previous?.meta?.lastUpdated || null,
         pairCount: hasCachedData ? previous.pairs.length : 0,
@@ -373,6 +486,136 @@ export async function collectCloudflareRadar(
       pairs: hasCachedData ? previous.pairs : [],
     }, previous)
   }
+}
+
+// Fetches every statistics interval independently: one interval failing
+// (fetch error, invalid response, or window mismatch) never poisons the
+// others. Returns { '1h': snapshot, '6h': snapshot, '24h': snapshot,
+// '7d': snapshot }.
+export async function collectCloudflareRadarIntervals(previousByInterval = {}, options = {}) {
+  const results = {}
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    results[interval] = await collectCloudflareRadarInterval(
+      interval,
+      (previousByInterval || {})[interval] || null,
+      options,
+    )
+  }
+  return results
+}
+
+// Backward-compatible single-interval (24h) collector, used by the
+// threat-intel snapshot's Cloudflare provider section.
+export async function collectCloudflareRadar(previous, options = {}) {
+  return collectCloudflareRadarInterval('24h', previous, options)
+}
+
+export function cloudflareHistoryFilename(generatedAt) {
+  return `${String(generatedAt).replace(/[-:.]/g, '')}.json`
+}
+
+export function cloudflareHistoryPath(interval, generatedAt) {
+  return `${CLOUDFLARE_HISTORY_DIR}/${interval}/${cloudflareHistoryFilename(generatedAt)}`
+}
+
+// Pure manifest merge: combines the previous manifest with new entries,
+// dedupes by path, sorts oldest→newest per interval, and keeps only the
+// newest `retentionPerInterval` entries per interval. Manifest entries are
+// { generatedAt, path, pairCount, lastUpdated }; `path` is site-relative
+// (fetchable as `${BASE_URL}${path}`).
+export function buildCloudflareHistoryManifest(
+  previousManifest,
+  entries,
+  { retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL, generatedAt = new Date().toISOString() } = {},
+) {
+  const intervals = {}
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    const existing = Array.isArray(previousManifest?.intervals?.[interval])
+      ? previousManifest.intervals[interval]
+      : []
+    const byPath = new Map()
+    for (const entry of [...existing, ...entries.filter((item) => item.interval === interval)]) {
+      byPath.set(entry.path, {
+        generatedAt: entry.generatedAt,
+        path: entry.path,
+        pairCount: entry.pairCount,
+        lastUpdated: entry.lastUpdated ?? null,
+      })
+    }
+    intervals[interval] = [...byPath.values()]
+      .sort((a, b) => Date.parse(a.generatedAt) - Date.parse(b.generatedAt))
+      .slice(-retentionPerInterval)
+  }
+  return { generatedAt, intervals }
+}
+
+// Writes per-interval files, the legacy 24h copy, history snapshots and the
+// manifest. Only the history snapshots of intervals that are live in this
+// run are added (a stale interval re-uses previous data, so re-stamping it
+// as new history would misrepresent when that data was fetched). Pruning
+// deletes only files under public/data/history/cloudflare/<interval>/.
+// Callers must NOT call this when the Cloudflare token is absent: a
+// token-less run must leave all interval files untouched instead of
+// overwriting them with not_configured data.
+export function writeCloudflareIntervalOutputs(
+  results,
+  { root = ROOT, now = () => new Date(), retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL } = {},
+) {
+  const written = []
+  const historyEntries = []
+  const pruned = []
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    const snapshot = results[interval]
+    if (!snapshot) continue
+    writeJsonAt(root, CLOUDFLARE_INTERVAL_FILE(interval), snapshot)
+    written.push(CLOUDFLARE_INTERVAL_FILE(interval))
+    if (interval === '24h') {
+      writeJsonAt(root, CLOUDFLARE_FILE, snapshot)
+      written.push(CLOUDFLARE_FILE)
+    }
+    if (snapshot.intervalStatus === 'live') {
+      const historyFile = cloudflareHistoryPath(interval, snapshot.generatedAt)
+      writeJsonAt(root, historyFile, snapshot)
+      historyEntries.push({
+        interval,
+        generatedAt: snapshot.generatedAt,
+        path: `data/history/cloudflare/${interval}/${cloudflareHistoryFilename(snapshot.generatedAt)}`,
+        pairCount: snapshot.pairs.length,
+        lastUpdated: snapshot.meta?.lastUpdated ?? null,
+      })
+    }
+  }
+  // Prune each interval directory to the retention cap, newest first by
+  // filename (compact ISO timestamps sort chronologically).
+  const keptPaths = new Set(historyEntries.map((entry) => entry.path))
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    const dir = path.join(root, CLOUDFLARE_HISTORY_DIR, interval)
+    let files = []
+    try {
+      files = fs.readdirSync(dir).filter((name) => name.endsWith('.json')).sort()
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error
+    }
+    const excess = files.slice(0, Math.max(0, files.length - retentionPerInterval))
+    for (const name of excess) {
+      fs.unlinkSync(path.join(dir, name))
+      pruned.push(`${CLOUDFLARE_HISTORY_DIR}/${interval}/${name}`)
+    }
+    for (const name of files.slice(Math.max(0, files.length - retentionPerInterval))) {
+      keptPaths.add(`data/history/cloudflare/${interval}/${name}`)
+    }
+  }
+  const previousManifest = readJsonAt(root, CLOUDFLARE_HISTORY_MANIFEST_FILE)
+  const manifest = buildCloudflareHistoryManifest(previousManifest, historyEntries, {
+    retentionPerInterval,
+    generatedAt: now().toISOString(),
+  })
+  // Drop manifest entries whose file no longer exists (e.g. just pruned).
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    manifest.intervals[interval] = manifest.intervals[interval].filter((entry) => keptPaths.has(entry.path))
+  }
+  writeJsonAt(root, CLOUDFLARE_HISTORY_MANIFEST_FILE, manifest)
+  return { written, historyEntries, manifest, pruned }
 }
 
 async function fetchDshieldJson(url) {
@@ -835,13 +1078,32 @@ function buildEvents(dashboard) {
 async function main() {
   const previous = readJson(OUT)
   const sourcesSnapshot = readJson(SOURCES_FILE)
-  const previousCloudflare = readJson(CLOUDFLARE_FILE)
-  const [dshield, nvd, cloudflare] = await Promise.all([
+  const previousCloudflareByInterval = {}
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    // Fall back to the legacy file for 24h on the first run after this
+    // change, when per-interval files do not exist yet.
+    previousCloudflareByInterval[interval] = readJson(CLOUDFLARE_INTERVAL_FILE(interval))
+      || (interval === '24h' ? readJson(CLOUDFLARE_FILE) : null)
+  }
+  const [dshield, nvd, cloudflareResults] = await Promise.all([
     collectDshield(previous),
     collectNvd(previous),
-    collectCloudflareRadar(previousCloudflare),
+    collectCloudflareRadarIntervals(previousCloudflareByInterval),
   ])
-  writeJson(CLOUDFLARE_FILE, cloudflare)
+  const cloudflare = cloudflareResults['24h']
+  if (CLOUDFLARE_RADAR_API_TOKEN) {
+    const history = writeCloudflareIntervalOutputs(cloudflareResults)
+    console.log(
+      `Cloudflare Radar intervals: ${CLOUDFLARE_INTERVALS.map((interval) => `${interval}=${cloudflareResults[interval].intervalStatus}`).join(', ')}; ` +
+      `history snapshots added: ${history.historyEntries.length}; pruned: ${history.pruned.length}.`,
+    )
+  } else {
+    // Token absent (e.g. a local run): leave every per-interval and legacy
+    // Cloudflare file untouched instead of overwriting them with
+    // not_configured data. The in-memory 24h result still reports
+    // not_configured in the threat-intel snapshot below.
+    console.log('Cloudflare Radar token not configured; leaving per-interval files unchanged.')
+  }
   const cachedKev = readJson(KEV_FILE)
   const previousKevFetchedAt = previous?.providers?.cisa_kev?.fetchedAt || null
   const useCachedKev = cachedKev && (
