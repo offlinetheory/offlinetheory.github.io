@@ -9,13 +9,13 @@ import './ThreatMap.css'
 
 /**
  * LIVE CYBER THREAT MAP — Offline Theory's live threat map, in the exact
- * layout of the Radware Live Threat Map screenshot Miah supplied:
- * brand block top-left, red callout button top-centre, LIVE / REFRESH
+ * layout of the Live Threat Map reference:
+ * brand block top-left, callout button top-centre, LIVE / REFRESH
  * buttons top-right, ATTACK TYPES legend and THREAT ALERTS panels down
- * the left over the map, a full-bleed dark map with teal outlines and
- * coloured country washes, a right rail (statistics interval, top
- * attackers, top attacked, attack vectors, application violations,
- * scanned ports), and a coloured multi-row timeline strip
+ * the left over the map, a full-bleed monochrome map with charcoal land
+ * and white outlines, a right rail (statistics interval, top attackers,
+ * top attacked, attack vectors, application violations, scanned ports),
+ * and a white multi-row timeline strip
  * along the bottom with a COLLAPSE control. The homepage footer band
  * (InfoBar + Newsletter, on paper) ends the page; the global Footer nav
  * row renders below it from App.jsx.
@@ -23,94 +23,61 @@ import './ThreatMap.css'
  * Nothing of Radware's is copied: no Radware name, logo, report text,
  * "Contact Sales", or copyright line, and none of Radware's numbers or
  * category names. The categories are ours — Scanning, Ransomware,
- * Exploited Flaws, Breaches — each with its own colour, and every
+ * Exploited Flaws, Breaches — and every
  * figure comes from our own live feeds.
  *
- * Real data only — nothing simulated or invented. Live from the browser
- * (all CORS-open, no key):
- *  - SANS Internet Storm Center (DShield) — most-reported attacking
- *    source IPs, most-targeted ports, InfoCon, and a 7-day daily
- *    summary of sensor reports. The source IPs' locations come from an
- *    hourly server-side snapshot (public/data/sources-snapshot.json):
- *    the snapshot job geolocates DShield's top 12 source IPs via
- *    ipwho.is once an hour, because ipwho.is rate-limits per-visitor
- *    lookups and the live map's arcs stopped drawing. Only if the
- *    snapshot is missing or empty does the page geolocate live in the
- *    visitor's browser via ipwho.is.
- *  - NIST NVD API — vulnerabilities published or modified in the last
- *    48 hours; the top weakness types (CWE) in those CVEs fill the
- *    "top application violations" panel.
- *  - Recent Breaches (recentbreaches.com) — free CORS-open JSON API:
- *    breach index (24h / 7d counts), breach geography by target
- *    country, and ransomware leak-site listings for the Threat Alerts
- *    panel. Attribution is shown on the page, as their licence
- *    requires. Their iframe widgets were not used: an iframe cannot
- *    be restyled, and the map widget would duplicate the map.
- *  - CISA Known Exploited Vulnerabilities catalog — hourly snapshot,
+ * Real data only — nothing simulated or invented. A single same-origin
+ * snapshot is refreshed server-side every 15 minutes; credentials stay in
+ * GitHub Actions secrets and never enter browser code.
+ *  - SANS Internet Storm Center (DShield) — sensor reports, source
+ *    locations, top ports and InfoCon from the server-side snapshot.
+ *  - NIST NVD API — seven days of published CVEs for the timeline; the
+ *    weakness panel remains filtered to the last 48 hours.
+ *  - abuse.ch ThreatFox — not fetched pending commercial-use eligibility
+ *    confirmation or an appropriate paid subscription.
+ *  - Recent Breaches is disabled pending permission for the site's intended use.
+ *    (not fetched or republished).
+ *    Data from this provider is not displayed while licensing is pending.
+ *  - CISA Known Exploited Vulnerabilities catalog — 15-minute snapshot,
  *    because CISA sends no CORS headers; it powers the "flaws
  *    confirmed exploited" counter only.
  *
  * Honest substitutions, labelled on the page: the "top network attack
  * vectors" panel is the most-probed services from DShield's top ports,
  * shown as a share of those ports' reports — there is no free live
- * feed of flood-type vector volumes. Countries wear a translucent
- * wash by the dominant category among their own reported data: teal
- * for the big scanning sources (DShield), purple for breach targets
- * (Recent Breaches), red for ransomware victims (leak listings that
- * name a country); exploited flaws have no geography in any feed, so
- * they colour no country. The wash is a map tint only — the legend
- * keeps the four category colours. The traffic is dense on purpose:
- * arcs run between the most-reported sources and out to the
- * breach-target and ransomware-victim countries, so the map reads
- * busy like the Radware screenshot Miah sent — but every endpoint is
- * a real country from our own feeds, and the arcs are motion, not
- * claimed attack routes. The timeline rows trace the real DShield
- * daily sensor-report trend of the last 7 days; the feeds publish no
- * per-category history, so every row shows that same real trend in its
- * own colour, and the strip says so.
+ * feed of flood-type vector volumes. Country outlines remain neutral;
+ * source and target locations are derived from the available provider data.
+ * The arcs connect reported source locations as visual motion, not
+ * claimed attack routes, and use only locations supplied by the feeds.
+ * The timeline shows DShield daily totals, NVD publications, KEV additions
+ * and, when licensing is cleared, ThreatFox indicators using provider
+ * timestamps where available.
  *
  * Feeds that are NOT on this page, and why: abuse.ch Feodo Tracker
  * has effectively stopped updating (last blocklist update March 2026),
- * URLhaus and ThreatFox download endpoints answer 410 Gone, and
+ * URLhaus download endpoints answer 410 Gone, and
  * Brandefense's ThreatMap sends X-Frame-Options: SAMEORIGIN, so it
  * cannot be embedded, and publishes no public feed or API. DStrak's
  * map is a search-library feature with no public embed or API either —
  * its underlying data is DShield, which this page already reads
- * directly. Because Feodo and URLhaus are gone, there is no free live
- * feed for malware or phishing volumes, so those two categories are
- * not shown as live counts.
+ * directly. When enabled, ThreatFox indicators are not aggregated into
+ * malware or phishing event volumes; the map presents source records instead.
  */
 
-const ISC = 'https://isc.sans.edu/api'
-const RB = 'https://recentbreaches.com/api'
-const NVD = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
-const KEV_SNAPSHOT = `${import.meta.env.BASE_URL}data/kev-snapshot.json`
-const SOURCES_SNAPSHOT = `${import.meta.env.BASE_URL}data/sources-snapshot.json`
+const THREAT_INTEL_SNAPSHOT = `${import.meta.env.BASE_URL}data/threat-intel-snapshot.json`
 const REFRESH_MS = 5 * 60 * 1000
 const FETCH_TIMEOUT_MS = 15000
+const INITIAL_TIMELINE_TIME = Date.now()
 
-// Our four categories, one colour each — the Radware screenshot's
-// palette, applied to our own categories.
+// Categories retain their identities in the data; map and legend accents
+// use white for a consistent monochrome presentation.
 const CATEGORIES = [
-  { key: 'scanning', label: 'Scanning', color: '#e5484d', note: 'Probing of exposed ports, reported by volunteer sensors.' },
-  { key: 'ransomware', label: 'Ransomware', color: '#f0c13d', note: 'Victims posted to extortion leak sites.' },
-  { key: 'exploited', label: 'Exploited flaws', color: '#5b8def', note: 'Vulnerabilities CISA confirms are in active use.' },
-  { key: 'breaches', label: 'Breaches', color: '#8b5cf6', note: 'Disclosed incidents and regulator filings.' },
+  { key: 'scanning', label: 'Scanning', color: '#FFFFFF', note: 'Probing of exposed ports, reported by volunteer sensors.' },
+  { key: 'ransomware', label: 'Ransomware', color: '#FFFFFF', note: 'Victims posted to extortion leak sites.' },
+  { key: 'exploited', label: 'Exploited flaws', color: '#FFFFFF', note: 'Vulnerabilities CISA confirms are in active use.' },
+  { key: 'breaches', label: 'Breaches', color: '#FFFFFF', note: 'Disclosed incidents and regulator filings.' },
 ]
 const CAT_BY_KEY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]))
-
-// Map washes — the translucent country tints, as in the Radware
-// screenshot Miah sent: teal for the big scanning-source countries,
-// purple for breach targets, red for ransomware victims. These are
-// map tints only; the legend keeps the four category colours above.
-// The dense traffic web is violet, with red arcs to ransomware-victim
-// countries — the look of the reference screenshot.
-const MAP_WASH = {
-  scanning: '#2fb3a3',
-  ransomware: '#e5484d',
-  breaches: '#8b5cf6',
-}
-const ARC_VIOLET = '#8b7cf6'
 
 const PORT_NAMES = {
   21: 'FTP', 22: 'SSH', 23: 'Telnet', 25: 'SMTP', 53: 'DNS', 80: 'HTTP',
@@ -171,7 +138,7 @@ const LAND = feature(worldTopo, worldTopo.objects.land)
 const COUNTRIES = feature(worldTopo, worldTopo.objects.countries)
 
 // ISO 3166-1 numeric codes, keyed by the alpha-2 code ipwho.is returns.
-// Used to shade each country by the dominant category among its data.
+// Used to match provider-reported countries to map features.
 const COUNTRY_NUMERIC = {
   US: '840', NL: '528', ES: '724', DE: '276', GB: '826', FR: '250', CN: '156',
   RU: '643', BR: '076', IN: '356', JP: '392', KR: '410', CA: '124', AU: '036',
@@ -193,8 +160,7 @@ const COUNTRY_NUMERIC = {
 }
 
 // Country names as Recent Breaches returns them, to alpha-2 codes —
-// for the flag in the Top Attacked list and for colouring countries
-// that appear as breach targets.
+// for the flag in the Top Attacked list and real target locations.
 const NAME_TO_CODE = {
   'United States': 'US', Canada: 'CA', Germany: 'DE', India: 'IN',
   'United Kingdom': 'GB', Spain: 'ES', 'South Korea': 'KR', Italy: 'IT',
@@ -231,15 +197,13 @@ function flagEmoji(code) {
   return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
 }
 
-const MAP_BASE_FILL = '#0a1418'
-
 const MAP_W = 1200
 const MAP_H = 620
 
 function fetchJson(url, { timeout = FETCH_TIMEOUT_MS } = {}) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), timeout)
-  return fetch(url, { signal: ctrl.signal })
+  return fetch(url, { signal: ctrl.signal, cache: 'no-store' })
     .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       return res.json()
@@ -247,13 +211,33 @@ function fetchJson(url, { timeout = FETCH_TIMEOUT_MS } = {}) {
     .finally(() => clearTimeout(timer))
 }
 
-function isoDaysAgo(days) {
-  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+function extractPortRecords(response) {
+  if (Array.isArray(response)) {
+    return response.filter((record) => record && typeof record === 'object' && !Array.isArray(record))
+  }
+  if (!response || typeof response !== 'object') return []
+
+  for (const key of ['topports', 'ports', 'data']) {
+    if (Object.hasOwn(response, key)) {
+      const records = extractPortRecords(response[key])
+      if (records.length > 0) return records
+    }
+  }
+
+  const hasPort = ['targetport', 'port', 'portin', 'number'].some((key) => Object.hasOwn(response, key))
+  const hasReports = ['records', 'reports', 'count'].some((key) => Object.hasOwn(response, key))
+  if (hasPort && hasReports) return [response]
+
+  return Object.entries(response)
+    .filter(([key]) => /^\d+$/.test(key))
+    .map(([, record]) => record)
+    .filter((record) => record && typeof record === 'object' && !Array.isArray(record))
 }
 
-function dateStrDaysAgo(days) {
-  const d = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-  return d.toISOString().slice(0, 10)
+function numericValue(value) {
+  if (typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
 }
 
 function fmtTime(date) {
@@ -277,37 +261,89 @@ function arcPath(a, b) {
   return `M ${a[0]} ${a[1]} Q ${cx} ${cy} ${b[0]} ${b[1]}`
 }
 
-// One waveform row of the timeline strip, Radware's form: a dense comb
-// of thin vertical spikes whose heights follow the real DShield daily
-// sensor-report trend. The 7 daily values are linearly interpolated to
-// ~140 sample points, so the shape is the real trend — no intraday
-// spikes are invented, and every row traces the same real trend (the
-// feeds publish no per-category history).
-function Waveform({ values, color }) {
-  const w = 700
-  const h = 30
-  const max = Math.max(1, ...values)
-  const at = (t) => {
-    if (values.length === 0) return 0
-    if (values.length === 1) return values[0]
-    const pos = t * (values.length - 1)
-    const i = Math.min(values.length - 2, Math.floor(pos))
-    const f = pos - i
-    return values[i] * (1 - f) + values[i + 1] * f
+const TIMELINE_TRACKS = [
+  { key: 'dshield', label: 'DShield daily reports', resolution: 'day' },
+  { key: 'dshieldPorts', label: 'DShield top ports', resolution: 'day' },
+  { key: 'nvd', label: 'NVD CVE publications', resolution: 'hour' },
+  { key: 'kev', label: 'CISA KEV additions', resolution: 'day' },
+  { key: 'threatfox', label: 'ThreatFox indicators', resolution: 'hour' },
+]
+
+const LIVE_WINDOW_MS = 20 * 60 * 1000
+const RECENT_WINDOW_MS = 60 * 60 * 1000
+const STALE_WINDOW_MS = 24 * 60 * 60 * 1000
+
+function providerFreshness(provider, now = Date.now()) {
+  const timestamp = Date.parse(provider?.fetchedAt || provider?.lastSuccessfulAt || '')
+  if (!Number.isFinite(timestamp)) return 'OFFLINE'
+  const age = Math.max(0, now - timestamp)
+  if (provider.status === 'live' && age <= LIVE_WINDOW_MS) return 'LIVE'
+  if (age <= RECENT_WINDOW_MS) return 'RECENT'
+  if (age <= STALE_WINDOW_MS) return 'STALE'
+  return 'OFFLINE'
+}
+
+function formatUtcTimestamp(value) {
+  const timestamp = Date.parse(value || '')
+  return Number.isFinite(timestamp)
+    ? new Date(timestamp).toISOString().replace('T', ' ').slice(0, 19) + ' UTC'
+    : 'no successful refresh'
+}
+
+function timelineTimestamp(value) {
+  if (typeof value !== 'string') return null
+  const isDate = /^\d{4}-\d{2}-\d{2}$/.test(value)
+  const isTimestamp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+  if (!isDate && !isTimestamp) return null
+  const timestamp = Date.parse(isDate ? `${value}T00:00:00Z` : value)
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
+function timelineSourceStatus(provider, events, now) {
+  if (provider?.status?.startsWith('disabled')) return 'DISABLED'
+  const freshness = providerFreshness(provider, now)
+  if (freshness === 'OFFLINE') return 'UNAVAILABLE'
+  return events.length > 0 ? freshness : 'NO EVENTS'
+}
+
+function ActivityTrack({ events, start, end, resolution }) {
+  const width = 1000
+  const baseline = 23
+  const maxHeight = 18
+  const bucketSize = resolution === 'hour' ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000
+  const barWidth = resolution === 'hour' ? 2.4 : 3
+  const buckets = new Map()
+  for (const event of events) {
+    if (
+      !Number.isFinite(event.timestamp) ||
+      !Number.isFinite(event.value) ||
+      event.value <= 0 ||
+      event.timestamp < start ||
+      event.timestamp > end
+    ) continue
+    const bucket = Math.floor(event.timestamp / bucketSize) * bucketSize
+    buckets.set(bucket, (buckets.get(bucket) || 0) + event.value)
   }
-  const n = 140
-  const spikes = []
-  for (let i = 0; i < n; i += 1) {
-    const t = n === 1 ? 0 : i / (n - 1)
-    const v = at(t) / max
-    const x = (t * w).toFixed(1)
-    const y = (h - 2 - v * (h - 6)).toFixed(1)
-    spikes.push(`M ${x} ${h - 1} L ${x} ${y}`)
-  }
+  const maxValue = Math.max(1, ...buckets.values())
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="gtw__wave" aria-hidden="true">
-      <rect x="0" y="0" width={w} height={h} fill={color} opacity="0.07" />
-      <path d={spikes.join(' ')} fill="none" stroke={color} strokeWidth="1" opacity="0.9" />
+    <svg viewBox={`0 0 ${width} 26`} preserveAspectRatio="none" className="gtw__activity-track" aria-hidden="true">
+      <path d={`M 0 ${baseline} H ${width}`} className="gtw__activity-baseline" />
+      {[...buckets.entries()].sort(([a], [b]) => a - b).map(([bucket, value]) => {
+        const bucketCenter = bucket + bucketSize / 2
+        const x = ((bucketCenter - start) / (end - start)) * width
+        const height = 1 + Math.sqrt(value / maxValue) * (maxHeight - 1)
+        return (
+          <rect
+            key={bucket}
+            x={Math.max(0, Math.min(width - barWidth, x - barWidth / 2))}
+            y={baseline - height}
+            width={barWidth}
+            height={height}
+            className="gtw__activity-bar"
+          />
+        )
+      })}
     </svg>
   )
 }
@@ -316,19 +352,22 @@ export default function ThreatMap() {
   useMeta({
     title: 'Live Cyber Threat Map',
     description:
-      'Live Cyber Threat Map — a live map of the attacks the internet is seeing right now: most-reported source addresses, most-targeted ports and countries, ransomware leak listings, exploited vulnerabilities and newly published CVEs, from free public feeds.',
+      'Live Cyber Threat Map — a regularly refreshed map of reported source addresses, scanned ports, exploited vulnerabilities and newly published CVEs from public feeds.',
   })
 
   const [data, setData] = useState({
     sources: [],
     ports: [],
     violations: [],
+    threatfox: [],
+    threatfoxStatus: 'disabled_license',
     infocon: null,
     kev: null,
     rbIndex: null,
     rbGeo: null,
     rbLeaks: [],
-    timeline: [],
+    timeline: { dshield: [], dshieldPorts: [], nvd: [], kev: [], threatfox: [] },
+    providers: null,
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(true)
@@ -336,7 +375,6 @@ export default function ThreatMap() {
   const [refreshing, setRefreshing] = useState(false)
   const [hovered, setHovered] = useState(null)
   const [chip, setChip] = useState(null)
-  const [interval, setInterval] = useState('1 hour')
   const [railCollapsed, setRailCollapsed] = useState(false)
   const [timelineCollapsed, setTimelineCollapsed] = useState(false)
   const mounted = useRef(true)
@@ -345,137 +383,165 @@ export default function ThreatMap() {
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
     const nextErrors = {}
-    const timelineDays = [6, 5, 4, 3, 2, 1, 0].map((d) => dateStrDaysAgo(d))
-
-    // Source locations come from the hourly server-side snapshot first
-    // (scripts/build-threat-snapshot.mjs geolocates DShield's top 12
-    // source IPs via ipwho.is once an hour and commits the result, so
-    // visitors never hit ipwho.is's per-visitor rate limit — that limit
-    // is what left the map with no arcs and Top Attackers stuck on
-    // "Loading…"). Only if the snapshot fetch fails or comes back empty
-    // does the page fall back to the live topips + ipwho.is flow.
-    let snapshotSources = null
     try {
-      const snap = await fetchJson(SOURCES_SNAPSHOT)
-      if (Array.isArray(snap?.sources) && snap.sources.length > 0) {
-        snapshotSources = snap.sources.filter(
-          (s) => typeof s.lat === 'number' && typeof s.lon === 'number',
-        )
-        if (snapshotSources.length === 0) snapshotSources = null
+      const snapshot = await fetchJson(THREAT_INTEL_SNAPSHOT)
+      if (!snapshot?.dashboard || !snapshot?.providers) {
+        throw new Error('The threat-intel snapshot has an unexpected shape')
       }
-    } catch {
-      snapshotSources = null
-    }
 
-    const [topIps, topPorts, infocon, kevSnap, nvd, rbIndex, rbGeo, rbLeaks, timelineRes] = await Promise.all([
-      snapshotSources
-        ? Promise.resolve(null)
-        : fetchJson(`${ISC}/topips/records/25?json`).catch((e) => { nextErrors.dshield = e.message; return null }),
-      fetchJson(`${ISC}/topports/records/10?json`).catch((e) => { nextErrors.dshield = e.message; return null }),
-      fetchJson(`${ISC}/infocon?json`).catch(() => null),
-      fetchJson(KEV_SNAPSHOT).catch((e) => { nextErrors.kev = e.message; return null }),
-      fetchJson(
-        `${NVD}?pubStartDate=${encodeURIComponent(isoDaysAgo(2))}&pubEndDate=${encodeURIComponent(new Date().toISOString())}&resultsPerPage=20&noRejected`,
-      ).catch((e) => { nextErrors.nvd = e.message; return null }),
-      fetchJson(`${RB}/index`).catch((e) => { nextErrors.rb = e.message; return null }),
-      fetchJson(`${RB}/geo`).catch((e) => { nextErrors.rb = e.message; return null }),
-      fetchJson(`${RB}/leaks`).catch((e) => { nextErrors.rb = e.message; return null }),
-      Promise.allSettled(timelineDays.map((d) => fetchJson(`${ISC}/dailysummary/${d}?json`))),
-    ])
+      const dashboard = snapshot.dashboard
+      const providerMessage = (key) => {
+        const provider = snapshot.providers[key]
+        if (!provider || provider.status === 'live') return null
+        return provider.error || `Provider status: ${provider.status}`
+      }
+      const dshieldWarning = providerMessage('dshield')
+      const threatFoxWarning = providerMessage('threatfox')
+      const threatFoxStatus = snapshot.providers.threatfox?.status || 'unavailable'
+      const topPortsFeed = snapshot.providers.dshield?.subfeeds?.top_ports
+      const nvdWarning = providerMessage('nvd')
+      const kevWarning = providerMessage('cisa_kev')
+      const breachWarning = providerMessage('recent_breaches')
+      if (dshieldWarning) {
+        nextErrors.dshield = dshieldWarning
+      }
+      if (threatFoxWarning && threatFoxStatus !== 'disabled_license') nextErrors.threatfox = threatFoxWarning
+      if (nvdWarning) nextErrors.nvd = nvdWarning
+      if (kevWarning) nextErrors.kev = kevWarning
+      if (breachWarning) nextErrors.rb = breachWarning
 
-    let sources = []
-    if (snapshotSources) {
-      sources = snapshotSources.map((s) => ({
-        ip: s.ip,
-        reports: Number(s.reports) || 0,
-        targets: Number(s.targets) || 0,
-        country: s.country,
-        countryCode: s.countryCode,
-        city: s.city || null,
-        lat: s.lat,
-        lon: s.lon,
-      }))
-    } else if (Array.isArray(topIps)) {
-      const top = topIps.slice(0, 12)
-      const located = await Promise.allSettled(
-        top.map((s) => fetchJson(`https://ipwho.is/${encodeURIComponent(s.source)}`)),
-      )
-      sources = top
-        .map((s, i) => {
-          const geo = located[i].status === 'fulfilled' ? located[i].value : null
-          if (!geo || geo.success === false || typeof geo.latitude !== 'number') return null
+      const sources = (Array.isArray(dashboard.sources) ? dashboard.sources : [])
+        .filter((source) =>
+          Number.isFinite(source.lat) &&
+          Number.isFinite(source.lon) &&
+          numericValue(source.reports) !== null,
+        )
+        .map((source) => ({
+          ip: source.ip,
+          reports: numericValue(source.reports),
+          targets: numericValue(source.targets),
+          country: source.country,
+          countryCode: source.countryCode,
+          city: source.city || null,
+          lat: source.lat,
+          lon: source.lon,
+        }))
+
+      const ports = extractPortRecords(dashboard.ports)
+        .map((record) => {
+          const port = numericValue(record.targetport ?? record.port ?? record.portin ?? record.number)
+          const records = numericValue(record.records ?? record.reports ?? record.count)
+          if (port == null || records == null || !Number.isInteger(port) || port < 1 || port > 65535 || records <= 0) {
+            return null
+          }
           return {
-            ip: s.source,
-            reports: Number(s.reports) || 0,
-            targets: Number(s.targets) || 0,
-            country: geo.country,
-            countryCode: geo.country_code,
-            city: geo.city || null,
-            lat: geo.latitude,
-            lon: geo.longitude,
+            port,
+            records,
+            rank: numericValue(record.rank),
+            targets: numericValue(record.targets),
+            sources: numericValue(record.sources),
+            date: record.date || dashboard.ports?.date || null,
           }
         })
         .filter(Boolean)
-    }
+        .sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER))
+        .slice(0, 6)
+      if (ports.length === 0 && topPortsFeed && topPortsFeed.status !== 'live') {
+        nextErrors.ports = topPortsFeed.error || `Provider status: ${topPortsFeed.status}`
+      } else if (ports.length === 0 && !topPortsFeed && dshieldWarning) {
+        nextErrors.ports = dshieldWarning
+      }
 
-    const ports = topPorts
-      ? Object.values(topPorts)
-          .map((p) => ({
-            port: Number(p.targetport),
-            records: Number(p.records) || 0,
-            targets: Number(p.targets) || 0,
-            sources: Number(p.sources) || 0,
-          }))
-          .sort((a, b) => b.records - a.records)
-          .slice(0, 6)
-      : []
+      const nvd = dashboard.nvd
+      const violationCounts = new Map()
+      const violationWindowStart = Date.now() - 48 * 60 * 60 * 1000
+      for (const item of nvd?.vulnerabilities || []) {
+        const cve = item.cve
+        if (!cve) continue
+        const publishedAt = Date.parse(cve.published || '')
+        if (!Number.isFinite(publishedAt) || publishedAt < violationWindowStart) continue
+        const primary = (cve.weaknesses || []).find((weakness) => weakness.type === 'Primary')
+        const descriptions = primary
+          ? primary.description || []
+          : (cve.weaknesses || []).flatMap((weakness) => weakness.description || [])
+        const ids = [...new Set(descriptions.filter((description) => description.lang === 'en').map((description) => description.value))]
+        for (const id of ids) {
+          if (/^CWE-\d+$/.test(id)) violationCounts.set(id, (violationCounts.get(id) || 0) + 1)
+        }
+      }
+      const violations = [...violationCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id, count]) => ({ id, name: CWE_NAMES[id] || id, count }))
 
-    // Top weakness types (CWE) across the newly published CVEs — the
-    // real basis for the "top application violations" panel. Prefer each
-    // CVE's Primary weakness; fall back to any English weakness listed.
-    const violationCounts = new Map()
-    for (const v of nvd?.vulnerabilities || []) {
-      const cve = v.cve
-      if (!cve) continue
-      const primary = (cve.weaknesses || []).find((w) => w.type === 'Primary')
-      const descs = primary
-        ? primary.description || []
-        : (cve.weaknesses || []).flatMap((w) => w.description || [])
-      const ids = [...new Set(descs.filter((d) => d.lang === 'en').map((d) => d.value))]
-      for (const id of ids) {
-        if (/^CWE-\d+$/.test(id)) violationCounts.set(id, (violationCounts.get(id) || 0) + 1)
+      const dailySummary = Array.isArray(dashboard.dailySummary) ? dashboard.dailySummary : []
+      const dshieldEvents = dailySummary
+        .map((day) => {
+          const timestamp = timelineTimestamp(day.date)
+          return timestamp == null ? null : { timestamp, value: Number(day.records) || 0 }
+        })
+        .filter(Boolean)
+      const dshieldPortEvents = ports
+        .map((port) => {
+          const timestamp = timelineTimestamp(port.date)
+          return timestamp == null ? null : { timestamp, value: port.records }
+        })
+        .filter(Boolean)
+      const nvdEvents = (Array.isArray(nvd?.vulnerabilities) ? nvd.vulnerabilities : [])
+        .map((item) => {
+          const timestamp = timelineTimestamp(item?.cve?.published)
+          return timestamp == null ? null : { timestamp, value: 1 }
+        })
+        .filter(Boolean)
+      const kev = dashboard.kev
+      const kevEvents = (Array.isArray(kev?.recent) ? kev.recent : [])
+        .map((vulnerability) => {
+          const timestamp = timelineTimestamp(vulnerability.dateAdded)
+          return timestamp == null ? null : { timestamp, value: 1 }
+        })
+        .filter(Boolean)
+      const threatfox = Array.isArray(dashboard.threatfox) ? dashboard.threatfox : []
+      const threatFoxEvents = threatfox
+        .map((indicator) => {
+          const timestamp = timelineTimestamp(indicator.firstSeen)
+          return timestamp == null ? null : { timestamp, value: 1 }
+        })
+        .filter(Boolean)
+
+      if (!mounted.current) return
+      setData({
+        sources,
+        ports,
+        violations,
+        threatfox,
+        threatfoxStatus: threatFoxStatus,
+        providers: snapshot.providers,
+        infocon: dashboard.infocon?.status || null,
+        kev,
+        rbIndex: dashboard.recentBreaches?.index || null,
+        rbGeo: dashboard.recentBreaches?.geo || null,
+        rbLeaks: Array.isArray(dashboard.recentBreaches?.leaks) ? dashboard.recentBreaches.leaks.slice(0, 4) : [],
+        timeline: {
+          dshield: dshieldEvents,
+          dshieldPorts: dshieldPortEvents,
+          nvd: nvdEvents,
+          kev: kevEvents,
+          threatfox: threatFoxEvents,
+        },
+      })
+      setErrors(nextErrors)
+      setUpdatedAt(snapshot.generatedAt ? new Date(snapshot.generatedAt) : null)
+    } catch (error) {
+      if (mounted.current) {
+        console.error(`Threat-intel snapshot unavailable: ${error.message}`)
+        setErrors({ snapshot: error.message, dshield: error.message })
+      }
+    } finally {
+      if (mounted.current) {
+        setLoading(false)
+        setRefreshing(false)
       }
     }
-    const violations = [...violationCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([id, count]) => ({ id, name: CWE_NAMES[id] || id, count }))
-
-    const timeline = timelineRes
-      .map((r, i) => {
-        if (r.status !== 'fulfilled') return null
-        const day = Array.isArray(r.value) ? r.value[0] : null
-        if (!day || typeof day.records !== 'number') return null
-        return { date: timelineDays[i], records: day.records, sources: day.sources || 0 }
-      })
-      .filter(Boolean)
-
-    if (!mounted.current) return
-    setData({
-      sources,
-      ports,
-      violations,
-      infocon: infocon?.status || null,
-      kev: kevSnap,
-      rbIndex: rbIndex && !rbIndex.error ? rbIndex : null,
-      rbGeo: rbGeo && !rbGeo.error ? rbGeo : null,
-      rbLeaks: Array.isArray(rbLeaks?.leaks) ? rbLeaks.leaks.slice(0, 4) : [],
-      timeline,
-    })
-    setErrors(nextErrors)
-    setUpdatedAt(new Date())
-    setLoading(false)
-    setRefreshing(false)
   }, [])
 
   useEffect(() => {
@@ -492,9 +558,7 @@ export default function ThreatMap() {
   const path = useMemo(() => geoPath(projection), [projection])
   const graticulePath = useMemo(() => path(geoGraticule()), [path])
 
-  // Hover chip: the country's name in a small teal chip pinned to the
-  // cursor on the map itself, like the "Canada" chip in the Radware
-  // screenshot — in addition to the readout line above the map.
+  // Pin the country's name to the cursor in addition to the map readout.
   const onCountryHover = (e, info, name) => {
     const rect = mapWrapRef.current?.getBoundingClientRect()
     if (!rect) return
@@ -508,11 +572,8 @@ export default function ThreatMap() {
     if (info) setHovered(info)
   }
 
-  // Dominant category per country, from that country's own live data:
-  // ransomware victims first (leak listings naming a country), then
-  // breach targets (Recent Breaches geography), then scanning sources
-  // (DShield). Exploited flaws have no geography in any feed, so they
-  // colour no country.
+  // Provider-derived categories identify real source and target locations
+  // for hover descriptions; they do not alter the monochrome map styling.
   const { countryPaths, nodes, arcs, targets } = useMemo(() => {
     const totals = new Map()
     for (const s of data.sources) {
@@ -524,15 +585,13 @@ export default function ThreatMap() {
     const leakCodes = new Set(
       (data.rbLeaks || []).map((l) => NAME_TO_CODE[l.country]).filter(Boolean),
     )
-    // Only the top five breach-target countries colour purple — the
-    // full 28-day geography list would paint half the map.
+    // Limit breach-target countries to the top five so the target layer
+    // remains focused on the strongest available provider records.
     const attackedCodes = new Set(
       ((data.rbGeo?.targets || []).slice(0, 5).map((t) => NAME_TO_CODE[t.country])).filter(Boolean),
     )
-    // A country that is a top scanning source keeps its red: the map's
-    // story is where attacks come from. Breach targets colour only
-    // countries with no top source; ransomware victims colour leak
-    // countries with no top source.
+    // Preserve the source/target category used for hover descriptions and
+    // endpoint selection without changing the map's monochrome country fill.
     const categoryOf = (code) => {
       if (totals.has(code)) return 'scanning'
       if (leakCodes.has(code)) return 'ransomware'
@@ -543,17 +602,17 @@ export default function ThreatMap() {
     for (const [code, c] of totals) {
       const num = COUNTRY_NUMERIC[code]
       const cat = categoryOf(code)
-      if (num && cat) infoById.set(num, { ...c, category: cat, fill: MAP_WASH[cat] })
+      if (num && cat) infoById.set(num, { ...c, category: cat })
     }
-    // Breach-target and ransomware-victim countries that filed no
-    // top source still get their category colour.
+    // Include real breach-target and ransomware-victim countries that
+    // filed no top source so their endpoints remain available.
     for (const code of [...attackedCodes, ...leakCodes]) {
       if (totals.has(code)) continue
       const num = COUNTRY_NUMERIC[code]
       const cat = categoryOf(code)
       if (num && cat) {
         const name = (data.rbGeo?.targets || []).find((t) => NAME_TO_CODE[t.country] === code)?.country || code
-        infoById.set(num, { country: name, code, reports: 0, sources: 0, category: cat, fill: MAP_WASH[cat] })
+        infoById.set(num, { country: name, code, reports: 0, sources: 0, category: cat })
       }
     }
     const countryPaths = COUNTRIES.features.map((f, i) => {
@@ -564,7 +623,6 @@ export default function ThreatMap() {
           key={i}
           d={path(f) || undefined}
           className="gtw__country"
-          style={{ fill: info ? info.fill : MAP_BASE_FILL, fillOpacity: info ? 0.42 : 1 }}
           onMouseEnter={() => info && setHovered(info)}
           onMouseMove={(e) => onCountryHover(e, info, name)}
           onMouseLeave={() => { setHovered(null); setChip(null) }}
@@ -610,17 +668,15 @@ export default function ThreatMap() {
         id: `t:${code}`,
         code,
         category: cat,
-        color: MAP_WASH[cat],
         x: c[0],
         y: c[1],
       })
     }
     // Arcs run between every pair of most-reported sources and from
     // every source out to the breach-target and ransomware-victim
-    // countries — a dense web, like the Radware screenshot. They are
+    // countries — a dense web. They are
     // motion, not claimed attack routes: DShield reports where the
-    // sources are, not where each packet was aimed. Arcs are violet,
-    // except arcs landing on a ransomware-victim country, which are red.
+    // sources are, not where each packet was aimed. Arcs are white.
     const arcs = []
     const seen = new Set()
     const addArc = (a, b) => {
@@ -629,8 +685,7 @@ export default function ThreatMap() {
       const key = `${a.id}>${b.id}`
       if (seen.has(key)) return
       seen.add(key)
-      const color = b.category === 'ransomware' ? MAP_WASH.ransomware : ARC_VIOLET
-      arcs.push({ key, d: arcPath([a.x, a.y], [b.x, b.y]), color })
+      arcs.push({ key, d: arcPath([a.x, a.y], [b.x, b.y]) })
     }
     for (let i = 0; i < nodes.length; i += 1) {
       for (let j = i + 1; j < nodes.length; j += 1) addArc(nodes[i], nodes[j])
@@ -656,11 +711,42 @@ export default function ThreatMap() {
   const totalReports = data.sources.reduce((sum, s) => sum + s.reports, 0)
   const geoTargets = (data.rbGeo?.targets || []).slice(0, 5)
   const sumTargetCount = Math.max(1, geoTargets.reduce((sum, t) => sum + t.count, 0))
-  const maxTimeline = Math.max(1, ...data.timeline.map((t) => t.records))
-  const todayReports = data.timeline.length ? data.timeline[data.timeline.length - 1].records : null
   const topPortRecords = data.ports.reduce((sum, p) => sum + p.records, 0)
   const sumViolationCount = Math.max(1, data.violations.reduce((sum, v) => sum + v.count, 0))
-  const timelineValues = data.timeline.map((t) => t.records)
+  const timelineNow = updatedAt?.getTime() ?? INITIAL_TIMELINE_TIME
+  const timelineStartDate = new Date(timelineNow)
+  timelineStartDate.setUTCHours(0, 0, 0, 0)
+  timelineStartDate.setUTCDate(timelineStartDate.getUTCDate() - 6)
+  const timelineStart = timelineStartDate.getTime()
+  const timelineTicks = Array.from({ length: 7 }, (_, i) => timelineStart + i * 24 * 60 * 60 * 1000)
+  const providerData = data.providers || {}
+  const dshieldFeeds = providerData.dshield?.subfeeds || {}
+  const timelineProviders = {
+    dshield: dshieldFeeds.daily_summary,
+    dshieldPorts: dshieldFeeds.top_ports,
+    nvd: providerData.nvd,
+    kev: providerData.cisa_kev,
+    threatfox: providerData.threatfox,
+  }
+  const timelineRows = TIMELINE_TRACKS.map((track) => {
+    const events = data.timeline[track.key] || []
+    return {
+      ...track,
+      events,
+      status: timelineSourceStatus(timelineProviders[track.key], events, timelineNow),
+    }
+  })
+  const freshnessItems = [
+    { key: 'dshield-sources', label: 'DShield sources', provider: dshieldFeeds.source_locations },
+    { key: 'dshield-ports', label: 'DShield ports', provider: dshieldFeeds.top_ports },
+    { key: 'dshield-reports', label: 'DShield reports', provider: dshieldFeeds.daily_summary },
+    { key: 'dshield-infocon', label: 'DShield InfoCon', provider: dshieldFeeds.infocon },
+    { key: 'ipwho', label: 'ipwho.is geolocation', provider: providerData.ip_geolocation },
+    { key: 'nvd', label: 'NIST NVD', provider: providerData.nvd },
+    { key: 'kev', label: 'CISA KEV', provider: providerData.cisa_kev },
+    { key: 'threatfox', label: 'ThreatFox', provider: providerData.threatfox },
+    { key: 'recent-breaches', label: 'Recent Breaches', provider: providerData.recent_breaches },
+  ]
 
   return (
     <div className={`gtw${railCollapsed ? ' gtw--rail-hidden' : ''}`}>
@@ -677,28 +763,28 @@ export default function ThreatMap() {
             >
               <defs>
                 <pattern id="gtw-grid" width="36" height="36" patternUnits="userSpaceOnUse">
-                  <path d="M 36 0 H 0 V 36" fill="none" stroke="#0e2a2e" strokeWidth="0.5" />
+                  <path d="M 36 0 H 0 V 36" className="gtw__map-grid" />
                 </pattern>
               </defs>
               <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
               <path d={graticulePath || undefined} className="gtw__graticule" />
               {countryPaths}
               {arcs.map((a) => (
-                <path key={a.key} d={a.d} className="gtw__arc" style={{ stroke: a.color }} />
+                <path key={a.key} d={a.d} className="gtw__arc" />
               ))}
               {arcs.slice(0, 14).map((a, i) => (
-                <circle key={`mover-${a.key}`} r="2.2" className="gtw__mover" style={{ fill: a.color }}>
+                <circle key={`mover-${a.key}`} r="2.2" className="gtw__mover">
                   <animateMotion dur={`${5 + (i % 4)}s`} repeatCount="indefinite" path={a.d} />
                 </circle>
               ))}
               {nodes.map((n) => (
                 <g key={n.ip} className="gtw__node">
-                  <circle cx={n.x} cy={n.y} r={n.r + 6} className="gtw__pulse" style={{ fill: CAT_BY_KEY[n.category].color }} />
-                  <circle cx={n.x} cy={n.y} r={n.r} className="gtw__dot" style={{ fill: CAT_BY_KEY[n.category].color }} />
+                  <circle cx={n.x} cy={n.y} r={n.r + 6} className="gtw__pulse" />
+                  <circle cx={n.x} cy={n.y} r={n.r} className="gtw__dot" />
                 </g>
               ))}
               {targets.map((t) => (
-                <circle key={t.id} cx={t.x} cy={t.y} r="2.5" className="gtw__mover" style={{ fill: t.color }} />
+                <circle key={t.id} cx={t.x} cy={t.y} r="2.5" className="gtw__mover" />
               ))}
             </svg>
 
@@ -713,18 +799,18 @@ export default function ThreatMap() {
             <div className="gtw__brand">
               <span className="gtw__brand-name">Offline Theory</span>
               <span className="gtw__brand-sub">Live Cyber Threat Map</span>
-              <span className="gtw__brand-note">Live data · SANS Internet Storm Center</span>
+              <span className="gtw__brand-note">Public feeds · refresh every 15 minutes</span>
               <span className="gtw__brand-status" role="status">
                 <span className={`gtw__live-dot ${loading ? 'is-loading' : ''}`} aria-hidden="true" />
-                {loading ? 'Contacting the feeds…' : `Live — updated ${updatedAt ? fmtTime(updatedAt) : '—'} UTC`}
+                {loading ? 'Loading the latest snapshot…' : `Snapshot · updated ${updatedAt ? fmtTime(updatedAt) : '—'} UTC`}
                 {data.infocon && (
                   <span className="gtw__infocon"> · InfoCon: <strong>{data.infocon}</strong></span>
                 )}
               </span>
             </div>
 
-            {/* Red callout button, top-centre */}
-            <button type="button" className="gtw__cta" onClick={() => load(true)} disabled={refreshing || loading} title="Refresh the live feeds">
+            {/* Callout button, top-centre */}
+            <button type="button" className="gtw__cta" onClick={() => load(true)} disabled={refreshing || loading} title="Check for the latest published snapshot">
               Live Cyber Threat Map
             </button>
 
@@ -732,10 +818,10 @@ export default function ThreatMap() {
             <div className="gtw__top-actions">
               <span className="gtw__live-btn" role="status">
                 <span className={`gtw__live-dot ${loading ? 'is-loading' : ''}`} aria-hidden="true" />
-                Live
+                Snapshot
               </span>
               <button type="button" className="gtw__refresh" onClick={() => load(true)} disabled={refreshing || loading}>
-                {refreshing ? 'Refreshing…' : 'Refresh now'}
+                {refreshing ? 'Checking…' : 'Check for updates'}
               </button>
             </div>
 
@@ -762,25 +848,34 @@ export default function ThreatMap() {
               </section>
 
               <section className="gtw__panel gtw__wire" aria-labelledby="wire-h">
-                <h2 id="wire-h" className="gtw__panel-title">Threat alerts</h2>
-                {data.rbLeaks.length === 0 && !errors.rb && <p className="gtw__empty">Loading…</p>}
-                {errors.rb && (
-                  <p className="gtw__error" role="alert">The Recent Breaches feed is unavailable right now ({errors.rb}).</p>
+                <h2 id="wire-h" className="gtw__panel-title">ThreatFox indicators</h2>
+                {data.threatfox.length === 0 && !errors.threatfox && (
+                  <p className="gtw__empty">
+                    {data.threatfoxStatus === 'disabled_license'
+                      ? 'Not fetched pending commercial-use eligibility or a paid subscription.'
+                      : 'No indicators in the latest snapshot.'}
+                  </p>
+                )}
+                {errors.threatfox && (
+                  <p className="gtw__error" role="alert">ThreatFox status: {errors.threatfox}</p>
                 )}
                 <ol className="gtw__wire-list">
-                  {data.rbLeaks.map((l) => (
-                    <li key={l.slug}>
-                      <a href={l.url} target="_blank" rel="noopener noreferrer">
-                        <span className="gtw__wire-icon" aria-hidden="true">↗</span>{l.victim}
-                      </a>
-                      <span className="gtw__wire-text">Listed by {l.group} — {l.claim || 'listed on a leak site'}</span>
-                      <span className="meta">{l.listed_ago || l.listed} · Claim, unverified</span>
+                  {data.threatfox.slice(0, 4).map((indicator) => (
+                    <li key={indicator.id || `${indicator.ioc}:${indicator.firstSeen}`}>
+                      <strong>{indicator.ioc}</strong>
+                      <span className="gtw__wire-text">
+                        {indicator.malware || indicator.threatType || indicator.iocType || 'Threat indicator'}
+                      </span>
+                      <span className="meta">
+                        {indicator.iocType || 'IOC'}{indicator.firstSeen ? ` · first seen ${indicator.firstSeen}` : ''}
+                      </span>
                     </li>
                   ))}
                 </ol>
                 <p className="gtw__aside-note">
-                  Leak-site listings are third-party claims, not confirmed breaches.
-                  Source: <a href="https://recentbreaches.com" target="_blank" rel="noopener noreferrer">Recent Breaches</a>.
+                  <a href="https://threatfox.abuse.ch/" target="_blank" rel="noopener noreferrer">abuse.ch ThreatFox</a>
+                  is disabled pending commercial-use eligibility or a paid subscription.
+                  Recent Breaches is not included pending permission for this site&rsquo;s intended use.
                 </p>
               </section>
             </div>
@@ -800,37 +895,15 @@ export default function ThreatMap() {
           {/* Timeline strip along the bottom of the map */}
           {timelineCollapsed ? (
             <div className="gtw__timeline gtw__timeline--collapsed">
-              <span className="gtw__timeline-collapsed-label">Sensor reports — last 7 days · DShield · collapsed</span>
+              <span className="gtw__timeline-collapsed-label">Threat activity — last 7 days · collapsed</span>
               <button type="button" className="gtw__timeline-show" onClick={() => setTimelineCollapsed(false)}>
                 Show timeline
               </button>
             </div>
           ) : (
-            <div className="gtw__timeline" aria-label="Sensor reports, last seven days">
-              <div className="gtw__timeline-main">
-                <div className="gtw__timeline-head">
-                  <h3 className="gtw__panel-title">Sensor reports — last 7 days · DShield</h3>
-                </div>
-                <div className="gtw__timeline-marks" aria-hidden="true">
-                  {data.timeline.map((t) => (
-                    <span key={t.date}>{fmtDayShort(t.date)}</span>
-                  ))}
-                  <span className="gtw__timeline-now">Now</span>
-                </div>
-                {data.timeline.length === 0 && !errors.dshield && <p className="gtw__empty">Loading…</p>}
-                <div className="gtw__timeline-rows">
-                  {CATEGORIES.map((c) => (
-                    <div className="gtw__timeline-row" key={c.key}>
-                      <Waveform values={timelineValues} color={c.color} />
-                    </div>
-                  ))}
-                </div>
-                <p className="gtw__timeline-note">
-                  One row per category, each tracing the real DShield daily sensor-report trend — the feeds publish no
-                  per-category history. Today: {todayReports != null ? `${todayReports.toLocaleString('en-US')} reports` : '—'} · 7-day peak {maxTimeline.toLocaleString('en-US')}.
-                </p>
-              </div>
-              <div className="gtw__timeline-side">
+            <section className="gtw__timeline" aria-label="Threat activity timeline, last seven days">
+              <div className="gtw__timeline-head">
+                <h3 className="gtw__panel-title">Threat activity — last 7 days</h3>
                 <button
                   type="button"
                   className="gtw__timeline-collapse"
@@ -839,20 +912,67 @@ export default function ThreatMap() {
                 >
                   ✕ Collapse
                 </button>
-                <ul className="gtw__timeline-legend" aria-label="Attack types shown on the timeline">
-                  {CATEGORIES.map((c) => (
-                    <li key={c.key} style={{ color: c.color }}>
-                      <span className="gtw__legend-dot" style={{ background: c.color }} aria-hidden="true" />
-                      {c.label}
+              </div>
+              <div className="gtw__timeline-content">
+                <div className="gtw__timeline-main">
+                  <div className="gtw__timeline-axis" aria-hidden="true">
+                    <div className="gtw__timeline-axis-plot">
+                      {timelineTicks.map((tick, i) => (
+                        <span
+                          key={tick}
+                          className={`gtw__timeline-label${i === 0 ? ' gtw__timeline-label--first' : ''}${i === timelineTicks.length - 1 ? ' gtw__timeline-label--last' : ''}`}
+                          style={{ left: `${((tick - timelineStart) / (timelineNow - timelineStart)) * 100}%` }}
+                        >
+                          {fmtDayShort(new Date(tick).toISOString().slice(0, 10))}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="gtw__timeline-now">NOW</span>
+                  </div>
+                  <div className="gtw__timeline-plot-layout">
+                    <div className="gtw__timeline-plot">
+                      <div className="gtw__timeline-grid" aria-hidden="true">
+                        {timelineTicks.map((tick) => (
+                          <span
+                            key={tick}
+                            style={{ left: `${((tick - timelineStart) / (timelineNow - timelineStart)) * 100}%` }}
+                          />
+                        ))}
+                      </div>
+                      <div className="gtw__timeline-rows">
+                        {timelineRows.map((track) => (
+                          <div className="gtw__timeline-row" key={track.key}>
+                            <ActivityTrack
+                              events={track.events}
+                              start={timelineStart}
+                              end={timelineNow}
+                              resolution={track.resolution}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="gtw__timeline-now-plot" aria-hidden="true" />
+                  </div>
+                </div>
+                <ul className="gtw__timeline-labels" aria-label="Activity sources">
+                  {timelineRows.map((track) => (
+                    <li key={track.key} className={`gtw__timeline-source gtw__timeline-source--${track.status.toLowerCase().replaceAll(' ', '-')}`}>
+                      <span className="gtw__timeline-source-name">{track.label}</span>
+                      <span className="gtw__timeline-source-status">{track.status}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-            </div>
+              <p className="gtw__timeline-note">
+                DShield reports, ports and CISA KEV use provider-supplied daily dates; NVD and available ThreatFox use hourly timestamps.
+                Missing source timestamps are left blank rather than inferred.
+              </p>
+            </section>
           )}
           {errors.dshield && (
             <p className="gtw__error gtw__error--below" role="alert">
-              The DShield feed is unavailable right now ({errors.dshield}). The map and port table will fill in when it answers.
+              DShield status: {errors.dshield}
             </p>
           )}
         </div>
@@ -861,20 +981,27 @@ export default function ThreatMap() {
         <aside className="gtw__rail" id="gtw-rail" aria-label="Live figures, rankings and scanned ports">
           <div className="gtw__rail-head">
             <h2 className="gtw__rail-title">Live Cyber Threat Map</h2>
-            <label className="gtw__interval" htmlFor="gtw-interval">
-              <span className="gtw__interval-label">Statistics interval</span>
-              <select
-                id="gtw-interval"
-                value={interval}
-                onChange={(e) => { setInterval(e.target.value); load(true) }}
-              >
-                <option value="1 hour">1 hour</option>
-                <option value="6 hours">6 hours</option>
-                <option value="24 hours">24 hours</option>
-                <option value="7 days">7 days</option>
-              </select>
-              <span className="gtw__interval-note">Live window · feeds refresh every 5 minutes</span>
-            </label>
+            <p className="gtw__interval-note">Provider snapshots refresh every 15 minutes. Freshness is shown per feed.</p>
+            <ul className="gtw__provider-freshness" aria-label="Provider freshness">
+              {freshnessItems.map(({ key, label, provider }) => {
+                const freshness = providerFreshness(provider)
+                const timestamp = provider?.fetchedAt || provider?.lastSuccessfulAt || null
+                const dataDate = provider?.dataDate
+                const title = [
+                  timestamp ? `Last successful refresh: ${formatUtcTimestamp(timestamp)}` : 'No successful refresh recorded',
+                  dataDate ? `Source data date: ${dataDate}` : null,
+                  provider?.error || null,
+                ].filter(Boolean).join(' · ')
+                return (
+                  <li key={key} className={`gtw__provider-freshness-item gtw__provider-freshness-item--${freshness.toLowerCase()}`} title={title}>
+                    <span className="gtw__provider-freshness-name">{label}</span>
+                    <strong>{freshness}</strong>
+                    {timestamp && <time dateTime={timestamp}>Last success · {formatUtcTimestamp(timestamp)}</time>}
+                    {dataDate && <span className="gtw__provider-freshness-date">Source date: {dataDate}</span>}
+                  </li>
+                )
+              })}
+            </ul>
           </div>
 
           <section className="gtw__panel" aria-labelledby="attackers-h">
@@ -885,7 +1012,7 @@ export default function ThreatMap() {
                 <li key={c.code}>
                   <span className="gtw__bars-label"><span className="gtw__flag" aria-hidden="true">{flagEmoji(c.code)}</span>{c.country}</span>
                   <span className="gtw__bars-track">
-                    <span className="gtw__bars-fill gtw__bars-fill--red" style={{ width: `${Math.max(4, (c.reports / sumCountryReports) * 100)}%` }} />
+                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (c.reports / sumCountryReports) * 100)}%` }} />
                   </span>
                   <span className="gtw__bars-num">{Math.round((c.reports / sumCountryReports) * 100)} %</span>
                 </li>
@@ -897,29 +1024,35 @@ export default function ThreatMap() {
           <section className="gtw__panel" aria-labelledby="attacked-h">
             <h2 id="attacked-h" className="gtw__panel-title">Top attacked</h2>
             {geoTargets.length === 0 && !errors.rb && <p className="gtw__empty">Loading…</p>}
+            {geoTargets.length === 0 && errors.rb && (
+              <p className="gtw__aside-note">Recent Breaches data is disabled pending permission for this site&rsquo;s intended use.</p>
+            )}
             <ol className="gtw__bars">
               {geoTargets.map((t) => (
                 <li key={t.country}>
                   <span className="gtw__bars-label"><span className="gtw__flag" aria-hidden="true">{flagEmoji(NAME_TO_CODE[t.country])}</span>{t.country}</span>
                   <span className="gtw__bars-track">
-                    <span className="gtw__bars-fill gtw__bars-fill--purple" style={{ width: `${Math.max(4, (t.count / sumTargetCount) * 100)}%` }} />
+                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (t.count / sumTargetCount) * 100)}%` }} />
                   </span>
                   <span className="gtw__bars-num">{Math.round((t.count / sumTargetCount) * 100)} %</span>
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Countries with the most breach targets, last 28 days. Source: <a href="https://recentbreaches.com" target="_blank" rel="noopener noreferrer">Recent Breaches</a>.</p>
+            <p className="gtw__aside-note">Breach geography is not shown while the Recent Breaches feed is disabled pending permission.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="vectors-h">
             <h2 id="vectors-h" className="gtw__panel-title">Top network attack vectors</h2>
-            {data.ports.length === 0 && !errors.dshield && <p className="gtw__empty">Loading…</p>}
+            {data.ports.length === 0 && !errors.ports && <p className="gtw__empty">Loading…</p>}
+            {data.ports.length === 0 && errors.ports && (
+              <p className="gtw__error" role="alert">The DShield top ports feed is unavailable right now ({errors.ports}).</p>
+            )}
             <ol className="gtw__bars">
               {data.ports.map((p) => (
                 <li key={p.port}>
                   <span className="gtw__bars-label" style={{ color: CAT_BY_KEY.ransomware.color }}>{PORT_NAMES[p.port] || 'Service'} · {p.port}</span>
                   <span className="gtw__bars-track">
-                    <span className="gtw__bars-fill gtw__bars-fill--yellow" style={{ width: `${Math.max(4, (p.records / maxPortRecords) * 100)}%` }} />
+                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (p.records / maxPortRecords) * 100)}%` }} />
                   </span>
                   <span className="gtw__bars-num">
                     {topPortRecords ? `${Math.round((p.records / topPortRecords) * 100)} %` : '—'}
@@ -941,7 +1074,7 @@ export default function ThreatMap() {
                 <li key={v.id}>
                   <span className="gtw__bars-label" style={{ color: CAT_BY_KEY.scanning.color }}>{v.name}</span>
                   <span className="gtw__bars-track">
-                    <span className="gtw__bars-fill gtw__bars-fill--red" style={{ width: `${Math.max(4, (v.count / sumViolationCount) * 100)}%` }} />
+                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (v.count / sumViolationCount) * 100)}%` }} />
                   </span>
                   <span className="gtw__bars-num">{v.id} · {v.count}</span>
                 </li>
@@ -952,7 +1085,10 @@ export default function ThreatMap() {
 
           <section className="gtw__panel" aria-labelledby="ports-h">
             <h2 id="ports-h" className="gtw__panel-title">Top scanned UDP / TCP ports</h2>
-            {data.ports.length === 0 && !errors.dshield && <p className="gtw__empty">Loading…</p>}
+            {data.ports.length === 0 && !errors.ports && <p className="gtw__empty">Loading…</p>}
+            {data.ports.length === 0 && errors.ports && (
+              <p className="gtw__error" role="alert">The DShield top ports feed is unavailable right now ({errors.ports}).</p>
+            )}
             <div className="gtw__port-grid">
               {data.ports.map((p, i) => (
                 <div className={`gtw__port-tile${i === 0 ? ' gtw__port-tile--hero' : ''}`} key={p.port}>
@@ -976,10 +1112,13 @@ export default function ThreatMap() {
         <InfoBar />
         <Newsletter />
         <p className="gtw__site-footer-credit">
-          Data: SANS Internet Storm Center · Recent Breaches · CISA KEV · NIST NVD · ipwho.is
+          Data: <a href="https://isc.sans.edu/api/" target="_blank" rel="noopener noreferrer">SANS Technology Institute / Internet Storm Center (DShield)</a>
+          {' · '}<a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener noreferrer">CISA KEV</a>
+          {' · '}<a href="https://nvd.nist.gov/" target="_blank" rel="noopener noreferrer">NIST NVD</a>
+          {' · '}<a href="https://ipwho.is/" target="_blank" rel="noopener noreferrer">ipwho.is</a>
+          {' · '}DShield data: commercial use with attribution; not for resale.
           {' — '}
-          Arcs are motion, not claimed attack routes. Countries wear a translucent wash by the dominant category among
-          their reported sources — teal top scanning sources, purple breach targets with no top source, red ransomware victims.
+          Arcs are motion, not claimed attack routes. ThreatFox is disabled pending commercial-use eligibility or a paid subscription; Recent Breaches is disabled pending permission.
           Attack vectors are most-probed services by port; application violations are CWE types in the last 48 hours of NVD CVEs.
         </p>
       </div>

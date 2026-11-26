@@ -1,8 +1,8 @@
 // Builds the threat-intel snapshots the Live Cyber Threat Map reads
 // same-origin: public/data/kev-snapshot.json (CISA KEV),
 // public/data/sources-snapshot.json (SANS DShield feeds, geolocated
-// server-side), and public/data/threatfox-snapshot.json (abuse.ch
-// ThreatFox IOCs, only when THREATFOX_AUTH_KEY is configured).
+// server-side), and public/data/threatfox-snapshot.json (abuse.ch ThreatFox
+// IOCs, only when licensing is cleared and the provider is explicitly enabled).
 //
 // Why snapshots: CISA publishes the KEV catalog as JSON but sends no CORS
 // headers, so a browser on offlinetheory.github.io cannot fetch it directly.
@@ -10,23 +10,23 @@
 // to geolocate the IPs through ipwho.is — and ipwho.is rate-limits those
 // lookups (HTTP 429), which once left the live map with no traffic data.
 // ThreatFox requires an Auth-Key header, which must never ship in frontend
-// JavaScript. This script runs in GitHub Actions (hourly), fetches everything
+// JavaScript. This script runs in GitHub Actions every 15 minutes, fetches everything
 // server-side, and commits small summaries the map page can fetch
 // same-origin. Every snapshot is labelled with when it was generated and
 // which provider each record came from, so the page can show LIVE vs CACHED
 // honestly and never present a stale or simulated record as live.
 //
 // Rules the script enforces:
-// - DShield feeds are fetched at most once per hour (the workflow runs
-//   hourly); a failed feed never wipes the previous snapshot — the old file
+// - DShield live feeds are fetched every 15 minutes; the bulk daily_sources
+//   availability check is cached for 24 hours. A failed feed never wipes the previous snapshot — the old file
 //   stays in place and the failure is recorded in providers status.
 // - Only valid public IPs are geolocated or published. Private, loopback,
 //   reserved and otherwise non-routable addresses are excluded, as are
 //   indicators that cannot be geolocated reliably. Coordinates are never
 //   invented.
-// - ThreatFox is skipped entirely unless THREATFOX_AUTH_KEY is set in the
-//   environment (GitHub Actions secret). Without it the provider is reported
-//   as not_configured and no request is attempted.
+// - ThreatFox is disabled by default pending commercial-use eligibility or
+//   an appropriate paid subscription. Once cleared, it can be enabled with
+//   ENABLE_THREATFOX and the required THREATFOX_AUTH_KEY secret.
 //
 // Usage: node scripts/build-threat-snapshot.mjs [--out public/data/kev-snapshot.json] [--out-sources public/data/sources-snapshot.json] [--out-threatfox public/data/threatfox-snapshot.json]
 import fs from 'node:fs'
@@ -42,6 +42,9 @@ const BLOCK_TXT = 'https://feeds.dshield.org/feeds/block.txt'
 const DAILY_SOURCES_URL = 'https://feeds.dshield.org/feeds/daily_sources'
 const THREATFOX_URL = 'https://threatfox-api.abuse.ch/api/v1/'
 const IPWHO_URL = 'https://ipwho.is'
+const USER_AGENT =
+  'OfflineTheoryThreatIntel/1.0 (+https://offlinetheory.github.io/; contact offlinetheory@proton.me)'
+const THREATFOX_ENABLED = process.env.ENABLE_THREATFOX === 'true'
 
 const outArg = process.argv.indexOf('--out')
 const OUT = outArg >= 0 ? process.argv[outArg + 1] : 'public/data/kev-snapshot.json'
@@ -96,15 +99,64 @@ function isPublicIp(ip) {
   return true
 }
 
+function providedNumber(value) {
+  if (typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
 function writeJson(file, obj) {
   fs.mkdirSync(path.dirname(file), { recursive: true })
   fs.writeFileSync(file, JSON.stringify(obj, null, 2) + '\n')
 }
 
 async function fetchText(url, label) {
-  const res = await fetch(url, { headers: { accept: 'text/plain, */*' } })
-  if (!res.ok) throw new Error(`${label} fetch failed: HTTP ${res.status}`)
-  return await res.text()
+  const res = await fetchDshieldResponse(url, {
+    headers: { accept: 'text/plain, */*', 'user-agent': USER_AGENT },
+  })
+  const body = await res.text()
+  if (!res.ok) throw new Error(`${label} fetch failed: HTTP ${res.status}: ${body.slice(0, 500)}`)
+  return body
+}
+
+async function fetchDshieldResponse(url, options = {}, attempts = 2) {
+  const { timeout = 30_000, ...fetchOptions } = options
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeout)
+    let res
+    try {
+      res = await fetch(url, { ...fetchOptions, signal: controller.signal })
+    } finally {
+      clearTimeout(timer)
+    }
+    if (res.status !== 429) return res
+    const body = await res.text()
+    if (attempt === attempts) {
+      throw new Error(`DShield rate limit persisted after retry: HTTP 429: ${body.slice(0, 500)}`)
+    }
+    const retryAfter = res.headers.get('retry-after')
+    const retrySeconds = Number(retryAfter)
+    const retryDate = Date.parse(retryAfter || '')
+    const serverWait = Number.isFinite(retrySeconds) && retrySeconds > 0
+      ? retrySeconds * 1000
+      : Number.isFinite(retryDate) ? Math.max(0, retryDate - Date.now()) : 0
+    const wait = Math.max(5 * 60 * 1000, serverWait)
+    console.warn(`DShield rate limit received: HTTP 429: ${body.slice(0, 500)}; waiting ${Math.ceil(wait / 1000)} seconds before retry.`)
+    await sleep(wait)
+  }
+  throw new Error('DShield request exhausted its retry attempts')
+}
+
+function rankedRows(data) {
+  if (Array.isArray(data)) return data
+  for (const key of ['topips', 'topports', 'data', 'ports']) {
+    if (Array.isArray(data?.[key])) return data[key]
+  }
+  return Object.entries(data || {})
+    .filter(([key]) => /^\d+$/.test(key))
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([, row]) => row)
 }
 // Geolocate one IP via ipwho.is, with retries on 429 (the free endpoint
 // rate-limits bursts). Honours Retry-After when the server sends one.
@@ -113,9 +165,19 @@ async function geolocate(ip, attempts = 4) {
     const res = await fetch(`${IPWHO_URL}/${encodeURIComponent(ip)}`, {
       headers: { accept: 'application/json' },
     })
+    const body = await res.text()
     if (res.ok) {
-      const geo = await res.json()
-      if (geo.success === false || typeof geo.latitude !== 'number') return null
+      let geo
+      try {
+        geo = JSON.parse(body)
+      } catch (error) {
+        console.warn(`ipwho.is returned invalid JSON for ${ip}: ${error.message}; body: ${body.slice(0, 500)}`)
+        return null
+      }
+      if (geo.success === false || typeof geo.latitude !== 'number' || typeof geo.longitude !== 'number') {
+        console.warn(`ipwho.is returned no usable coordinates for ${ip}: ${body.slice(0, 500)}`)
+        return null
+      }
       return {
         ip,
         country: geo.country,
@@ -128,11 +190,11 @@ async function geolocate(ip, attempts = 4) {
     if (res.status === 429 && attempt < attempts) {
       const retryAfter = Number(res.headers.get('retry-after'))
       const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000 * attempt
-      console.warn(`ipwho.is rate-limited ${ip} (attempt ${attempt}/${attempts}); waiting ${wait}ms`)
+      console.warn(`ipwho.is rate-limited ${ip} (HTTP 429, attempt ${attempt}/${attempts}): ${body.slice(0, 500)}; waiting ${wait}ms`)
       await sleep(wait)
       continue
     }
-    console.warn(`ipwho.is lookup failed for ${ip}: HTTP ${res.status}`)
+    console.warn(`ipwho.is lookup failed for ${ip}: HTTP ${res.status}: ${body.slice(0, 500)}`)
     return null
   }
   return null
@@ -194,52 +256,69 @@ function parseBlockTxt(text) {
 
 async function buildSourcesSnapshot() {
   const fetchedAt = new Date().toISOString()
-  const feeds = { topips: 'error', top10: 'error', block: 'error', dailySources: 'error' }
+  const feeds = { topips: 'error', topipsText: 'error', top10: 'error', block: 'error', dailySources: 'error' }
+  let previousSnapshot = null
+  try {
+    previousSnapshot = JSON.parse(fs.readFileSync(OUT_SOURCES, 'utf8'))
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
   let topRows = []
+  let topIpsDataDate = null
+  let topIpsFetchedAt = null
   let top10Sources = []
   let blocklist = []
-  let dailySources = null
+  let dailySources = previousSnapshot?.dailySources || null
 
   // The two DShield rankings disagree on order: topips.txt / top10.txt rank
-  // one way (IP + reverse-DNS hostname, no counts), the JSON API ranks by
-  // reports and carries reports/targets. The map needs counts to size its
-  // markers, so the geolocated sources come from the API; the txt rankings
-  // are recorded alongside them for reference. No counts are ever joined
-  // across the two rankings — they are different lists.
+  // one way (IP + reverse-DNS hostname, no counts), the JSON API ranks
+  // by reports and carries reports/targets. Geolocated sources require those
+  // API counts; text-only rankings are metadata, never a count fallback.
   let topIpsTxt = []
   try {
     topIpsTxt = parseTopIpsTxt(await fetchText(TOPIPS_TXT, 'DShield topips.txt'))
     if (topIpsTxt.length === 0) throw new Error('topips.txt parsed to zero rows')
-    feeds.topips = 'ok'
+    feeds.topipsText = 'ok'
   } catch (err) {
     console.warn(`DShield topips.txt failed (${err.message})`)
   }
   try {
-    const res = await fetch(TOPIPS_API, { headers: { accept: 'application/json' } })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = await res.json()
-    if (!Array.isArray(data)) throw new Error('unexpected shape')
-    topRows = data
-      .filter((s) => isPublicIp(s.source))
+    const res = await fetchDshieldResponse(TOPIPS_API, {
+      timeout: 30_000,
+      headers: { accept: 'application/json', 'user-agent': USER_AGENT },
+    })
+    const body = await res.text()
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${body.slice(0, 500)}`)
+    let data
+    try {
+      data = JSON.parse(body)
+    } catch (error) {
+      throw new Error(`invalid JSON response: ${error.message}; body: ${body.slice(0, 500)}`)
+    }
+    const rows = rankedRows(data)
+    topRows = rows
+      .filter((s) => s && isPublicIp(s.source) &&
+        Number.isInteger(Number(s.rank)) && Number(s.rank) > 0 &&
+        providedNumber(s.reports) != null && providedNumber(s.reports) > 0)
       .map((s) => ({
+        rank: Number(s.rank),
         source: s.source,
-        reports: Number(s.reports) || 0,
-        targets: Number(s.targets) || 0,
+        reports: providedNumber(s.reports),
+        targets: providedNumber(s.targets),
         firstSeen: null, // the API publishes no first/last-seen timestamps
         lastSeen: null,
       }))
-    if (topRows.length === 0) throw new Error('API returned zero public rows')
-    if (feeds.topips === 'error') feeds.topips = 'ok (api only)'
+    if (topRows.length === 0) {
+      throw new Error(`API returned no ranked rows; HTTP ${res.status}, body: ${body.slice(0, 500)}`)
+    }
+    topIpsFetchedAt = new Date().toISOString()
+    topIpsDataDate = typeof data.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.date)
+      ? data.date
+      : null
+    for (const row of topRows) row.dataDate = topIpsDataDate
+    feeds.topips = 'ok'
   } catch (err) {
     console.warn(`DShield topips API failed: ${err.message}`)
-    // Fall back to the txt ranking with null counts rather than no data.
-    topRows = topIpsTxt.map((r) => ({
-      source: r.source,
-      reports: null,
-      targets: null,
-      firstSeen: null,
-      lastSeen: null,
-    }))
   }
 
   try {
@@ -256,20 +335,27 @@ async function buildSourcesSnapshot() {
     console.warn(`DShield block.txt failed: ${err.message}`)
   }
 
-  // daily_sources is a ~149 MB bulk dump (millions of per-source rows). The
-  // map cannot use it as markers, and downloading it hourly is wasteful, so
-  // the pipeline checks its availability with a HEAD request only and
-  // records the size. No body is downloaded.
-  try {
-    const res = await fetch(DAILY_SOURCES_URL, { method: 'HEAD' })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    dailySources = {
-      bytes: Number(res.headers.get('content-length')) || null,
-      note: 'Bulk feed (~149 MB) — availability checked only, body not downloaded.',
+  // daily_sources is a ~149 MB dump not used by the map. Check availability
+  // with HEAD only once a day; never download the body.
+  const lastDailyCheck = Date.parse(dailySources?.checkedAt || '')
+  if (!Number.isFinite(lastDailyCheck) || Date.now() - lastDailyCheck >= DAY) {
+    try {
+      const res = await fetchDshieldResponse(DAILY_SOURCES_URL, {
+        method: 'HEAD',
+        headers: { 'user-agent': USER_AGENT },
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      dailySources = {
+        bytes: Number(res.headers.get('content-length')) || null,
+        checkedAt: fetchedAt,
+        note: 'Bulk feed (~149 MB) — availability checked daily; body not downloaded.',
+      }
+      feeds.dailySources = 'ok'
+    } catch (err) {
+      console.warn(`DShield daily_sources check failed: ${err.message}`)
     }
-    feeds.dailySources = 'ok'
-  } catch (err) {
-    console.warn(`DShield daily_sources check failed: ${err.message}`)
+  } else {
+    feeds.dailySources = 'cached'
   }
   // Geolocate the top sources, sequentially with a polite pause: bursts are
   // what trip ipwho.is's rate limit. A failed lookup drops that one source;
@@ -287,18 +373,33 @@ async function buildSourcesSnapshot() {
       provider: 'DShield',
       reports: s.reports,
       targets: s.targets,
+      rank: s.rank,
+      dataDate: s.dataDate,
       firstSeen: s.firstSeen,
       lastSeen: s.lastSeen,
     })
   }
   if (sources.length === 0) throw new Error('No DShield source IPs geolocated successfully')
+  const geolocationFetchedAt = new Date().toISOString()
+  const requestedGeolocations = Math.min(12, topRows.length)
+  const geolocationStatus = sources.length === requestedGeolocations ? 'ok' : 'partial'
+
+  if (topRows.length === 0) throw new Error('No valid dated DShield top-IP rows with provider-supplied report counts')
 
   const snapshot = {
     source: 'SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is',
     sourceUrl: TOPIPS_TXT,
     generatedAt: fetchedAt,
+    dataDate: topIpsDataDate,
     providers: {
-      dshield: { status: feeds.topips === 'error' ? 'error' : 'ok', fetchedAt, feeds },
+      dshield: { status: 'ok', fetchedAt: topIpsFetchedAt, dataDate: topIpsDataDate, feeds },
+      ip_geolocation: {
+        status: geolocationStatus,
+        fetchedAt: geolocationFetchedAt,
+        successfulLookups: sources.length,
+        requestedLookups: requestedGeolocations,
+        error: geolocationStatus === 'partial' ? 'Some source IPs could not be geolocated.' : null,
+      },
       threatfox: { status: 'see threatfox-snapshot.json', fetchedAt: null },
     },
     sources,
@@ -311,10 +412,13 @@ async function buildSourcesSnapshot() {
   console.log(`Wrote ${OUT_SOURCES}: ${sources.length} geolocated sources, top10 ${top10Sources.length}, blocklist ${blocklist.length} ranges.`)
 }
 
-// ThreatFox get_iocs, gated on THREATFOX_AUTH_KEY. With no key configured
-// nothing is requested and no file is written; the map reports the provider
-// as not_configured.
+// ThreatFox get_iocs, gated on explicit licensing approval and THREATFOX_AUTH_KEY.
+// Without both, nothing is requested and no file is written.
 async function buildThreatfoxSnapshot() {
+  if (!THREATFOX_ENABLED) {
+    console.log('ThreatFox skipped: disabled pending commercial-use eligibility or a paid subscription.')
+    return
+  }
   if (!THREATFOX_KEY) {
     console.log('ThreatFox skipped: THREATFOX_AUTH_KEY is not configured.')
     return
@@ -322,8 +426,8 @@ async function buildThreatfoxSnapshot() {
   const fetchedAt = new Date().toISOString()
   const res = await fetch(THREATFOX_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Auth-Key': THREATFOX_KEY },
-    body: JSON.stringify({ query: 'get_iocs', days: 1 }),
+    headers: { 'Content-Type': 'application/json', 'Auth-Key': THREATFOX_KEY, 'user-agent': USER_AGENT },
+    body: JSON.stringify({ query: 'get_iocs', days: 7 }),
   })
   if (!res.ok) throw new Error(`ThreatFox request failed: HTTP ${res.status}`)
   const body = await res.json()
@@ -358,7 +462,7 @@ async function buildThreatfoxSnapshot() {
   }
 
   writeJson(OUT_THREATFOX, {
-    source: 'abuse.ch ThreatFox get_iocs (last 24h), geolocated via ipwho.is',
+    source: 'abuse.ch ThreatFox get_iocs (last 7 days), geolocated via ipwho.is',
     sourceUrl: THREATFOX_URL,
     generatedAt: fetchedAt,
     status: 'ok',
@@ -369,7 +473,9 @@ async function buildThreatfoxSnapshot() {
 }
 
 async function buildKevSnapshot() {
-  const res = await fetch(KEV_URL, { headers: { accept: 'application/json' } })
+  const res = await fetch(KEV_URL, {
+    headers: { accept: 'application/json', 'user-agent': USER_AGENT },
+  })
   if (!res.ok) throw new Error(`KEV fetch failed: HTTP ${res.status}`)
   const catalog = await res.json()
   const vulns = Array.isArray(catalog.vulnerabilities) ? catalog.vulnerabilities : []
@@ -396,7 +502,7 @@ async function buildKevSnapshot() {
     addedLast7Days: last7.length,
     addedLast30Days: last30.length,
     topVendors,
-    recent: sorted.slice(0, 12).map((v) => ({
+    recent: sorted.slice(0, 100).map((v) => ({
       cveID: v.cveID,
       vendorProject: v.vendorProject,
       product: v.product,
@@ -411,8 +517,13 @@ async function buildKevSnapshot() {
 }
 
 async function main() {
-  // KEV is required: if it fails, the run fails loudly.
-  await buildKevSnapshot()
+  // A KEV outage must not block other providers; the normalized snapshot
+  // retains the last successful KEV data and marks its freshness honestly.
+  try {
+    await buildKevSnapshot()
+  } catch (err) {
+    console.warn(`KEV snapshot skipped: ${err.message}`)
+  }
 
   // The sources snapshot is best-effort: if DShield or ipwho.is is
   // unavailable, the old file stays in place (the workflow only commits

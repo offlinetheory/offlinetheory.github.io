@@ -152,6 +152,7 @@ function staticRoutes() {
         { route: 'about', title: 'About', desc: aboutDesc },
         { route: 'privacy', title: 'Privacy policy', desc: 'How OFFLINE THEORY collects and uses information, including the newsletter, hosting, and affiliate links.' },
         { route: 'search', title: 'Search', desc: searchDesc },
+        { route: 'threat-map', title: 'Live Cyber Threat Map', desc: 'A live map of cyber threat reports, source addresses, targeted ports, breach targets and exploited vulnerabilities from public data feeds.' },
         ...ARTICLES.map((a) => {
           const cover = getSeoCover(a.thumb)
           const hashed = cover ? findHashedAsset(dist, cover.filePrefix) : null

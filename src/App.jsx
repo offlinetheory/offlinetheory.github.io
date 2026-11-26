@@ -8,6 +8,7 @@ import ArticlePage from './pages/ArticlePage.jsx'
 import AboutPage from './pages/AboutPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import PrivacyPage from './pages/PrivacyPage.jsx'
+import ThreatMap from './pages/ThreatMap.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 function ScrollToTop() {
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/threat-map" element={<ThreatMap />} />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
