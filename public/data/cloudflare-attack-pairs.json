@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": null,
+  "generatedAt": "2026-11-26T05:21:37.271Z",
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
-    "status": "not_configured",
+    "status": "offline",
     "fetchedAt": null,
     "lastUpdated": null,
     "pairCount": 0,
-    "error": "CLOUDFLARE_RADAR_API_TOKEN is not available to the server-side ingestion process.",
+    "error": "Cloudflare Radar HTTP 200; success=true; errors=none; response keys=success,errors,result; result keys=top_0,meta; Cloudflare Radar response is missing valid upstream metadata",
     "cacheIntervalMinutes": 15,
     "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan."
   },

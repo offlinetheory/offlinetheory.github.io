@@ -1,12 +1,12 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-26T03:30:48.623Z",
+  "generatedAt": "2026-11-26T05:21:22.846Z",
   "dataDate": null,
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-26T03:30:49.134Z",
+      "fetchedAt": "2026-11-26T05:21:23.456Z",
       "dataDate": null,
       "feeds": {
         "topips": "ok",
@@ -18,7 +18,7 @@
     },
     "ip_geolocation": {
       "status": "ok",
-      "fetchedAt": "2026-11-26T03:31:02.843Z",
+      "fetchedAt": "2026-11-26T05:21:37.100Z",
       "successfulLookups": 12,
       "requestedLookups": 12,
       "error": null
@@ -296,7 +296,7 @@
         "network": "150.129.10.0/24",
         "startIp": "150.129.10.0",
         "endIp": "150.129.10.255",
-        "reports": 362,
+        "reports": 367,
         "asn": "LITESERVER",
         "country": "NL",
         "abuse": "ripe@liteserver.nl"
@@ -323,7 +323,7 @@
         "network": "77.239.124.0/24",
         "startIp": "77.239.124.0",
         "endIp": "77.239.124.255",
-        "reports": 350,
+        "reports": 353,
         "asn": null,
         "country": null,
         "abuse": null
@@ -332,7 +332,7 @@
         "network": "198.235.24.0/24",
         "startIp": "198.235.24.0",
         "endIp": "198.235.24.255",
-        "reports": 350,
+        "reports": 352,
         "asn": "GOOGLE-CLOUD-PLATFORM",
         "country": "US",
         "abuse": "None"
@@ -341,7 +341,7 @@
         "network": "66.132.172.0/24",
         "startIp": "66.132.172.0",
         "endIp": "66.132.172.255",
-        "reports": 347,
+        "reports": 350,
         "asn": null,
         "country": null,
         "abuse": null
@@ -350,7 +350,7 @@
         "network": "66.132.186.0/24",
         "startIp": "66.132.186.0",
         "endIp": "66.132.186.255",
-        "reports": 346,
+        "reports": 349,
         "asn": null,
         "country": null,
         "abuse": null
@@ -359,7 +359,7 @@
         "network": "66.132.195.0/24",
         "startIp": "66.132.195.0",
         "endIp": "66.132.195.255",
-        "reports": 345,
+        "reports": 348,
         "asn": null,
         "country": null,
         "abuse": null
@@ -368,7 +368,7 @@
         "network": "156.225.1.0/24",
         "startIp": "156.225.1.0",
         "endIp": "156.225.1.255",
-        "reports": 343,
+        "reports": 345,
         "asn": "OCTL-AS-AP",
         "country": "OceanBlue",
         "abuse": "Cloud"
@@ -377,10 +377,28 @@
         "network": "216.25.90.0/24",
         "startIp": "216.25.90.0",
         "endIp": "216.25.90.255",
-        "reports": 341,
+        "reports": 342,
         "asn": null,
         "country": null,
         "abuse": null
+      },
+      {
+        "network": "151.243.11.0/24",
+        "startIp": "151.243.11.0",
+        "endIp": "151.243.11.255",
+        "reports": 341,
+        "asn": "RASANA",
+        "country": "IR",
+        "abuse": "abuse@rasana.net"
+      },
+      {
+        "network": "91.196.152.0/24",
+        "startIp": "91.196.152.0",
+        "endIp": "91.196.152.255",
+        "reports": 338,
+        "asn": "ATT-INTERNET4",
+        "country": "US",
+        "abuse": "abuse@att.net"
       },
       {
         "network": "193.47.62.0/24",
@@ -392,85 +410,67 @@
         "abuse": "support@quadranet.com"
       },
       {
-        "network": "151.243.11.0/24",
-        "startIp": "151.243.11.0",
-        "endIp": "151.243.11.255",
-        "reports": 336,
-        "asn": "RASANA",
-        "country": "IR",
-        "abuse": "abuse@rasana.net"
-      },
-      {
-        "network": "91.196.152.0/24",
-        "startIp": "91.196.152.0",
-        "endIp": "91.196.152.255",
-        "reports": 335,
-        "asn": "ATT-INTERNET4",
-        "country": "US",
-        "abuse": "abuse@att.net"
-      },
-      {
-        "network": "195.182.16.0/24",
-        "startIp": "195.182.16.0",
-        "endIp": "195.182.16.255",
-        "reports": 333,
-        "asn": "OT2-AS",
-        "country": "UA",
-        "abuse": "abuse@omegatelecom.ua"
-      },
-      {
         "network": "172.110.223.0/24",
         "startIp": "172.110.223.0",
         "endIp": "172.110.223.255",
-        "reports": 332,
+        "reports": 336,
         "asn": null,
         "country": null,
         "abuse": null
       },
       {
-        "network": "200.138.46.0/24",
-        "startIp": "200.138.46.0",
-        "endIp": "200.138.46.255",
-        "reports": 331,
-        "asn": "V",
-        "country": "tal",
-        "abuse": "BR"
-      },
-      {
-        "network": "217.60.242.0/24",
-        "startIp": "217.60.242.0",
-        "endIp": "217.60.242.255",
-        "reports": 330,
-        "asn": "TCI",
-        "country": "IR",
-        "abuse": "LIRadmin@tci.ir"
-      },
-      {
-        "network": "45.156.128.0/24",
-        "startIp": "45.156.128.0",
-        "endIp": "45.156.128.255",
-        "reports": 329,
-        "asn": "AS-BITSIGHT",
-        "country": "PT",
-        "abuse": ">>UNKNOWN<<"
+        "network": "195.182.16.0/24",
+        "startIp": "195.182.16.0",
+        "endIp": "195.182.16.255",
+        "reports": 334,
+        "asn": "OT2-AS",
+        "country": "UA",
+        "abuse": "abuse@omegatelecom.ua"
       },
       {
         "network": "77.67.26.0/24",
         "startIp": "77.67.26.0",
         "endIp": "77.67.26.255",
-        "reports": 329,
+        "reports": 332,
         "asn": "GTT-BACKBONE",
         "country": "GTT",
         "abuse": "US"
       },
       {
+        "network": "185.242.226.0/24",
+        "startIp": "185.242.226.0",
+        "endIp": "185.242.226.255",
+        "reports": 332,
+        "asn": "AS49870-BV",
+        "country": "NL",
+        "abuse": "abuse@westcall.ru"
+      },
+      {
+        "network": "200.138.46.0/24",
+        "startIp": "200.138.46.0",
+        "endIp": "200.138.46.255",
+        "reports": 332,
+        "asn": "V",
+        "country": "tal",
+        "abuse": "BR"
+      },
+      {
         "network": "185.107.80.0/24",
         "startIp": "185.107.80.0",
         "endIp": "185.107.80.255",
-        "reports": 329,
+        "reports": 331,
         "asn": "NFORCE",
         "country": "NL",
         "abuse": "abuse@nforce.com"
+      },
+      {
+        "network": "217.60.242.0/24",
+        "startIp": "217.60.242.0",
+        "endIp": "217.60.242.255",
+        "reports": 331,
+        "asn": "TCI",
+        "country": "IR",
+        "abuse": "LIRadmin@tci.ir"
       }
     ]
   },

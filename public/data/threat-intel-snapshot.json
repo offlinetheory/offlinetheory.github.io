@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T03:31:07.327Z",
+  "generatedAt": "2026-11-26T05:21:42.091Z",
   "refreshIntervalMinutes": 15,
   "providers": {
     "dshield": {
@@ -9,37 +9,37 @@
       "attribution": "SANS Technology Institute / Internet Storm Center (DShield)",
       "license": "Commercial use is permitted with attribution; do not resell. See the provider’s published license terms.",
       "status": "live",
-      "fetchedAt": "2026-11-26T03:31:07.277Z",
+      "fetchedAt": "2026-11-26T05:21:42.049Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "Best effort; on HTTP 429 the job pauses for 5 minutes before retrying.",
       "subfeeds": {
         "source_locations": {
           "status": "live",
-          "fetchedAt": "2026-11-26T03:30:49.134Z",
+          "fetchedAt": "2026-11-26T05:21:23.456Z",
           "dataDate": null,
           "error": null
         },
         "top_ports": {
           "status": "live",
-          "fetchedAt": "2026-11-26T03:31:03.269Z",
+          "fetchedAt": "2026-11-26T05:21:37.726Z",
           "dataDate": "2026-11-25",
           "error": null
         },
         "infocon": {
           "status": "live",
-          "fetchedAt": "2026-11-26T03:31:03.402Z",
+          "fetchedAt": "2026-11-26T05:21:37.984Z",
           "dataDate": null,
           "error": null
         },
         "daily_summary": {
           "status": "live",
-          "fetchedAt": "2026-11-26T03:31:07.277Z",
+          "fetchedAt": "2026-11-26T05:21:42.049Z",
           "dataDate": "2026-11-26",
           "error": null
         }
       },
-      "sourceDataLastSuccessfulAt": "2026-11-26T03:30:49.134Z",
+      "sourceDataLastSuccessfulAt": "2026-11-26T05:21:23.456Z",
       "sourceDataDate": null
     },
     "threatfox": {
@@ -59,7 +59,7 @@
       "attribution": "NIST National Vulnerability Database (NVD)",
       "license": "Public NVD data; NIST does not endorse products or services.",
       "status": "live",
-      "fetchedAt": "2026-11-26T03:31:04.943Z",
+      "fetchedAt": "2026-11-26T05:21:38.933Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "One unauthenticated request per refresh; NVD unauthenticated limit is 5 requests per 30 seconds."
@@ -70,9 +70,25 @@
       "attribution": "CISA Known Exploited Vulnerabilities catalog",
       "license": "U.S. government work; source attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-26T03:30:48.597Z",
+      "fetchedAt": "2026-11-26T05:21:22.825Z",
       "error": null,
       "cacheIntervalMinutes": 15
+    },
+    "cloudflare_radar": {
+      "name": "Cloudflare Radar",
+      "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
+      "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
+      "license": "Cloudflare Radar aggregated attack data; attribution provided.",
+      "status": "offline",
+      "fetchedAt": null,
+      "error": "Cloudflare Radar HTTP 200; success=true; errors=none; response keys=success,errors,result; result keys=top_0,meta; Cloudflare Radar response is missing valid upstream metadata",
+      "lastUpdated": null,
+      "dateRange": null,
+      "units": null,
+      "normalization": null,
+      "pairCount": 0,
+      "cacheIntervalMinutes": 15,
+      "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan."
     },
     "recent_breaches": {
       "name": "Recent Breaches",
@@ -89,7 +105,7 @@
       "url": "https://ipwho.is/",
       "attribution": "ipwho.is",
       "status": "live",
-      "fetchedAt": "2026-11-26T03:31:02.843Z",
+      "fetchedAt": "2026-11-26T05:21:37.100Z",
       "cacheIntervalMinutes": 60,
       "license": "Public IP geolocation lookups; only routable public IPs are sent.",
       "successfulLookups": 12,
@@ -97,7 +113,7 @@
       "error": null
     }
   },
-  "eventCount": 4409,
+  "eventCount": 4404,
   "events": [
     {
       "id": "dshield:13.94.254.200",
@@ -741,402 +757,6 @@
       "sourceUrl": "https://isc.sans.edu/api/dailysummary/2026-11-26?json",
       "details": {
         "reports": 175420
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132611",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T04:17:27.287Z",
-      "lastObservedAt": "2026-11-24T04:17:24.210Z",
-      "title": "CVE-2026-132611",
-      "summary": "A security vulnerability has been detected in SourceCodester Simple Form Builder Web App 1.0. This impacts the function save_response of the file /classes/Forms.php. The manipulation of the argument q[<index>] leads to unrestricted upload. Remote exploitation of the attack is possible. The exploit has been disclosed publicly and may be used.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132611",
-      "details": {
-        "weaknesses": [
-          "CWE-284",
-          "CWE-434"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132621",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T04:17:27.497Z",
-      "lastObservedAt": "2026-11-19T16:20:21.620Z",
-      "title": "CVE-2026-132621",
-      "summary": "A vulnerability has been found in GearUP Hyperev up to 20261020. This affects an unknown function. Such manipulation leads to on-chip debug and test interface with improper access control. The attack can be executed directly on the physical device. The vendor was contacted early about this disclosure but did not respond in any way.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132621",
-      "details": {
-        "weaknesses": [
-          "CWE-1191"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132622",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T04:17:27.700Z",
-      "lastObservedAt": "2026-11-19T16:20:22.660Z",
-      "title": "CVE-2026-132622",
-      "summary": "A vulnerability was found in GearUP Hyperev up to 20261020. This impacts the function get_wlan_sitesurvey of the file ld/utils.lua of the component WLAN Site Survey. Performing a manipulation of the argument line results in os command injection. The attack is possible to be carried out remotely. The vendor was contacted early about this disclosure but did not respond in any way.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132622",
-      "details": {
-        "weaknesses": [
-          "CWE-77",
-          "CWE-78"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132798",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T04:17:27.903Z",
-      "lastObservedAt": "2026-11-19T20:17:48.260Z",
-      "title": "CVE-2026-132798",
-      "summary": "Improper Limitation of a Pathname to a Restricted Directory in the Como log viewer in Temenos Application Framework Java (TAFJ) R18.SP76.0 allows remote authenticated attackers to read arbitrary files via path traversal",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132798",
-      "details": {
-        "weaknesses": [
-          "CWE-22"
-        ],
-        "vulnStatus": "Received"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-104357",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:24.360Z",
-      "lastObservedAt": "2026-11-24T10:17:40.987Z",
-      "title": "CVE-2026-104357",
-      "summary": "A flaw was found in libtirpc. The SunRPC UDP/datagram server transport reuses a single receive buffer across requests and resets the XDR decode position without rebinding the decode length to the size of the datagram actually received. As a result, when a short UDP RPC request is received after a longer one, the XDR decoder can read stale bytes left in the reused buffer and interpret them as part of the current request, including credential, verifier, or procedure-argument fields. The highest threat from this vulnerability is to data confidentiality and integrity for services that use a UDP-based SunRPC server.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-104357",
-      "details": {
-        "weaknesses": [
-          "CWE-226"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-130888",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:33.170Z",
-      "lastObservedAt": "2026-11-19T20:17:28.800Z",
-      "title": "CVE-2026-130888",
-      "summary": "A flaw was found in nbdkit. The qcow2dec filter's zstd_compressed_cluster() function incorrectly sets the ZSTD input buffer size to the uncompressed cluster size instead of the compressed buffer size. A crafted QCOW2 image with ZSTD-compressed clusters can trigger a heap over-read, leading to a denial of service and potentially exposing heap memory.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-130888",
-      "details": {
-        "weaknesses": [
-          "CWE-125"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132625",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:37.750Z",
-      "lastObservedAt": "2026-11-19T19:17:26.813Z",
-      "title": "CVE-2026-132625",
-      "summary": "A vulnerability was determined in SourceCodester Student Project Allocation and Management System 1.0. Affected is an unknown function of the file /login.php of the component Login Handler. Executing a manipulation of the argument username/password can lead to sql injection. The attack may be performed from remote. The exploit has been publicly disclosed and may be utilized.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132625",
-      "details": {
-        "weaknesses": [
-          "CWE-74",
-          "CWE-89"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132626",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:38.007Z",
-      "lastObservedAt": "2026-11-24T04:17:24.357Z",
-      "title": "CVE-2026-132626",
-      "summary": "A vulnerability was identified in SourceCodester Modern Ticket Reservation System 1.0. Affected by this vulnerability is an unknown functionality of the file /booking/validate.php. The manipulation of the argument ticket leads to sql injection. It is possible to initiate the attack remotely. The exploit is publicly available and might be used.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132626",
-      "details": {
-        "weaknesses": [
-          "CWE-74",
-          "CWE-89"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132627",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:38.257Z",
-      "lastObservedAt": "2026-11-19T16:20:23.683Z",
-      "title": "CVE-2026-132627",
-      "summary": "A security flaw has been discovered in SourceCodester E-Commerce Shopping Cart Web Application 1.0. Affected by this issue is some unknown functionality of the file action.php. The manipulation of the argument keyword results in sql injection. It is possible to launch the attack remotely. The exploit has been released to the public and may be used for attacks.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132627",
-      "details": {
-        "weaknesses": [
-          "CWE-74",
-          "CWE-89"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132802",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:38.507Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132802",
-      "summary": "A malicious actor with access to the network and low privileges could exploit an Improper Link Resolution Before File Access vulnerability found in UniFi Access Application to execute arbitrary code with root privileges on the host device.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132802",
-      "details": {
-        "weaknesses": [
-          "CWE-59"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132803",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:38.673Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132803",
-      "summary": "A malicious actor with access to the network and low privileges could exploit a series of authenticated SQL Injection vulnerabilities found in UniFi Access Application to escalate privileges on the host device.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132803",
-      "details": {
-        "weaknesses": [
-          "CWE-89"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132804",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:38.833Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132804",
-      "summary": "A malicious actor with access to the network and low privileges could exploit a Server-Side Request Forgery (SSRF) vulnerability found in UniFi Access Application to escalate privileges within UniFi OS.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132804",
-      "details": {
-        "weaknesses": [
-          "CWE-918"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132805",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:39.000Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132805",
-      "summary": "A malicious actor with access to the network could exploit a Server-Side Request Forgery (SSRF) vulnerability found in UniFi Access Application to obtain information and make unauthorized changes on the host device.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132805",
-      "details": {
-        "weaknesses": [
-          "CWE-918"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132806",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:39.183Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132806",
-      "summary": "A malicious actor with access to the network and low privileges could exploit an authenticated SQL Injection vulnerability found in UniFi Access Application to obtain sensitive information and make unauthorized changes within the UniFi Access Application.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132806",
-      "details": {
-        "weaknesses": [
-          "CWE-89"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132807",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:39.360Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132807",
-      "summary": "A malicious actor with access to the network and under certain conditions could exploit an Improper Certificate Validation vulnerability found in UniFi Access Application to obtain sensitive information from and make unauthorized changes to an adopted UniFi Access device.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132807",
-      "details": {
-        "weaknesses": [
-          "CWE-295"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-132808",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:39.513Z",
-      "lastObservedAt": "2026-11-23T15:41:07.453Z",
-      "title": "CVE-2026-132808",
-      "summary": "A malicious actor with access to the network and low privileges could exploit an Incorrect Authorization vulnerability found in UniFi Access Application to execute arbitrary commands on certain adopted UniFi Access devices.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-132808",
-      "details": {
-        "weaknesses": [
-          "CWE-863"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-84998",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T05:18:40.940Z",
-      "lastObservedAt": "2026-11-19T17:19:01.973Z",
-      "title": "CVE-2026-84998",
-      "summary": "The NextScripts: Social Networks Auto-Poster plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'comment_author' and 'comment_agent' Comment Fields in all versions up to, and including, 4.4.8 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The injected payload executes in an administrator's browser session when the administrator views the WordPress comment moderation queue, including pending and unapproved comments, meaning no prior approval of the comment is required for exploitation.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-84998",
-      "details": {
-        "weaknesses": [
-          "CWE-79"
-        ],
-        "vulnStatus": "Deferred"
       }
     },
     {
@@ -14970,7 +14590,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-19T16:21:31.033Z",
-      "lastObservedAt": "2026-11-25T21:17:17.630Z",
+      "lastObservedAt": "2026-11-26T05:18:20.573Z",
       "title": "CVE-2026-133275",
       "summary": "A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct an arbitrary file upload attack due to insufficient file type validation. A successful exploit could allow an attacker to upload arbitrary files to the target system. This is MTLVULN-1861.",
       "indicator": null,
@@ -15677,7 +15297,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-19T17:18:51.670Z",
-      "lastObservedAt": "2026-11-25T21:17:17.773Z",
+      "lastObservedAt": "2026-11-26T05:18:21.160Z",
       "title": "CVE-2026-133303",
       "summary": "A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to leverage pre-staged malicious content to conduct an XML injection attack due to insufficient parameter validation. A successful exploit could allow an attacker to execute arbitrary commands within the context of the system. This is MTLVULN-1862.",
       "indicator": null,
@@ -15838,7 +15458,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-19T17:18:52.740Z",
-      "lastObservedAt": "2026-11-25T21:17:17.920Z",
+      "lastObservedAt": "2026-11-26T05:18:21.543Z",
       "title": "CVE-2026-133311",
       "summary": "A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker, with knowledge of a specific system-generated random identifier or pre-staged content, to conduct an unauthorized access attack due to improper authentication mechanisms. A successful exploit could allow an attacker to obtain sensitive information. The vulnerability is limited to the affected functionality and does not provide unrestricted access to arbitrary files elsewhere on the system. This is MTLVULN-1863.",
       "indicator": null,
@@ -15861,7 +15481,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-19T17:18:52.880Z",
-      "lastObservedAt": "2026-11-25T21:17:18.063Z",
+      "lastObservedAt": "2026-11-26T05:18:21.963Z",
       "title": "CVE-2026-133323",
       "summary": "A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct a blind command injection attack due to insufficient parameter sanitization. A successful exploit could allow an attacker to execute arbitrary commands within the context of the system. This is MTLVULN-1864.",
       "indicator": null,
@@ -15884,7 +15504,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-19T17:18:53.017Z",
-      "lastObservedAt": "2026-11-25T21:17:18.210Z",
+      "lastObservedAt": "2026-11-26T05:18:22.280Z",
       "title": "CVE-2026-133324",
       "summary": "A vulnerability in the Audio, Web, and Video Conferencing (AWV) component of Mitel MiCollab through 10.3 (10.3.0.18) could allow an unauthenticated attacker to conduct an authentication bypass attack due to improper handling of authentication. A successful exploit could allow an attacker to bypass authentication and perform unauthorized actions within the context of the application. This is MTLVULN-1877.",
       "indicator": null,
@@ -57339,7 +56959,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-23T17:17:31.780Z",
-      "lastObservedAt": "2026-11-25T21:17:18.503Z",
+      "lastObservedAt": "2026-11-26T05:18:22.960Z",
       "title": "CVE-2026-133469",
       "summary": "XO (Xen Orchestra) is a solution to visualize, manage, backup and delegate your XCP-ng (or XenServer) infrastructure. Prior to 6.9.2 and 6.10.1, REST cookie parsing turns authenticationToken=j:%7B%7D into {}. REST authentication passes that object to the XO token provider without requiring a string. The token collection treats {} as an unfiltered lookup and returns its first token; the provider authenticates as that token's owner if it is unexpired. The authenticated /rest/v0/users/me/authentication_tokens route then returns reusable login token IDs. This vulnerability is actively exploited in the wild. This vulnerability is fixed in 6.9.2 and 6.10.1.",
       "indicator": null,
@@ -63348,7 +62968,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T04:17:22.243Z",
-      "lastObservedAt": "2026-11-24T19:18:06.823Z",
+      "lastObservedAt": "2026-11-26T04:17:09.710Z",
       "title": "CVE-2026-128791",
       "summary": "Any WiFi client can send HTTP DELETE to /meeting-recording/delete to permanently delete files without authentication.",
       "indicator": null,
@@ -64454,7 +64074,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T04:17:38.043Z",
-      "lastObservedAt": "2026-11-24T19:18:28.903Z",
+      "lastObservedAt": "2026-11-26T04:17:12.813Z",
       "title": "CVE-2026-9790",
       "summary": "Endpoints accessible without authentication from any WiFi client (e.g., /user/hasSimCard, /user/pooling, /api/device-info).",
       "indicator": null,
@@ -64589,7 +64209,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.170Z",
-      "lastObservedAt": "2026-11-25T17:17:34.750Z",
+      "lastObservedAt": "2026-11-26T04:17:09.823Z",
       "title": "CVE-2026-128793",
       "summary": "Accessible without authentication via /user/resetPasswordFlagTest, forcing a password change prompt on the next admin login.",
       "indicator": null,
@@ -64612,7 +64232,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.300Z",
-      "lastObservedAt": "2026-11-25T17:17:34.873Z",
+      "lastObservedAt": "2026-11-26T04:17:09.940Z",
       "title": "CVE-2026-128794",
       "summary": "Admin password stored in plaintext at /data/data/com.acer.android.m3.webserver/shared_prefs/userInfo.xml, allowing any app with root or file access to read credentials directly.",
       "indicator": null,
@@ -64635,7 +64255,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.423Z",
-      "lastObservedAt": "2026-11-25T17:17:35.003Z",
+      "lastObservedAt": "2026-11-26T04:17:10.053Z",
       "title": "CVE-2026-128795",
       "summary": "After authentication, /user/getNetworkStatus discloses SIM phone number, cell tower ID (enabling geolocation), and network type.",
       "indicator": null,
@@ -64658,7 +64278,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.553Z",
-      "lastObservedAt": "2026-11-25T17:17:35.123Z",
+      "lastObservedAt": "2026-11-26T04:17:10.173Z",
       "title": "CVE-2026-128796",
       "summary": "System service 'antaiuiserver' exposes transaction 14 (sendMyATCmd) & 4, allowing ANY app on device to send arbitrary AT commands to modem without permissions (no READ_PHONE_STATE, SEND_SMS). Enables reading IMEI, IMSI, ICCID, and managing SMS.",
       "indicator": null,
@@ -64681,7 +64301,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.683Z",
-      "lastObservedAt": "2026-11-24T15:16:34.437Z",
+      "lastObservedAt": "2026-11-26T04:17:10.300Z",
       "title": "CVE-2026-128797",
       "summary": "Web administration panel (port 8080) binds to all network interfaces including public IPv6 addresses, making internal API endpoints reachable over WAN without firewall protection (related to CVE-2026-50224).",
       "indicator": null,
@@ -64704,7 +64324,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T06:17:07.803Z",
-      "lastObservedAt": "2026-11-24T15:16:34.437Z",
+      "lastObservedAt": "2026-11-26T04:17:10.400Z",
       "title": "CVE-2026-128798",
       "summary": "Any connected WiFi client can fetch device info and meeting recording metadata without credentials.",
       "indicator": null,
@@ -80316,7 +79936,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-24T22:18:49.567Z",
-      "lastObservedAt": "2026-11-24T22:18:49.567Z",
+      "lastObservedAt": "2026-11-26T05:18:15.213Z",
       "title": "CVE-2026-124284",
       "summary": "A critical security vulnerability affects certain authentication methods in Genetec Security Center, including external identity providers using OpenID Connect (OIDC) or SAML 2.0, and Active Directory Federation Services (AD FS) using WS-Trust or WS-Federation.\nUnder specific conditions, successful exploitation may allow an unauthenticated attacker to gain unauthorized access to the system with the privileges of an affected user. Successful exploitation requires a specific combination of conditions to be met, which reduces the likelihood of a successful attack.",
       "indicator": null,
@@ -84698,7 +84318,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T05:18:29.723Z",
-      "lastObservedAt": "2026-11-25T19:17:27.740Z",
+      "lastObservedAt": "2026-11-26T05:18:19.750Z",
       "title": "CVE-2026-130336",
       "summary": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection') in the HWBridge custom methods command dispatcher (lib/rex/post/hwbridge/ui/console/command_dispatcher/custom_methods.rb) in Rapid7 Metasploit Framework versions prior to 6.5.10 on all platforms allows a malicious or compromised hardware bridge to execute arbitrary code in the msfconsole process via a crafted method_name returned by the /custom_methods endpoint. The injected code runs automatically when the operator connects to the bridge, without the operator invoking any custom command.",
       "indicator": null,
@@ -85438,7 +85058,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T08:16:46.057Z",
-      "lastObservedAt": "2026-11-25T15:17:51.373Z",
+      "lastObservedAt": "2026-11-26T05:18:23.497Z",
       "title": "CVE-2026-80247",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Missing Authentication for Critical Function vulnerability. An attacker with local access to the appliance could potentially exploit this vulnerability, leading to unauthorized access to sensitive information, modification of protected resources, and execution of privileged operations within the appliance security context, potentially resulting in compromise of confidentiality, integrity, and availability.",
       "indicator": null,
@@ -86795,7 +86415,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T09:17:21.247Z",
-      "lastObservedAt": "2026-11-25T16:17:55.973Z",
+      "lastObservedAt": "2026-11-26T05:18:23.620Z",
       "title": "CVE-2026-80260",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Buffer Copy without Checking Size of Input ('Classic Buffer Overflow') vulnerability. A high privileged attacker with local access could potentially exploit this vulnerability, leading to remote execution.",
       "indicator": null,
@@ -86864,7 +86484,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T09:17:21.643Z",
-      "lastObservedAt": "2026-11-25T16:17:56.190Z",
+      "lastObservedAt": "2026-11-26T05:18:23.743Z",
       "title": "CVE-2026-80263",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Heap-based Buffer Overflow vulnerability. A low privileged local attacker could potentially exploit this vulnerability, leading to application crashes, denial of service, disclosure of sensitive information, modification of application data, and potentially arbitrary code execution within the affected process.",
       "indicator": null,
@@ -87652,7 +87272,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:15.610Z",
-      "lastObservedAt": "2026-11-25T16:17:56.297Z",
+      "lastObservedAt": "2026-11-26T05:18:23.857Z",
       "title": "CVE-2026-80267",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Use of Hard-coded Credentials vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to unauthorized access.",
       "indicator": null,
@@ -87675,7 +87295,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:15.750Z",
-      "lastObservedAt": "2026-11-25T17:18:00.473Z",
+      "lastObservedAt": "2026-11-26T05:18:23.990Z",
       "title": "CVE-2026-80269",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Insecure Temporary File vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to filesystem access for attacker.",
       "indicator": null,
@@ -87721,7 +87341,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:16.023Z",
-      "lastObservedAt": "2026-11-25T16:17:56.400Z",
+      "lastObservedAt": "2026-11-26T05:18:24.117Z",
       "title": "CVE-2026-80271",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Use of Hard-coded Cryptographic Key vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to remote execution.",
       "indicator": null,
@@ -87767,7 +87387,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:16.290Z",
-      "lastObservedAt": "2026-11-25T16:17:56.507Z",
+      "lastObservedAt": "2026-11-26T05:18:24.247Z",
       "title": "CVE-2026-80273",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') vulnerability. An attacker with local access to the appliance could potentially exploit this vulnerability, leading to arbitrary command execution and privilege escalation, resulting in complete compromise of confidentiality, integrity, and availability of the appliance.",
       "indicator": null,
@@ -87790,7 +87410,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:16.427Z",
-      "lastObservedAt": "2026-11-25T17:18:00.597Z",
+      "lastObservedAt": "2026-11-26T05:18:24.360Z",
       "title": "CVE-2026-80283",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Missing Authentication for Critical Function vulnerability. An attacker with local access could potentially exploit this vulnerability, leading to unauthorized disclosure of sensitive information, unauthorized modification of system resources, and execution of privileged actions that could lead to compromise of the appliance.",
       "indicator": null,
@@ -87813,7 +87433,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:16.560Z",
-      "lastObservedAt": "2026-11-25T13:17:31.610Z",
+      "lastObservedAt": "2026-11-26T05:18:24.477Z",
       "title": "CVE-2026-80284",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Improper Authentication vulnerability. An attacker with local access could potentially exploit this vulnerability, leading to exposure of sensitive data and unauthorized modification of system operations.",
       "indicator": null,
@@ -87836,7 +87456,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T10:17:16.697Z",
-      "lastObservedAt": "2026-11-25T10:17:16.697Z",
+      "lastObservedAt": "2026-11-26T05:18:24.600Z",
       "title": "CVE-2026-80285",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Execution with Unnecessary Privileges vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to elevation of privileges.",
       "indicator": null,
@@ -89129,7 +88749,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T13:17:31.723Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:24.717Z",
       "title": "CVE-2026-80286",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an External Control of File Name or Path vulnerability. A low privileged local attacker could potentially exploit this vulnerability, leading to unauthorized file access, modification, potentially compromising confidentiality and integrity.",
       "indicator": null,
@@ -89152,7 +88772,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T13:17:31.850Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:24.857Z",
       "title": "CVE-2026-80287",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Missing Authentication for Critical Function vulnerability. An attacker with local access could potentially exploit this vulnerability, leading to unauthorized access to system resources, disclosure of sensitive information, modification of protected configurations, and execution of privileged operations.",
       "indicator": null,
@@ -89175,7 +88795,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T13:17:31.987Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:24.990Z",
       "title": "CVE-2026-80288",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Improper Input Validation vulnerability. An attacker with local access could potentially exploit this vulnerability, leading to unauthorized access to sensitive information and privileged functionality.",
       "indicator": null,
@@ -89221,7 +88841,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T13:17:32.240Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:25.123Z",
       "title": "CVE-2026-80291",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Missing Authentication for Critical Function vulnerability. A local attacker could potentially exploit this vulnerability, leading to unauthorized access to sensitive data, modification of critical resources, and disruption of appliance functionality.",
       "indicator": null,
@@ -89290,7 +88910,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T13:17:32.643Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:25.897Z",
       "title": "CVE-2026-80294",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Improper Restriction of XML External Entity Reference vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to command execution.",
       "indicator": null,
@@ -89544,7 +89164,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:09.610Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:26.323Z",
       "title": "CVE-2026-80361",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Missing Authentication for Critical Function vulnerability. An attacker with local access to the appliance could potentially exploit this vulnerability, leading to unauthorized access to sensitive information, unauthorized modification of application data, and execution of actions with elevated privileges within the appliance environment.",
       "indicator": null,
@@ -89590,7 +89210,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:09.870Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:26.487Z",
       "title": "CVE-2026-80363",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Use of Hard-coded Credentials vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to unauthorized access.",
       "indicator": null,
@@ -89613,7 +89233,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:10.007Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:26.620Z",
       "title": "CVE-2026-80364",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Download of Code Without Integrity Check vulnerability. A low privileged local attacker could potentially exploit this vulnerability, leading to full compromise of confidentiality, integrity, and availability.",
       "indicator": null,
@@ -89636,7 +89256,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:10.150Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:32.570Z",
       "title": "CVE-2026-80365",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains a Use of Externally-Controlled Format String vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to remote execution.",
       "indicator": null,
@@ -89682,7 +89302,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:10.410Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:32.700Z",
       "title": "CVE-2026-80367",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Out-of-bounds Write vulnerability. A local attacker could potentially exploit this vulnerability, leading to application instability, denial of service, disclosure of sensitive information, arbitrary memory modification, and potentially execution of attacker-controlled code within the affected process.",
       "indicator": null,
@@ -89728,7 +89348,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T14:17:10.677Z",
-      "lastObservedAt": "2026-11-25T20:19:22.693Z",
+      "lastObservedAt": "2026-11-26T05:18:32.837Z",
       "title": "CVE-2026-80369",
       "summary": "Dell Secure Connect Gateway (SCG) Virtual Edition, versions prior to 5.36.00.16, contains an Uncontrolled Search Path Element vulnerability. A low privileged attacker with local access could potentially exploit this vulnerability, leading to remote execution.",
       "indicator": null,
@@ -91827,7 +91447,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T17:17:50.523Z",
-      "lastObservedAt": "2026-11-25T17:17:50.523Z",
+      "lastObservedAt": "2026-11-26T05:18:23.137Z",
       "title": "CVE-2026-136835",
       "summary": "Jenkins Script Security Plugin 1436.v1082791135e4 and earlier does not reject @Builder annotations whose builderStrategy member names an arbitrary class when the annotation is referred to using a partially qualified class name, allowing attackers with permission to define and run sandboxed scripts, including Pipelines, to execute code outside the sandbox if a suitable class is present on the classpath of the component that evaluates the script.",
       "indicator": null,
@@ -93154,7 +92774,7 @@
       "provider": "nvd",
       "category": "vulnerability",
       "firstObservedAt": "2026-11-25T19:17:26.823Z",
-      "lastObservedAt": "2026-11-25T19:17:26.950Z",
+      "lastObservedAt": "2026-11-26T05:18:14.553Z",
       "title": "CVE-2026-119452",
       "summary": "GitLab has remediated an issue in GitLab CE/EE affecting all versions from 13.7.0 before 19.4.11, 19.5 before 19.5.9, and 19.6 before 19.6.2 that under certain conditions could have allowed an authenticated user with Maintainer-role permissions to obtain another user's authenticated session cookie and gain unauthorized access to that user's account due to improper session storage handling in the dependency proxy authentication flow when a redirect-pending state was triggered.",
       "indicator": null,
@@ -98423,6 +98043,282 @@
       }
     },
     {
+      "id": "nvd:CVE-2026-123688",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:09.423Z",
+      "lastObservedAt": "2026-11-26T04:17:09.423Z",
+      "title": "CVE-2026-123688",
+      "summary": "An improper authorization vulnerability exists in the patch management functionality of StellarOne. An attacker with Viewer web access can perform administrative patch management operations. This issue affects StellarOne: before 5.0.3232.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-123688",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-123689",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:09.570Z",
+      "lastObservedAt": "2026-11-26T04:17:09.570Z",
+      "title": "CVE-2026-123689",
+      "summary": "A SQL injection vulnerability exists in the Search Agents API of StellarOne due to improper sanitization of user-supplied input. An authenticated attacker with Viewer privileges can send crafted requests to manipulate backend SQL queries. This issue affects StellarOne: before 5.0.3232.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-123689",
+      "details": {
+        "weaknesses": [
+          "CWE-89"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133202",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:10.503Z",
+      "lastObservedAt": "2026-11-26T04:17:10.503Z",
+      "title": "CVE-2026-133202",
+      "summary": "In Revive Adserver through 6.0.9, an authenticated manager with access to two advertisers can associate a conversion tracker owned by one advertiser with a campaign owned by the other. The tracker-campaign page checks access to each object but does not verify that their actual owners match. The resulting association can expose the first advertiser's tracker name and identifier in the second advertiser's restricted conversion report.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133202",
+      "details": {
+        "weaknesses": [
+          "CWE-284"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133203",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:10.633Z",
+      "lastObservedAt": "2026-11-26T04:17:10.633Z",
+      "title": "CVE-2026-133203",
+      "summary": "In Revive Adserver through 6.0.9, the public conversion-variable endpoint does not verify that a caller-supplied conversion belongs to the supplied tracker. An unauthenticated attacker can submit a unique variable for a different tracker's conversion, causing that conversion to be classified as a duplicate and excluded from conversion reports.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133203",
+      "details": {
+        "weaknesses": [
+          "CWE-284"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133204",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:10.760Z",
+      "lastObservedAt": "2026-11-26T04:17:10.760Z",
+      "title": "CVE-2026-133204",
+      "summary": "In Revive Adserver through 6.0.9, the zone-linking page can disclose campaign and banner names and identifiers belonging to another agency. An authenticated manager, or a website user with permission to link banners to zones, can supply another agency's advertiser and campaign identifiers because the selection lists are not restricted to the agency owning the zone.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133204",
+      "details": {
+        "weaknesses": [
+          "CWE-639"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133205",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:10.897Z",
+      "lastObservedAt": "2026-11-26T04:17:10.897Z",
+      "title": "CVE-2026-133205",
+      "summary": "In Revive Adserver through 6.0.9, an authenticated manager can supply another agency's advertiser or website identifier as a report scope and obtain that entity's name in an XLS report header. Submitted scope identifiers are not checked against the manager's permitted selections. The demonstrated disclosure is limited to entity names.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133205",
+      "details": {
+        "weaknesses": [
+          "CWE-200"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133206",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.013Z",
+      "lastObservedAt": "2026-11-26T04:17:11.013Z",
+      "title": "CVE-2026-133206",
+      "summary": "In Revive Adserver through 6.0.9, an advertiser can put XML syntax in fields of its own video creative. Unescaped MediaFile attributes and CDATA terminators allow the advertiser to inject elements into VAST responses served for a publisher's zone. A crafted TrackingEvents block can suppress the ad server's video playback event records and redirect tracking requests to an attacker-controlled endpoint.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133206",
+      "details": {
+        "weaknesses": [
+          "CWE-91"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133207",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.133Z",
+      "lastObservedAt": "2026-11-26T04:17:11.133Z",
+      "title": "CVE-2026-133207",
+      "summary": "In Revive Adserver through 6.0.9, user-controlled entity names in XLS report exports can be interpreted as spreadsheet formulas. A user with permission to rename a zone can place a formula in the zone name, which is then included in another user's Conversion Tracking report. Opening the affected spreadsheet can evaluate the formula and alter displayed report contents.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133207",
+      "details": {
+        "weaknesses": [
+          "CWE-94"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133208",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.257Z",
+      "lastObservedAt": "2026-11-26T04:17:11.257Z",
+      "title": "CVE-2026-133208",
+      "summary": "In Revive Adserver through 6.0.9, unauthenticated request parameters in ad delivery can cause reflected cross-site scripting. A crafted delivery URL places a macro token in the source or target parameter and malicious markup in the referer parameter. Macro replacement after initial input encoding can insert the unescaped markup into generated banner output, causing JavaScript execution in the delivery origin when a visitor follows the URL. An active banner is required.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133208",
+      "details": {
+        "weaknesses": [
+          "CWE-79"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133209",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.373Z",
+      "lastObservedAt": "2026-11-26T04:17:11.373Z",
+      "title": "CVE-2026-133209",
+      "summary": "In Revive Adserver through 6.0.9, deleting an agency, advertiser, or publisher through affected API paths can leave the associated account and user session active because the deletion path does not load the entity's account identifier before cleanup. A user whose entity has been deleted can continue accessing pages of the orphaned account. Access to data belonging to another agency was not demonstrated.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133209",
+      "details": {
+        "weaknesses": [
+          "CWE-613"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133210",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.493Z",
+      "lastObservedAt": "2026-11-26T04:17:11.493Z",
+      "title": "CVE-2026-133210",
+      "summary": "In Revive Adserver through 6.0.9, the zone banner-linking page (zone-include.php) does not cast the keys of the includebanner request array to integers. An authenticated manager, or a trafficker with the zone-linking permission, who owns the submitted website and zone can place SQL in an array key, which is concatenated unquoted into the banner-lookup query, resulting in time-based blind SQL injection bounded by the privileges of the application's database account.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133210",
+      "details": {
+        "weaknesses": [
+          "CWE-89"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133211",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T04:17:11.607Z",
+      "lastObservedAt": "2026-11-26T04:17:11.607Z",
+      "title": "CVE-2026-133211",
+      "summary": "In Revive Adserver through 6.0.9, the ct0 request parameter of the delivery scripts is only required to start with http:// or https:// and is prepended unescaped to banner click URLs. An unauthenticated attacker can craft a delivery URL that executes JavaScript in the delivery origin when a visitor follows it. An active banner using the raw {clickurl} macro is required.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133211",
+      "details": {
+        "weaknesses": [
+          "CWE-79"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
       "id": "cisa_kev:CVE-2026-103406",
       "provider": "cisa_kev",
       "category": "known_exploited_vulnerability",
@@ -101025,453 +100921,8 @@
       }
     ],
     "nvd": {
-      "totalResults": 4312,
+      "totalResults": 4307,
       "vulnerabilities": [
-        {
-          "cve": {
-            "id": "CVE-2026-132611",
-            "published": "2026-11-19T04:17:27.287Z",
-            "lastModified": "2026-11-24T04:17:24.210Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A security vulnerability has been detected in SourceCodester Simple Form Builder Web App 1.0. This impacts the function save_response of the file /classes/Forms.php. The manipulation of the argument q[<index>] leads to unrestricted upload. Remote exploitation of the attack is possible. The exploit has been disclosed publicly and may be used."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-284"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-434"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132621",
-            "published": "2026-11-19T04:17:27.497Z",
-            "lastModified": "2026-11-19T16:20:21.620Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability has been found in GearUP Hyperev up to 20261020. This affects an unknown function. Such manipulation leads to on-chip debug and test interface with improper access control. The attack can be executed directly on the physical device. The vendor was contacted early about this disclosure but did not respond in any way."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-1191"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132622",
-            "published": "2026-11-19T04:17:27.700Z",
-            "lastModified": "2026-11-19T16:20:22.660Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability was found in GearUP Hyperev up to 20261020. This impacts the function get_wlan_sitesurvey of the file ld/utils.lua of the component WLAN Site Survey. Performing a manipulation of the argument line results in os command injection. The attack is possible to be carried out remotely. The vendor was contacted early about this disclosure but did not respond in any way."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-77"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-78"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132798",
-            "published": "2026-11-19T04:17:27.903Z",
-            "lastModified": "2026-11-19T20:17:48.260Z",
-            "vulnStatus": "Received",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Improper Limitation of a Pathname to a Restricted Directory in the Como log viewer in Temenos Application Framework Java (TAFJ) R18.SP76.0 allows remote authenticated attackers to read arbitrary files via path traversal"
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-22"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-104357",
-            "published": "2026-11-19T05:18:24.360Z",
-            "lastModified": "2026-11-24T10:17:40.987Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A flaw was found in libtirpc. The SunRPC UDP/datagram server transport reuses a single receive buffer across requests and resets the XDR decode position without rebinding the decode length to the size of the datagram actually received. As a result, when a short UDP RPC request is received after a longer one, the XDR decoder can read stale bytes left in the reused buffer and interpret them as part of the current request, including credential, verifier, or procedure-argument fields. The highest threat from this vulnerability is to data confidentiality and integrity for services that use a UDP-based SunRPC server."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-226"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-130888",
-            "published": "2026-11-19T05:18:33.170Z",
-            "lastModified": "2026-11-19T20:17:28.800Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A flaw was found in nbdkit. The qcow2dec filter's zstd_compressed_cluster() function incorrectly sets the ZSTD input buffer size to the uncompressed cluster size instead of the compressed buffer size. A crafted QCOW2 image with ZSTD-compressed clusters can trigger a heap over-read, leading to a denial of service and potentially exposing heap memory."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-125"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132625",
-            "published": "2026-11-19T05:18:37.750Z",
-            "lastModified": "2026-11-19T19:17:26.813Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability was determined in SourceCodester Student Project Allocation and Management System 1.0. Affected is an unknown function of the file /login.php of the component Login Handler. Executing a manipulation of the argument username/password can lead to sql injection. The attack may be performed from remote. The exploit has been publicly disclosed and may be utilized."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-74"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132626",
-            "published": "2026-11-19T05:18:38.007Z",
-            "lastModified": "2026-11-24T04:17:24.357Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability was identified in SourceCodester Modern Ticket Reservation System 1.0. Affected by this vulnerability is an unknown functionality of the file /booking/validate.php. The manipulation of the argument ticket leads to sql injection. It is possible to initiate the attack remotely. The exploit is publicly available and might be used."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-74"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132627",
-            "published": "2026-11-19T05:18:38.257Z",
-            "lastModified": "2026-11-19T16:20:23.683Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A security flaw has been discovered in SourceCodester E-Commerce Shopping Cart Web Application 1.0. Affected by this issue is some unknown functionality of the file action.php. The manipulation of the argument keyword results in sql injection. It is possible to launch the attack remotely. The exploit has been released to the public and may be used for attacks."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-74"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132802",
-            "published": "2026-11-19T05:18:38.507Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and low privileges could exploit an Improper Link Resolution Before File Access vulnerability found in UniFi Access Application to execute arbitrary code with root privileges on the host device."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-59"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132803",
-            "published": "2026-11-19T05:18:38.673Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and low privileges could exploit a series of authenticated SQL Injection vulnerabilities found in UniFi Access Application to escalate privileges on the host device."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132804",
-            "published": "2026-11-19T05:18:38.833Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and low privileges could exploit a Server-Side Request Forgery (SSRF) vulnerability found in UniFi Access Application to escalate privileges within UniFi OS."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-918"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132805",
-            "published": "2026-11-19T05:18:39.000Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network could exploit a Server-Side Request Forgery (SSRF) vulnerability found in UniFi Access Application to obtain information and make unauthorized changes on the host device."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-918"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132806",
-            "published": "2026-11-19T05:18:39.183Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and low privileges could exploit an authenticated SQL Injection vulnerability found in UniFi Access Application to obtain sensitive information and make unauthorized changes within the UniFi Access Application."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132807",
-            "published": "2026-11-19T05:18:39.360Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and under certain conditions could exploit an Improper Certificate Validation vulnerability found in UniFi Access Application to obtain sensitive information from and make unauthorized changes to an adopted UniFi Access device."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-295"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-132808",
-            "published": "2026-11-19T05:18:39.513Z",
-            "lastModified": "2026-11-23T15:41:07.453Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A malicious actor with access to the network and low privileges could exploit an Incorrect Authorization vulnerability found in UniFi Access Application to execute arbitrary commands on certain adopted UniFi Access devices."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-863"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-84998",
-            "published": "2026-11-19T05:18:40.940Z",
-            "lastModified": "2026-11-19T17:19:01.973Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "The NextScripts: Social Networks Auto-Poster plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'comment_author' and 'comment_agent' Comment Fields in all versions up to, and including, 4.4.8 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The injected payload executes in an administrator's browser session when the administrator views the WordPress comment moderation queue, including pending and unapproved comments, meaning no prior approval of the comment is required for exploitation."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-79"
-                  }
-                ]
-              }
-            ]
-          }
-        },
         {
           "cve": {
             "id": "CVE-2026-108687",
@@ -114681,7 +114132,7 @@
           "cve": {
             "id": "CVE-2026-133275",
             "published": "2026-11-19T16:21:31.033Z",
-            "lastModified": "2026-11-25T21:17:17.630Z",
+            "lastModified": "2026-11-26T05:18:20.573Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -115499,7 +114950,7 @@
           "cve": {
             "id": "CVE-2026-133303",
             "published": "2026-11-19T17:18:51.670Z",
-            "lastModified": "2026-11-25T21:17:17.773Z",
+            "lastModified": "2026-11-26T05:18:21.160Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -115674,7 +115125,7 @@
           "cve": {
             "id": "CVE-2026-133311",
             "published": "2026-11-19T17:18:52.740Z",
-            "lastModified": "2026-11-25T21:17:17.920Z",
+            "lastModified": "2026-11-26T05:18:21.543Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -115699,7 +115150,7 @@
           "cve": {
             "id": "CVE-2026-133323",
             "published": "2026-11-19T17:18:52.880Z",
-            "lastModified": "2026-11-25T21:17:18.063Z",
+            "lastModified": "2026-11-26T05:18:21.963Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -115724,7 +115175,7 @@
           "cve": {
             "id": "CVE-2026-133324",
             "published": "2026-11-19T17:18:53.017Z",
-            "lastModified": "2026-11-25T21:17:18.210Z",
+            "lastModified": "2026-11-26T05:18:22.280Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -159537,7 +158988,7 @@
           "cve": {
             "id": "CVE-2026-133469",
             "published": "2026-11-23T17:17:31.780Z",
-            "lastModified": "2026-11-25T21:17:18.503Z",
+            "lastModified": "2026-11-26T05:18:22.960Z",
             "vulnStatus": "Modified",
             "descriptions": [
               {
@@ -166145,7 +165596,7 @@
           "cve": {
             "id": "CVE-2026-128791",
             "published": "2026-11-24T04:17:22.243Z",
-            "lastModified": "2026-11-24T19:18:06.823Z",
+            "lastModified": "2026-11-26T04:17:09.710Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167353,7 +166804,7 @@
           "cve": {
             "id": "CVE-2026-9790",
             "published": "2026-11-24T04:17:38.043Z",
-            "lastModified": "2026-11-24T19:18:28.903Z",
+            "lastModified": "2026-11-26T04:17:12.813Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167487,7 +166938,7 @@
           "cve": {
             "id": "CVE-2026-128793",
             "published": "2026-11-24T06:17:07.170Z",
-            "lastModified": "2026-11-25T17:17:34.750Z",
+            "lastModified": "2026-11-26T04:17:09.823Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167512,7 +166963,7 @@
           "cve": {
             "id": "CVE-2026-128794",
             "published": "2026-11-24T06:17:07.300Z",
-            "lastModified": "2026-11-25T17:17:34.873Z",
+            "lastModified": "2026-11-26T04:17:09.940Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167537,7 +166988,7 @@
           "cve": {
             "id": "CVE-2026-128795",
             "published": "2026-11-24T06:17:07.423Z",
-            "lastModified": "2026-11-25T17:17:35.003Z",
+            "lastModified": "2026-11-26T04:17:10.053Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167562,7 +167013,7 @@
           "cve": {
             "id": "CVE-2026-128796",
             "published": "2026-11-24T06:17:07.553Z",
-            "lastModified": "2026-11-25T17:17:35.123Z",
+            "lastModified": "2026-11-26T04:17:10.173Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167587,7 +167038,7 @@
           "cve": {
             "id": "CVE-2026-128797",
             "published": "2026-11-24T06:17:07.683Z",
-            "lastModified": "2026-11-24T15:16:34.437Z",
+            "lastModified": "2026-11-26T04:17:10.300Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -167612,7 +167063,7 @@
           "cve": {
             "id": "CVE-2026-128798",
             "published": "2026-11-24T06:17:07.803Z",
-            "lastModified": "2026-11-24T15:16:34.437Z",
+            "lastModified": "2026-11-26T04:17:10.400Z",
             "vulnStatus": "Deferred",
             "descriptions": [
               {
@@ -184066,7 +183517,7 @@
           "cve": {
             "id": "CVE-2026-124284",
             "published": "2026-11-24T22:18:49.567Z",
-            "lastModified": "2026-11-24T22:18:49.567Z",
+            "lastModified": "2026-11-26T05:18:15.213Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -188854,7 +188305,7 @@
           "cve": {
             "id": "CVE-2026-130336",
             "published": "2026-11-25T05:18:29.723Z",
-            "lastModified": "2026-11-25T19:17:27.740Z",
+            "lastModified": "2026-11-26T05:18:19.750Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -189579,7 +189030,7 @@
           "cve": {
             "id": "CVE-2026-80247",
             "published": "2026-11-25T08:16:46.057Z",
-            "lastModified": "2026-11-25T15:17:51.373Z",
+            "lastModified": "2026-11-26T05:18:23.497Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -191054,7 +190505,7 @@
           "cve": {
             "id": "CVE-2026-80260",
             "published": "2026-11-25T09:17:21.247Z",
-            "lastModified": "2026-11-25T16:17:55.973Z",
+            "lastModified": "2026-11-26T05:18:23.620Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -191129,7 +190580,7 @@
           "cve": {
             "id": "CVE-2026-80263",
             "published": "2026-11-25T09:17:21.643Z",
-            "lastModified": "2026-11-25T16:17:56.190Z",
+            "lastModified": "2026-11-26T05:18:23.743Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192003,7 +191454,7 @@
           "cve": {
             "id": "CVE-2026-80267",
             "published": "2026-11-25T10:17:15.610Z",
-            "lastModified": "2026-11-25T16:17:56.297Z",
+            "lastModified": "2026-11-26T05:18:23.857Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192028,7 +191479,7 @@
           "cve": {
             "id": "CVE-2026-80269",
             "published": "2026-11-25T10:17:15.750Z",
-            "lastModified": "2026-11-25T17:18:00.473Z",
+            "lastModified": "2026-11-26T05:18:23.990Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192078,7 +191529,7 @@
           "cve": {
             "id": "CVE-2026-80271",
             "published": "2026-11-25T10:17:16.023Z",
-            "lastModified": "2026-11-25T16:17:56.400Z",
+            "lastModified": "2026-11-26T05:18:24.117Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192128,7 +191579,7 @@
           "cve": {
             "id": "CVE-2026-80273",
             "published": "2026-11-25T10:17:16.290Z",
-            "lastModified": "2026-11-25T16:17:56.507Z",
+            "lastModified": "2026-11-26T05:18:24.247Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192153,7 +191604,7 @@
           "cve": {
             "id": "CVE-2026-80283",
             "published": "2026-11-25T10:17:16.427Z",
-            "lastModified": "2026-11-25T17:18:00.597Z",
+            "lastModified": "2026-11-26T05:18:24.360Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192178,7 +191629,7 @@
           "cve": {
             "id": "CVE-2026-80284",
             "published": "2026-11-25T10:17:16.560Z",
-            "lastModified": "2026-11-25T13:17:31.610Z",
+            "lastModified": "2026-11-26T05:18:24.477Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192203,7 +191654,7 @@
           "cve": {
             "id": "CVE-2026-80285",
             "published": "2026-11-25T10:17:16.697Z",
-            "lastModified": "2026-11-25T10:17:16.697Z",
+            "lastModified": "2026-11-26T05:18:24.600Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -192213,7 +191664,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -193621,7 +193072,7 @@
           "cve": {
             "id": "CVE-2026-80286",
             "published": "2026-11-25T13:17:31.723Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:24.717Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -193631,7 +193082,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -193646,7 +193097,7 @@
           "cve": {
             "id": "CVE-2026-80287",
             "published": "2026-11-25T13:17:31.850Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:24.857Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -193671,7 +193122,7 @@
           "cve": {
             "id": "CVE-2026-80288",
             "published": "2026-11-25T13:17:31.987Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:24.990Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -193721,7 +193172,7 @@
           "cve": {
             "id": "CVE-2026-80291",
             "published": "2026-11-25T13:17:32.240Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:25.123Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -193731,7 +193182,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -193796,7 +193247,7 @@
           "cve": {
             "id": "CVE-2026-80294",
             "published": "2026-11-25T13:17:32.643Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:25.897Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194075,7 +193526,7 @@
           "cve": {
             "id": "CVE-2026-80361",
             "published": "2026-11-25T14:17:09.610Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:26.323Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194125,7 +193576,7 @@
           "cve": {
             "id": "CVE-2026-80363",
             "published": "2026-11-25T14:17:09.870Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:26.487Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194135,7 +193586,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -194150,7 +193601,7 @@
           "cve": {
             "id": "CVE-2026-80364",
             "published": "2026-11-25T14:17:10.007Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:26.620Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194160,7 +193611,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -194175,7 +193626,7 @@
           "cve": {
             "id": "CVE-2026-80365",
             "published": "2026-11-25T14:17:10.150Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:32.570Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194225,7 +193676,7 @@
           "cve": {
             "id": "CVE-2026-80367",
             "published": "2026-11-25T14:17:10.410Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:32.700Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -194275,7 +193726,7 @@
           "cve": {
             "id": "CVE-2026-80369",
             "published": "2026-11-25T14:17:10.677Z",
-            "lastModified": "2026-11-25T20:19:22.693Z",
+            "lastModified": "2026-11-26T05:18:32.837Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -196574,7 +196025,7 @@
           "cve": {
             "id": "CVE-2026-136835",
             "published": "2026-11-25T17:17:50.523Z",
-            "lastModified": "2026-11-25T17:17:50.523Z",
+            "lastModified": "2026-11-26T05:18:23.137Z",
             "vulnStatus": "Received",
             "descriptions": [
               {
@@ -197982,7 +197433,7 @@
           "cve": {
             "id": "CVE-2026-119452",
             "published": "2026-11-25T19:17:26.823Z",
-            "lastModified": "2026-11-25T19:17:26.950Z",
+            "lastModified": "2026-11-26T05:18:14.553Z",
             "vulnStatus": "Awaiting Analysis",
             "descriptions": [
               {
@@ -197992,7 +197443,7 @@
             ],
             "weaknesses": [
               {
-                "type": "Primary",
+                "type": "Secondary",
                 "description": [
                   {
                     "lang": "en",
@@ -203677,6 +203128,306 @@
                   {
                     "lang": "en",
                     "value": "CWE-369"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-123688",
+            "published": "2026-11-26T04:17:09.423Z",
+            "lastModified": "2026-11-26T04:17:09.423Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "An improper authorization vulnerability exists in the patch management functionality of StellarOne. An attacker with Viewer web access can perform administrative patch management operations. This issue affects StellarOne: before 5.0.3232."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-123689",
+            "published": "2026-11-26T04:17:09.570Z",
+            "lastModified": "2026-11-26T04:17:09.570Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A SQL injection vulnerability exists in the Search Agents API of StellarOne due to improper sanitization of user-supplied input. An authenticated attacker with Viewer privileges can send crafted requests to manipulate backend SQL queries. This issue affects StellarOne: before 5.0.3232."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-89"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133202",
+            "published": "2026-11-26T04:17:10.503Z",
+            "lastModified": "2026-11-26T04:17:10.503Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, an authenticated manager with access to two advertisers can associate a conversion tracker owned by one advertiser with a campaign owned by the other. The tracker-campaign page checks access to each object but does not verify that their actual owners match. The resulting association can expose the first advertiser's tracker name and identifier in the second advertiser's restricted conversion report."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-284"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133203",
+            "published": "2026-11-26T04:17:10.633Z",
+            "lastModified": "2026-11-26T04:17:10.633Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, the public conversion-variable endpoint does not verify that a caller-supplied conversion belongs to the supplied tracker. An unauthenticated attacker can submit a unique variable for a different tracker's conversion, causing that conversion to be classified as a duplicate and excluded from conversion reports."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-284"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133204",
+            "published": "2026-11-26T04:17:10.760Z",
+            "lastModified": "2026-11-26T04:17:10.760Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, the zone-linking page can disclose campaign and banner names and identifiers belonging to another agency. An authenticated manager, or a website user with permission to link banners to zones, can supply another agency's advertiser and campaign identifiers because the selection lists are not restricted to the agency owning the zone."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-639"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133205",
+            "published": "2026-11-26T04:17:10.897Z",
+            "lastModified": "2026-11-26T04:17:10.897Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, an authenticated manager can supply another agency's advertiser or website identifier as a report scope and obtain that entity's name in an XLS report header. Submitted scope identifiers are not checked against the manager's permitted selections. The demonstrated disclosure is limited to entity names."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-200"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133206",
+            "published": "2026-11-26T04:17:11.013Z",
+            "lastModified": "2026-11-26T04:17:11.013Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, an advertiser can put XML syntax in fields of its own video creative. Unescaped MediaFile attributes and CDATA terminators allow the advertiser to inject elements into VAST responses served for a publisher's zone. A crafted TrackingEvents block can suppress the ad server's video playback event records and redirect tracking requests to an attacker-controlled endpoint."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-91"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133207",
+            "published": "2026-11-26T04:17:11.133Z",
+            "lastModified": "2026-11-26T04:17:11.133Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, user-controlled entity names in XLS report exports can be interpreted as spreadsheet formulas. A user with permission to rename a zone can place a formula in the zone name, which is then included in another user's Conversion Tracking report. Opening the affected spreadsheet can evaluate the formula and alter displayed report contents."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-94"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133208",
+            "published": "2026-11-26T04:17:11.257Z",
+            "lastModified": "2026-11-26T04:17:11.257Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, unauthenticated request parameters in ad delivery can cause reflected cross-site scripting. A crafted delivery URL places a macro token in the source or target parameter and malicious markup in the referer parameter. Macro replacement after initial input encoding can insert the unescaped markup into generated banner output, causing JavaScript execution in the delivery origin when a visitor follows the URL. An active banner is required."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-79"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133209",
+            "published": "2026-11-26T04:17:11.373Z",
+            "lastModified": "2026-11-26T04:17:11.373Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, deleting an agency, advertiser, or publisher through affected API paths can leave the associated account and user session active because the deletion path does not load the entity's account identifier before cleanup. A user whose entity has been deleted can continue accessing pages of the orphaned account. Access to data belonging to another agency was not demonstrated."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-613"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133210",
+            "published": "2026-11-26T04:17:11.493Z",
+            "lastModified": "2026-11-26T04:17:11.493Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, the zone banner-linking page (zone-include.php) does not cast the keys of the includebanner request array to integers. An authenticated manager, or a trafficker with the zone-linking permission, who owns the submitted website and zone can place SQL in an array key, which is concatenated unquoted into the banner-lookup query, resulting in time-based blind SQL injection bounded by the privileges of the application's database account."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-89"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133211",
+            "published": "2026-11-26T04:17:11.607Z",
+            "lastModified": "2026-11-26T04:17:11.607Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In Revive Adserver through 6.0.9, the ct0 request parameter of the delivery scripts is only required to start with http:// or https:// and is prepended unescaped to banner click URLs. An unauthenticated attacker can craft a delivery URL that executes JavaScript in the delivery origin when a visitor follows it. An active banner using the raw {clickurl} macro is required."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-79"
                   }
                 ]
               }
