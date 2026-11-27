@@ -54,7 +54,7 @@ function pairArcPath(origin, target, path) {
   return path({ type: 'LineString', coordinates }) || ''
 }
 
-export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path, countryNumeric = {}) {
+export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path, countryNumeric = {}, layerTag = null) {
   const featuresByName = new Map()
   const featuresById = new Map()
   for (const country of countryFeatures) {
@@ -90,11 +90,16 @@ export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path
     targetTotals.set(targetId, (targetTotals.get(targetId) || 0) + ratio)
     countryCodeById.set(originId, pair.originCountryAlpha2)
     countryCodeById.set(targetId, pair.targetCountryAlpha2)
+    // The layer tag keeps the two Cloudflare datasets distinct: the same
+    // origin→target pair can exist in both WAF and DDoS data, and each
+    // copy needs its own arc, path id, and layer label.
+    const layer = pair.cfLayer || layerTag || null
     arcs.push({
-      key: `${pair.originCountryAlpha2}:${pair.targetCountryAlpha2}:${index}`,
-      pathId: `gtw-cf-arc-${index}`,
+      key: layer ? `${layer}:${pair.originCountryAlpha2}:${pair.targetCountryAlpha2}:${index}` : `${pair.originCountryAlpha2}:${pair.targetCountryAlpha2}:${index}`,
+      pathId: layer ? `gtw-cf-arc-${layer}-${index}` : `gtw-cf-arc-${index}`,
       d: pairArcPath(origin, target, path),
       value,
+      layer,
       originId,
       targetId,
       originCountryAlpha2: pair.originCountryAlpha2,
@@ -137,9 +142,264 @@ export function buildCloudflareRadarMap(pairs, countryFeatures, projection, path
 export const CLOUDFLARE_INTERVALS = ['1h', '6h', '24h', '7d']
 export const CLOUDFLARE_INTERVAL_LABELS = { '1h': '1h', '6h': '6h', '24h': '24h', '7d': '7d' }
 
+/**
+ * Cloudflare Radar mitigationProduct filter. 'all' is the unfiltered
+ * aggregate (the per-interval pairs file); the seven enum values are the
+ * mitigationProduct values the Radar API accepts. Product files are
+ * per (interval, product); a missing/erroring product file is never
+ * substituted with another product's data.
+ */
+export const CLOUDFLARE_PRODUCTS = [
+  'all',
+  'DDOS',
+  'WAF',
+  'BOT_MANAGEMENT',
+  'ACCESS_RULES',
+  'IP_REPUTATION',
+  'API_SHIELD',
+  'DATA_LOSS_PREVENTION',
+]
+export const CLOUDFLARE_PRODUCT_LABELS = {
+  all: 'All',
+  DDOS: 'DDoS',
+  WAF: 'WAF',
+  BOT_MANAGEMENT: 'Bot Management',
+  ACCESS_RULES: 'Access Rules',
+  IP_REPUTATION: 'IP Reputation',
+  API_SHIELD: 'API Shield',
+  DATA_LOSS_PREVENTION: 'Data Loss Prevention',
+}
+const CLOUDFLARE_PRODUCT_SUFFIXES = {
+  DDOS: 'ddos',
+  WAF: 'waf',
+  BOT_MANAGEMENT: 'bot_management',
+  ACCESS_RULES: 'access_rules',
+  IP_REPUTATION: 'ip_reputation',
+  API_SHIELD: 'api_shield',
+  DATA_LOSS_PREVENTION: 'data_loss_prevention',
+}
+
+export function normalizeCloudflareProduct(product) {
+  return CLOUDFLARE_PRODUCTS.includes(product) ? product : 'all'
+}
+
+export function cloudflareProductLabel(product) {
+  return CLOUDFLARE_PRODUCT_LABELS[normalizeCloudflareProduct(product)] || 'All'
+}
+
+function cloudflareFileSuffix(product) {
+  const safeProduct = normalizeCloudflareProduct(product)
+  return safeProduct === 'all' ? '' : `-${CLOUDFLARE_PRODUCT_SUFFIXES[safeProduct]}`
+}
+
 export function cloudflareIntervalUrl(baseUrl, interval) {
+  return cloudflareProductUrl(baseUrl, interval, 'all')
+}
+
+export function cloudflareProductUrl(baseUrl, interval, product = 'all') {
   const safeInterval = CLOUDFLARE_INTERVALS.includes(interval) ? interval : '24h'
-  return `${baseUrl}data/cloudflare-attack-pairs-${safeInterval}.json`
+  return `${baseUrl}data/cloudflare-attack-pairs-${safeInterval}${cloudflareFileSuffix(product)}.json`
+}
+
+export function cloudflareTimeseriesUrl(baseUrl, interval, product = 'all') {
+  const safeInterval = CLOUDFLARE_INTERVALS.includes(interval) ? interval : '24h'
+  return `${baseUrl}data/cloudflare-timeseries-${safeInterval}${cloudflareFileSuffix(product)}.json`
+}
+
+/** Real aggregation resolution of the published timeseries per interval. */
+export const CLOUDFLARE_AGG_INTERVALS = { '1h': '15m', '6h': '15m', '24h': '1h', '7d': '1d' }
+
+export function cloudflareAggInterval(interval) {
+  return CLOUDFLARE_AGG_INTERVALS[interval] || '1h'
+}
+
+/**
+ * The two Cloudflare map layers and the mitigationProduct dataset each
+ * one honestly represents. Web Attackers is the WAF dataset ONLY;
+ * DDoS Attackers is the DDOS dataset ONLY. The other five products
+ * (BOT_MANAGEMENT, ACCESS_RULES, IP_REPUTATION, API_SHIELD,
+ * DATA_LOSS_PREVENTION) are published server-side but are NOT separate
+ * map layers — one dataset is never duplicated as two layers.
+ */
+export const CLOUDFLARE_LAYER_PRODUCTS = { web: 'WAF', ddos: 'DDOS' }
+export const CLOUDFLARE_LAYER_LABELS = { web: 'Web Attackers', ddos: 'DDoS Attackers' }
+
+/**
+ * Combine the enabled Cloudflare layers' pairs into one list, tagging
+ * each pair with its layer. A disabled layer contributes nothing — never
+ * the 'all' aggregate, never another layer's data. Rankings, map arcs,
+ * highlights and country details all read this one combined list.
+ */
+export function combineCloudflareLayerPairs(layers) {
+  const combined = []
+  for (const layer of ['web', 'ddos']) {
+    const entry = layers?.[layer]
+    if (!entry?.enabled || !Array.isArray(entry.pairs)) continue
+    for (const pair of entry.pairs) {
+      if (pair && typeof pair === 'object') combined.push({ ...pair, cfLayer: layer })
+    }
+  }
+  return combined
+}
+
+const RAW_COUNT_NORMALIZATIONS = new Set(['', 'none', 'raw', 'count', 'counts'])
+
+function vectorProductTotal(entry) {
+  return entry.points.reduce((sum, point) => sum + point.value, 0)
+}
+
+/**
+ * Top Network Attack Vectors, computed ONLY from per-mitigationProduct
+ * timeseries totals: each product's serie values summed over the window,
+ * as a share of the summed total. Available ONLY when every one of the
+ * seven products has published timeseries points for the interval AND
+ * every file's meta.normalization indicates raw counts. Normalized
+ * values (PERCENTAGE, MIN0_MAX, ...) cannot be summed into shares of
+ * anything real, and a missing product means the total cannot be
+ * validated — both cases return available:false with the named reason,
+ * and the panel must show disabled, never DShield ports as flood values.
+ */
+export function computeAttackVectorsFromTimeseries(productTimeseries) {
+  const byProduct = new Map()
+  for (const entry of Array.isArray(productTimeseries) ? productTimeseries : []) {
+    if (entry && typeof entry.product === 'string') byProduct.set(entry.product, entry)
+  }
+  const required = CLOUDFLARE_PRODUCTS.filter((product) => product !== 'all')
+  const missing = required.filter((product) => {
+    const entry = byProduct.get(product)
+    return !entry || !Array.isArray(entry.points) || entry.points.length === 0
+  })
+  if (missing.length > 0) {
+    return {
+      available: false,
+      reason: `Per-product timeseries ${missing.length === required.length ? 'have not been published yet' : `are missing for ${missing.join(', ')}`} for this interval, so per-product totals cannot be validated.`,
+      vectors: [],
+    }
+  }
+  const normalized = required.filter((product) => {
+    const normalization = String(byProduct.get(product).normalization || '').toLowerCase()
+    return !RAW_COUNT_NORMALIZATIONS.has(normalization)
+  })
+  if (normalized.length > 0) {
+    const values = [...new Set(normalized.map((product) => String(byProduct.get(product).normalization || 'not supplied')))]
+    return {
+      available: false,
+      reason: `Timeseries values are normalized (${values.join(', ')}), not raw counts — per-product totals cannot be summed into shares.`,
+      vectors: [],
+    }
+  }
+  const vectors = required
+    .map((product) => ({
+      product,
+      label: CLOUDFLARE_PRODUCT_LABELS[product],
+      total: vectorProductTotal(byProduct.get(product)),
+    }))
+    .sort((a, b) => b.total - a.total)
+  const grandTotal = vectors.reduce((sum, vector) => sum + vector.total, 0)
+  if (!(grandTotal > 0)) {
+    return {
+      available: false,
+      reason: 'Per-product timeseries totals are zero for this interval, so no shares can be computed.',
+      vectors: [],
+    }
+  }
+  return {
+    available: true,
+    reason: null,
+    vectors: vectors.map((vector) => ({ ...vector, share: vector.total / grandTotal })),
+  }
+}
+export function responseMatchesRequest(response, interval, product = 'all') {
+  if (!response || typeof response !== 'object') return false
+  if (response.interval !== interval) return false
+  if (typeof response.product === 'string' && response.product) {
+    return response.product === normalizeCloudflareProduct(product)
+  }
+  return true
+}
+
+/**
+ * Requested-vs-returned window shift, in minutes. The API returns the
+ * latest fully aggregated window, which can lag the requested window
+ * (e.g. 1h requested 21:30–22:30Z, returned 21:00–22:00Z = 30 min).
+ * Prefers an explicit `windowShiftMinutes` on the file; otherwise derives
+ * it from the requested `window` vs the API's actual `meta.dateRange`.
+ * Returns null when neither source can supply both ends, 0 when aligned.
+ */
+export function computeWindowShiftMinutes(file) {
+  if (Number.isFinite(file?.windowShiftMinutes)) return file.windowShiftMinutes
+  const requestedStart = Date.parse(file?.window?.dateStart || '')
+  const actualStart = Date.parse(file?.meta?.dateRange?.[0]?.startTime || '')
+  if (!Number.isFinite(requestedStart) || !Number.isFinite(actualStart)) return null
+  return Math.round((requestedStart - actualStart) / 60000)
+}
+
+/**
+ * Map a published timeseries document to renderable points, preserving
+ * the provider's real timestamps and values exactly — no interpolation,
+ * no invented points. `serie` is { timestamps: [], values: [] }; entries
+ * past the shorter array, non-finite timestamps, or non-finite values are
+ * dropped, never guessed.
+ */
+export function mapTimeseriesPoints(timeseries) {
+  const serie = timeseries?.serie
+  if (!serie || typeof serie !== 'object') return []
+  const timestamps = Array.isArray(serie.timestamps) ? serie.timestamps : []
+  const values = Array.isArray(serie.values) ? serie.values : []
+  const points = []
+  for (let i = 0; i < Math.min(timestamps.length, values.length); i += 1) {
+    const timestamp = typeof timestamps[i] === 'number'
+      ? timestamps[i]
+      : Date.parse(timestamps[i] || '')
+    const value = Number(values[i])
+    if (!Number.isFinite(timestamp) || !Number.isFinite(value)) continue
+    points.push({ timestamp, value })
+  }
+  return points
+}
+
+/** Timeline-track status label derived only from the timeseries document. */
+export function timeseriesStatusLabel(timeseries) {
+  const status = String(timeseries?.timeseriesStatus || timeseries?.status || '').toLowerCase()
+  if (status === 'live') return 'LIVE'
+  if (status === 'stale') return 'STALE'
+  if (status === 'unavailable' || status === 'error' || status === 'offline') return 'UNAVAILABLE'
+  if (Array.isArray(timeseries?.points) && timeseries.points.length > 0) return 'LIVE'
+  if (timeseries && typeof timeseries === 'object') return 'NO DATA'
+  return 'UNAVAILABLE'
+}
+
+/**
+ * Manifest entries for one (interval, product). Reads the v2 manifest
+ * shape (`pairs[interval][product]` / `timeseries[interval][product]`)
+ * and falls back to the v1 shape (`intervals[interval]`, pairs/"all"
+ * only). `kind` is 'pairs' or 'timeseries'.
+ */
+export function manifestEntries(manifest, interval, product = 'all', kind = 'pairs') {
+  const safeProduct = normalizeCloudflareProduct(product)
+  const section = manifest?.[kind]
+  if (section && typeof section === 'object') {
+    const byInterval = section[interval]
+    if (byInterval && typeof byInterval === 'object') {
+      const entries = byInterval[safeProduct]
+      if (Array.isArray(entries)) return entries
+    }
+  }
+  if (kind === 'pairs' && safeProduct === 'all') {
+    const v1 = manifest?.intervals?.[interval]
+    if (Array.isArray(v1)) return v1
+  }
+  return []
+}
+
+/** Nearest retained snapshot at/before `timestamp` for one interval+product. */
+export function selectHistoricalSnapshotForProduct(manifest, interval, product, timestamp) {
+  return selectHistoricalSnapshot(manifestEntries(manifest, interval, product, 'pairs'), timestamp)
+}
+
+/** Nearest retained timeseries history entry at/before `timestamp`. */
+export function selectHistoricalTimeseriesForProduct(manifest, interval, product, timestamp) {
+  return selectHistoricalSnapshot(manifestEntries(manifest, interval, product, 'timeseries'), timestamp)
 }
 
 /**

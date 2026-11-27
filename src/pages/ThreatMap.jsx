@@ -8,26 +8,39 @@ import Newsletter from '../components/Newsletter.jsx'
 import {
   buildCountryActivity,
   buildThreatAlerts,
+  cloudflareLayerVisibility,
   countryFillStyle,
-  layerVisibility,
   LIVE_WINDOW_MS,
   panMapTransform,
   providerFreshness,
   RECENT_WINDOW_MS,
   sourceObservedAt,
-  STALE_WINDOW_MS,
   sourcesInTimeWindow,
   timelineTrackVisible,
+  timeseriesTrackVisible,
+  verifiedPortProtocol,
   zoomMapTransform,
 } from './threatMapCountryActivity.js'
 import {
   arcPulsePlan,
   buildCloudflareRadarMap,
   CLOUDFLARE_INTERVALS,
-  cloudflareIntervalUrl,
+  CLOUDFLARE_LAYER_LABELS,
+  CLOUDFLARE_PRODUCTS,
+  CLOUDFLARE_PRODUCT_LABELS,
+  cloudflareAggInterval,
+  cloudflareProductUrl,
+  cloudflareTimeseriesUrl,
+  combineCloudflareLayerPairs,
+  computeAttackVectorsFromTimeseries,
+  computeWindowShiftMinutes,
+  manifestEntries,
+  mapTimeseriesPoints,
   pairsForCountry,
   rankCloudflareCountries,
-  selectHistoricalSnapshot,
+  responseMatchesRequest,
+  selectHistoricalSnapshotForProduct,
+  timeseriesStatusLabel,
 } from './cloudflareRadarMap.js'
 import './ThreatMap.css'
 
@@ -46,9 +59,11 @@ import './ThreatMap.css'
  *
  * Nothing of Radware's is copied: no Radware name, logo, report text,
  * "Contact Sales", or copyright line, and none of Radware's numbers or
- * category names. The categories are ours — Scanning, Ransomware,
- * Exploited Flaws, Breaches — and every
- * figure comes from our own published provider snapshots.
+ * category names. The five layers are ours — Web Attackers (Cloudflare
+ * WAF dataset only), DDoS Attackers (Cloudflare DDOS dataset only),
+ * Scanners (DShield), Intruders and Anonymizers (both disabled until a
+ * legitimate source is configured) — and every figure comes from our
+ * own published provider snapshots.
  *
  * Real data only — nothing simulated or invented. A single same-origin
  * snapshot is refreshed server-side every 15 minutes; credentials stay in
@@ -69,16 +84,22 @@ import './ThreatMap.css'
  *    confirmed exploited" counter only.
  *
  * Honest substitutions, labelled on the page: the "top network attack
- * vectors" panel is the most-probed services from DShield's top ports,
- * shown as a share of those ports' reports — there is no free live
- * feed of flood-type vector volumes. Country fills and markers use
- * reported DShield source locations. Cloudflare Radar separately supplies
- * aggregated Layer 7 origin-to-target country pairs; these are not
- * individual DShield source-to-destination routes.
- * The timeline shows DShield daily totals, NVD publications, KEV additions
- * and, when licensing is cleared, ThreatFox indicators using provider
- * timestamps where available. Cloudflare upstream update time is displayed
- * independently from the local snapshot refresh time.
+ * vectors" panel is computed only from per-mitigation-product
+ * timeseries totals and only when those values are raw counts; while
+ * the timeseries files are unpublished or normalized, the panel shows
+ * disabled with the named limitation — DShield ports are most-probed
+ * services, never flood-type vector volumes. Country fills and markers
+ * use reported DShield source locations. Cloudflare Radar separately
+ * supplies aggregated Layer 7 origin-to-target country pairs; these are
+ * not individual DShield source-to-destination routes.
+ * The timeline shows one track per attack layer: Web and DDoS render
+ * their layer's real Cloudflare timeseries points, Scanners renders
+ * DShield daily totals, and Intruders/Anonymizers show disabled tracks.
+ * NVD and KEV live in alerts and sidebar panels, not as timeline
+ * tracks. Cloudflare upstream update time is displayed independently
+ * from the local snapshot refresh time. There is no under-attack
+ * indicator: pair values are percentage shares, not absolute volumes,
+ * and no baseline exists to define a defensible threshold.
  *
  * Feeds that are NOT on this page, and why: abuse.ch Feodo Tracker
  * has effectively stopped updating (last blocklist update March 2026),
@@ -92,20 +113,26 @@ import './ThreatMap.css'
  */
 
 const THREAT_INTEL_SNAPSHOT = `${import.meta.env.BASE_URL}data/threat-intel-snapshot.json`
-const CLOUDFLARE_RADAR_SNAPSHOT = `${import.meta.env.BASE_URL}data/cloudflare-attack-pairs.json`
 const CLOUDFLARE_HISTORY_MANIFEST = `${import.meta.env.BASE_URL}data/history/cloudflare-manifest.json`
 const REFRESH_MS = 5 * 60 * 1000
 const FETCH_TIMEOUT_MS = 15000
 const INITIAL_TIMELINE_TIME = Date.now()
 
-// Categories retain their identities in the data; map and legend accents
-// use white for a consistent monochrome presentation.
+// The five attack layers. Web Attackers is the Cloudflare WAF
+// mitigation-product dataset ONLY; DDoS Attackers is the DDOS dataset
+// ONLY — one dataset is never duplicated as two layers, and the other
+// five mitigation products are published server-side but are not
+// separate map layers. Scanners are DShield's geolocated sources.
+// Intruders and Anonymizers have no enabled source: Intruders needs an
+// event-level intrusion/IDS feed, Anonymizers a Tor/anonymizer-exit-node
+// feed. Until one is configured, those layers show only their disabled
+// notice — nothing is plotted or invented for them.
 const CATEGORIES = [
-  { key: 'scanning', label: 'Scanning', color: '#FFFFFF', note: 'Probing of exposed ports, reported by volunteer sensors.' },
-  { key: 'cloudflare', label: 'Cloudflare Radar pairs', color: '#FFFFFF', note: 'Aggregated Layer 7 origin-to-target country pairs.' },
-  { key: 'exploited', label: 'Exploited flaws', color: '#FFFFFF', note: 'Vulnerabilities CISA confirms are in active use.' },
-  { key: 'ransomware', label: 'Ransomware', color: '#FFFFFF', note: 'Victims posted to extortion leak sites.', noSource: true },
-  { key: 'breaches', label: 'Breaches', color: '#FFFFFF', note: 'Disclosed incidents and regulator filings.', noSource: true },
+  { key: 'web', label: 'Web Attackers', color: '#FFFFFF', note: 'Layer 7 attacks mitigated by WAF — Cloudflare Radar mitigationProduct=WAF.' },
+  { key: 'ddos', label: 'DDoS Attackers', color: '#FFFFFF', note: 'DDoS attacks — Cloudflare Radar mitigationProduct=DDOS.' },
+  { key: 'scanning', label: 'Scanners', color: '#FFFFFF', note: 'Probing of exposed ports, reported by volunteer sensors (DShield).' },
+  { key: 'intruders', label: 'Intruders', color: '#FFFFFF', note: 'Intrusion/IDS events — no enabled source. Needs an event-level intrusion/IDS feed.', noSource: true },
+  { key: 'anonymizers', label: 'Anonymizers', color: '#FFFFFF', note: 'Traffic via anonymizers — no enabled source. Needs a Tor/anonymizer-exit-node feed.', noSource: true },
 ]
 const CAT_BY_KEY = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]))
 
@@ -117,17 +144,10 @@ const PORT_NAMES = {
   8443: 'HTTPS (alt)', 8888: 'HTTP (alt)', 9000: 'HTTP (alt)',
 }
 
-// Transport protocol for the well-known ports DShield reports. Ports
-// not listed here are shown without a protocol claim.
-const PORT_PROTOCOL = {
-  21: 'TCP', 22: 'TCP', 23: 'TCP', 25: 'TCP', 53: 'UDP', 69: 'UDP',
-  80: 'TCP', 110: 'TCP', 111: 'TCP', 123: 'UDP', 135: 'TCP', 137: 'UDP',
-  138: 'UDP', 139: 'TCP', 143: 'TCP', 161: 'UDP', 443: 'TCP', 445: 'TCP',
-  500: 'UDP', 1433: 'TCP', 1701: 'UDP', 1900: 'UDP', 2222: 'TCP',
-  2323: 'TCP', 3306: 'TCP', 3389: 'TCP', 5060: 'UDP', 5353: 'UDP',
-  5432: 'TCP', 5900: 'TCP', 6379: 'TCP', 8000: 'TCP', 8080: 'TCP', 8443: 'TCP',
-  8888: 'TCP', 9000: 'TCP', 11211: 'UDP', 27015: 'UDP',
-}
+// DShield's top-port records carry no protocol field (verified against
+// the published snapshot), so no protocol is ever inferred from a port
+// number here — a port's protocol is shown only where a record supplies
+// it (see verifiedPortProtocol), otherwise "not verified".
 
 // Friendly names for the weakness types that commonly top the NVD
 // list; anything unmapped is shown by its CWE id.
@@ -190,39 +210,6 @@ const COUNTRY_NUMERIC = {
   EC: '218', BO: '068', PY: '600', UY: '858', GY: '328', SR: '740', TT: '780',
 }
 
-// Country names as Recent Breaches returns them, to alpha-2 codes —
-// for the flag in the Top Attacked list and real target locations.
-const NAME_TO_CODE = {
-  'United States': 'US', Canada: 'CA', Germany: 'DE', India: 'IN',
-  'United Kingdom': 'GB', Spain: 'ES', 'South Korea': 'KR', Italy: 'IT',
-  Brazil: 'BR', Malaysia: 'MY', Indonesia: 'ID', France: 'FR',
-  Australia: 'AU', Japan: 'JP', Netherlands: 'NL', Russia: 'RU',
-  'Russian Federation': 'RU', Ireland: 'IE', Singapore: 'SG', Poland: 'PL',
-  Turkey: 'TR', Ukraine: 'UA', Mexico: 'MX', Argentina: 'AR', Chile: 'CL',
-  Colombia: 'CO', Peru: 'PE', Venezuela: 'VE', Romania: 'RO', Czechia: 'CZ',
-  'Czech Republic': 'CZ', Hungary: 'HU', Greece: 'GR', Portugal: 'PT',
-  Sweden: 'SE', Norway: 'NO', Denmark: 'DK', Finland: 'FI', Switzerland: 'CH',
-  Austria: 'AT', Belgium: 'BE', 'New Zealand': 'NZ', Philippines: 'PH',
-  Pakistan: 'PK', Bangladesh: 'BD', Kazakhstan: 'KZ', Belarus: 'BY',
-  Georgia: 'GE', Armenia: 'AM', Azerbaijan: 'AZ', Iraq: 'IQ', Afghanistan: 'AF',
-  Nepal: 'NP', 'Sri Lanka': 'LK', Myanmar: 'MM', Cambodia: 'KH', Laos: 'LA',
-  Mongolia: 'MN', Kyrgyzstan: 'KG', Tajikistan: 'TJ', Turkmenistan: 'TM',
-  Uzbekistan: 'UZ', Moldova: 'MD', Albania: 'AL', 'Bosnia and Herzegovina': 'BA',
-  Croatia: 'HR', Serbia: 'RS', Slovenia: 'SI', Slovakia: 'SK', Bulgaria: 'BG',
-  Lithuania: 'LT', Latvia: 'LV', Estonia: 'EE', Iceland: 'IS', Luxembourg: 'LU',
-  Malta: 'MT', Cyprus: 'CY', Algeria: 'DZ', Morocco: 'MA', Tunisia: 'TN',
-  Libya: 'LY', Kenya: 'KE', Ghana: 'GH', 'Ivory Coast': 'CI', Senegal: 'SN',
-  Cameroon: 'CM', Angola: 'AO', Ethiopia: 'ET', Tanzania: 'TZ', Uganda: 'UG',
-  Zambia: 'ZM', Zimbabwe: 'ZW', 'Dominican Republic': 'DO', Cuba: 'CU',
-  Jamaica: 'JM', Haiti: 'HT', Guatemala: 'GT', Honduras: 'HN', 'El Salvador': 'SV',
-  Nicaragua: 'NI', 'Costa Rica': 'CR', Panama: 'PA', Ecuador: 'EC', Bolivia: 'BO',
-  Paraguay: 'PY', Uruguay: 'UY', Guyana: 'GY', Suriname: 'SR',
-  'Trinidad and Tobago': 'TT', China: 'CN', Taiwan: 'TW', 'Hong Kong': 'HK',
-  Vietnam: 'VN', Thailand: 'TH', 'South Africa': 'ZA', Nigeria: 'NG',
-  Egypt: 'EG', Israel: 'IL', 'United Arab Emirates': 'AE', 'Saudi Arabia': 'SA',
-  Iran: 'IR',
-}
-
 function flagEmoji(code) {
   if (!code || code.length !== 2) return ''
   return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
@@ -230,6 +217,9 @@ function flagEmoji(code) {
 
 const MAP_W = 1200
 const MAP_H = 620
+// Stable empty pairs reference for history-gap layers, so memoised
+// derivations don't see a fresh array on every render.
+const EMPTY_PAIRS = []
 
 function fetchJson(url, { timeout = FETCH_TIMEOUT_MS } = {}) {
   const ctrl = new AbortController()
@@ -309,12 +299,11 @@ function formatCloudflareUnits(units) {
 }
 
 const TIMELINE_TRACKS = [
-  { key: 'dshield', label: 'DShield daily reports', resolution: 'day' },
-  { key: 'dshieldPorts', label: 'DShield top ports', resolution: 'day' },
-  { key: 'nvd', label: 'NVD CVE publications', resolution: 'hour' },
-  { key: 'kev', label: 'CISA KEV additions', resolution: 'day' },
-  { key: 'cloudflare', label: 'Cloudflare Radar snapshots', resolution: 'snapshot' },
-  { key: 'threatfox', label: 'ThreatFox indicators', resolution: 'hour' },
+  { key: 'web', label: 'Web Attackers · WAF timeseries', resolution: '1h' },
+  { key: 'ddos', label: 'DDoS Attackers · DDoS timeseries', resolution: '1h' },
+  { key: 'intruders', label: 'Intruders · no source configured', resolution: 'day' },
+  { key: 'scanners', label: 'Scanners · DShield daily reports', resolution: 'day' },
+  { key: 'anonymizers', label: 'Anonymizers · no source configured', resolution: 'day' },
 ]
 
 function cloudflareFreshness(provider, now = Date.now()) {
@@ -356,8 +345,15 @@ function ActivityTrack({ events, start, end, resolution, cursor = null }) {
   const width = 1000
   const baseline = 23
   const maxHeight = 18
-  const bucketSize = resolution === 'hour' ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000
-  const barWidth = resolution === 'hour' ? 2.4 : 3
+  // Buckets are the provider's real resolution — 15m bins for the 1h/6h
+  // Cloudflare timeseries, hourly for 24h/NVD, daily for 7d/DShield/KEV.
+  // Points are bucketed, never interpolated: a gap stays a gap.
+  const bucketSize = resolution === '15m'
+    ? 15 * 60 * 1000
+    : resolution === 'hour' || resolution === '1h'
+      ? 60 * 60 * 1000
+      : 24 * 60 * 60 * 1000
+  const barWidth = resolution === 'day' || resolution === '1d' ? 3 : 2.4
   const buckets = new Map()
   for (const event of events) {
     if (
@@ -395,6 +391,33 @@ function ActivityTrack({ events, start, end, resolution, cursor = null }) {
   )
 }
 
+function emptyCloudflareLayer() {
+  return {
+    pairs: [],
+    meta: null,
+    provider: null,
+    generatedAt: null,
+    window: null,
+    windowShiftMinutes: null,
+    status: 'unavailable',
+    error: 'Layer file not loaded yet',
+  }
+}
+
+function emptyTimeseries() {
+  return {
+    points: [],
+    meta: null,
+    normalization: null,
+    status: 'unavailable',
+    error: 'Timeseries file not loaded yet',
+    aggInterval: null,
+    generatedAt: null,
+    window: null,
+    windowShiftMinutes: null,
+  }
+}
+
 export default function ThreatMap() {
   useMeta({
     title: 'Live Cyber Threat Map',
@@ -410,13 +433,13 @@ export default function ThreatMap() {
     threatfoxStatus: 'disabled_license',
     dailySummary: [],
     nvdRecent: [],
-    cloudflareRadar: { meta: null, pairs: [], provider: null, generatedAt: null },
+    cloudflareRadar: { web: emptyCloudflareLayer(), ddos: emptyCloudflareLayer() },
     infocon: null,
     kev: null,
     rbIndex: null,
     rbGeo: null,
     rbLeaks: [],
-    timeline: { dshield: [], dshieldPorts: [], nvd: [], kev: [], threatfox: [] },
+    timeline: { dshield: [] },
     providers: null,
   })
   const [errors, setErrors] = useState({})
@@ -429,20 +452,33 @@ export default function ThreatMap() {
   const [chip, setChip] = useState(null)
   const [selectedIntel, setSelectedIntel] = useState(null)
   const [attackFilters, setAttackFilters] = useState({
+    web: true,
+    ddos: true,
     scanning: true,
-    cloudflare: true,
-    ransomware: true,
-    exploited: true,
-    breaches: true,
+    intruders: true,
+    anonymizers: true,
   })
-  const [cfInterval, setCfInterval] = useState('24h')
-  const [cfIntervalMeta, setCfIntervalMeta] = useState(null)
+  // Interval default is 1h: the reference recording runs on a 1-hour
+  // interval, and the timeline's default window is 1 hour.
+  const [cfInterval, setCfInterval] = useState('1h')
+  // Timeseries per mitigation product, keyed by product enum — WAF and
+  // DDOS feed the Web/DDoS timeline tracks; all seven feed the attack
+  // vectors panel. No timeseries files are published yet, so every
+  // entry starts (and stays, until the pipeline publishes them) as
+  // unavailable with empty points — never substituted or invented.
+  const [cfTimeseriesByProduct, setCfTimeseriesByProduct] = useState({})
   const [cfManifest, setCfManifest] = useState(null)
-  const [cfPreviousPairs, setCfPreviousPairs] = useState(null)
-  const [historicalCf, setHistoricalCf] = useState(null)
+  const [cfPreviousPairs, setCfPreviousPairs] = useState({ web: null, ddos: null })
+  const [historicalCf, setHistoricalCf] = useState({ web: null, ddos: null })
   const cfIntervalRef = useRef(cfInterval)
   cfIntervalRef.current = cfInterval
-  const historicalCfFetchedRef = useRef(null)
+  // Monotonic load-generation id: a response is applied only while its
+  // generation is still current, so a slow earlier request (e.g. 1h)
+  // resolving after a later one (e.g. 24h), or the 5-minute auto-refresh
+  // racing an interval/product switch, can never apply one
+  // interval/product's pairs under another's label.
+  const loadGenerationRef = useRef(0)
+  const historicalCfFetchedRef = useRef({ web: null, ddos: null })
   const [mapTransform, setMapTransform] = useState({ x: 0, y: 0, scale: 1 })
   const [isPanning, setIsPanning] = useState(false)
   const [timeWindow, setTimeWindow] = useState(null)
@@ -459,22 +495,37 @@ export default function ThreatMap() {
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
+    const generation = ++loadGenerationRef.current
+    const requestInterval = cfIntervalRef.current
     const nextErrors = {}
     try {
-      // The selected interval's file; for 24h the legacy base file remains
-      // as a fallback until the per-interval -24h file is published.
+      // One fetch per dataset, all for the requested interval only:
+      // WAF + DDOS pair files (the two map layers) and the
+      // per-mitigation-product timeseries files (Web/DDoS tracks + the
+      // attack-vectors panel). There is no fallback: a missing file
+      // shows UNAVAILABLE for that layer/product instead of a
+      // substitute. Manual refresh only re-fetches these same-origin
+      // files — it never triggers a workflow re-run.
       const cloudflarePromise = (async () => {
-        try {
-          return await fetchJson(cloudflareIntervalUrl(import.meta.env.BASE_URL, cfIntervalRef.current))
-        } catch (error) {
-          if (cfIntervalRef.current !== '24h') throw error
-          return fetchJson(CLOUDFLARE_RADAR_SNAPSHOT)
+        const results = await Promise.allSettled([
+          fetchJson(cloudflareProductUrl(import.meta.env.BASE_URL, requestInterval, 'WAF')),
+          fetchJson(cloudflareProductUrl(import.meta.env.BASE_URL, requestInterval, 'DDOS')),
+          ...CLOUDFLARE_PRODUCTS.filter((product) => product !== 'all').map((product) =>
+            fetchJson(cloudflareTimeseriesUrl(import.meta.env.BASE_URL, requestInterval, product))),
+        ])
+        return {
+          pairsWaf: results[0],
+          pairsDdos: results[1],
+          timeseriesResults: results.slice(2),
         }
       })()
       const [snapshotResult, cloudflareResult] = await Promise.allSettled([
         fetchJson(THREAT_INTEL_SNAPSHOT),
         cloudflarePromise,
       ])
+      // Stale-response guard: ignore everything from an earlier
+      // generation (superseded interval/product switch or refresh).
+      if (!mounted.current || generation !== loadGenerationRef.current) return
       if (snapshotResult.status === 'rejected') throw snapshotResult.reason
       const snapshot = snapshotResult.value
       if (!snapshot?.dashboard || !snapshot?.providers) {
@@ -482,43 +533,94 @@ export default function ThreatMap() {
       }
 
       const dashboard = snapshot.dashboard
-      const cloudflareSnapshot = cloudflareResult.status === 'fulfilled' &&
-        Array.isArray(cloudflareResult.value?.pairs) &&
-        cloudflareResult.value?.provider
-        ? cloudflareResult.value
-        : null
-      let cloudflareProvider = cloudflareSnapshot?.provider || snapshot.providers.cloudflare_radar
-      if (cloudflareSnapshot) {
-        setCfIntervalMeta({
-          interval: cloudflareSnapshot.interval || cfIntervalRef.current,
-          generatedAt: cloudflareSnapshot.generatedAt || null,
-          window: cloudflareSnapshot.window || null,
-          intervalStatus: cloudflareSnapshot.intervalStatus || cloudflareSnapshot.provider?.status || null,
-          intervalError: cloudflareSnapshot.intervalError || null,
-        })
-      }
-      if (!cloudflareSnapshot) {
-        nextErrors.cloudflare = cloudflareResult.status === 'rejected'
-          ? cloudflareResult.reason.message
-          : 'Cloudflare Radar snapshot has an unexpected response shape'
-        setCfIntervalMeta({
-          interval: cfIntervalRef.current,
-          generatedAt: null,
-          window: null,
-          intervalStatus: 'unavailable',
-          intervalError: nextErrors.cloudflare,
-        })
-        if (cloudflareProvider && cloudflareProvider.status !== 'not_configured') {
-          const hasSuccessfulDataset = Boolean(cloudflareProvider.lastUpdated || cloudflareProvider.fetchedAt)
-          cloudflareProvider = {
-            ...cloudflareProvider,
-            status: hasSuccessfulDataset ? 'stale' : 'offline',
-            error: nextErrors.cloudflare,
+      const cloudflareDocs = cloudflareResult.status === 'fulfilled' ? cloudflareResult.value : null
+      const fallbackProvider = snapshot.providers.cloudflare_radar || null
+      // One layer state per Cloudflare dataset. A layer whose file is
+      // missing, erroring, or mismatched yields empty pairs + status
+      // 'unavailable' with the reason — never another layer's data.
+      const layerFromPairsDoc = (settled, product) => {
+        if (
+          settled?.status === 'fulfilled' &&
+          Array.isArray(settled.value?.pairs) &&
+          settled.value?.provider &&
+          responseMatchesRequest(settled.value, requestInterval, product)
+        ) {
+          const doc = settled.value
+          return {
+            pairs: doc.pairs,
+            meta: doc.meta || null,
+            provider: doc.provider,
+            generatedAt: doc.generatedAt || null,
+            window: doc.window || null,
+            windowShiftMinutes: computeWindowShiftMinutes(doc),
+            status: doc.intervalStatus || doc.provider?.status || 'live',
+            error: doc.intervalError || null,
           }
         }
-      } else if (cloudflareProvider?.status !== 'live') {
-        nextErrors.cloudflare = cloudflareProvider?.error || `Provider status: ${cloudflareProvider?.status || 'unavailable'}`
+        return {
+          ...emptyCloudflareLayer(),
+          provider: fallbackProvider,
+          error: settled?.status === 'rejected'
+            ? settled.reason.message
+            : settled?.status === 'fulfilled'
+              ? 'Cloudflare Radar file does not match the requested interval/product, or has an unexpected response shape'
+              : 'Cloudflare Radar file is unavailable',
+        }
       }
+      const webLayer = layerFromPairsDoc(cloudflareDocs?.pairsWaf, 'WAF')
+      const ddosLayer = layerFromPairsDoc(cloudflareDocs?.pairsDdos, 'DDOS')
+      if (webLayer.status === 'unavailable') nextErrors.cloudflareWeb = webLayer.error
+      else if (webLayer.provider?.status !== 'live') {
+        nextErrors.cloudflareWeb = webLayer.provider?.error || `Provider status: ${webLayer.provider?.status || 'unavailable'}`
+      }
+      if (ddosLayer.status === 'unavailable') nextErrors.cloudflareDdos = ddosLayer.error
+      else if (ddosLayer.provider?.status !== 'live') {
+        nextErrors.cloudflareDdos = ddosLayer.provider?.error || `Provider status: ${ddosLayer.provider?.status || 'unavailable'}`
+      }
+      // Timeseries per product: missing, erroring, or mismatched files
+      // yield empty points + UNAVAILABLE — never another
+      // interval/product's series.
+      const timeseriesByProduct = {}
+      const vectorProducts = CLOUDFLARE_PRODUCTS.filter((product) => product !== 'all')
+      vectorProducts.forEach((product, index) => {
+        const settled = cloudflareDocs?.timeseriesResults?.[index]
+        if (
+          settled?.status === 'fulfilled' &&
+          settled.value &&
+          typeof settled.value === 'object' &&
+          responseMatchesRequest(settled.value, requestInterval, product)
+        ) {
+          const doc = settled.value
+          const points = mapTimeseriesPoints(doc)
+          const rawStatus = String(doc.timeseriesStatus || '').toLowerCase()
+          timeseriesByProduct[product] = {
+            points,
+            meta: doc.meta || null,
+            normalization: doc.meta?.normalization || doc.normalization || null,
+            status: rawStatus === 'live' || rawStatus === 'stale'
+              ? rawStatus
+              : (points.length > 0 ? 'live' : 'unavailable'),
+            error: rawStatus === 'unavailable' || rawStatus === 'error'
+              ? (doc.timeseriesError || `Timeseries status: ${rawStatus}`)
+              : null,
+            aggInterval: doc.aggInterval || doc.meta?.aggInterval || cloudflareAggInterval(requestInterval),
+            generatedAt: doc.generatedAt || null,
+            window: doc.window || null,
+            windowShiftMinutes: computeWindowShiftMinutes(doc),
+          }
+        } else {
+          timeseriesByProduct[product] = {
+            ...emptyTimeseries(),
+            error: settled?.status === 'rejected'
+              ? settled.reason.message
+              : settled?.status === 'fulfilled'
+                ? 'Timeseries file does not match the requested interval/product, or has an unexpected shape'
+                : 'Timeseries file is unavailable',
+            aggInterval: cloudflareAggInterval(requestInterval),
+          }
+        }
+      })
+      setCfTimeseriesByProduct(timeseriesByProduct)
       const providerMessage = (key) => {
         const provider = snapshot.providers[key]
         if (!provider || provider.status === 'live') return null
@@ -573,6 +675,9 @@ export default function ThreatMap() {
             targets: numericValue(record.targets),
             sources: numericValue(record.sources),
             date: record.date || dashboard.ports?.date || null,
+            // Kept only when the record supplies it; DShield's records
+            // do not, so this is null and the UI says "not verified".
+            protocol: typeof record.protocol === 'string' ? record.protocol : null,
           }
         })
         .filter(Boolean)
@@ -607,38 +712,17 @@ export default function ThreatMap() {
         .map(([id, count]) => ({ id, name: CWE_NAMES[id] || id, count }))
 
       const dailySummary = Array.isArray(dashboard.dailySummary) ? dashboard.dailySummary : []
+      // The Scanners timeline track uses DShield DAILY points only —
+      // sparse, one point per day, never dozens of fake hourly spikes.
+      // NVD/KEV live in alerts + sidebar panels, not as timeline tracks.
       const dshieldEvents = dailySummary
         .map((day) => {
           const timestamp = timelineTimestamp(day.date)
           return timestamp == null ? null : { timestamp, value: Number(day.records) || 0 }
         })
         .filter(Boolean)
-      const dshieldPortEvents = ports
-        .map((port) => {
-          const timestamp = timelineTimestamp(port.date)
-          return timestamp == null ? null : { timestamp, value: port.records }
-        })
-        .filter(Boolean)
-      const nvdEvents = (Array.isArray(nvd?.vulnerabilities) ? nvd.vulnerabilities : [])
-        .map((item) => {
-          const timestamp = timelineTimestamp(item?.cve?.published)
-          return timestamp == null ? null : { timestamp, value: 1 }
-        })
-        .filter(Boolean)
       const kev = dashboard.kev
-      const kevEvents = (Array.isArray(kev?.recent) ? kev.recent : [])
-        .map((vulnerability) => {
-          const timestamp = timelineTimestamp(vulnerability.dateAdded)
-          return timestamp == null ? null : { timestamp, value: 1 }
-        })
-        .filter(Boolean)
       const threatfox = Array.isArray(dashboard.threatfox) ? dashboard.threatfox : []
-      const threatFoxEvents = threatfox
-        .map((indicator) => {
-          const timestamp = timelineTimestamp(indicator.firstSeen)
-          return timestamp == null ? null : { timestamp, value: 1 }
-        })
-        .filter(Boolean)
 
       if (!mounted.current) return
       const nvdRecent = (Array.isArray(nvd?.vulnerabilities) ? nvd.vulnerabilities : [])
@@ -655,23 +739,8 @@ export default function ThreatMap() {
         threatfoxStatus: threatFoxStatus,
         dailySummary,
         nvdRecent,
-        cloudflareRadar: cloudflareSnapshot
-          ? {
-            meta: cloudflareSnapshot.meta,
-            pairs: cloudflareSnapshot.pairs,
-            provider: cloudflareProvider,
-            generatedAt: cloudflareSnapshot.generatedAt || null,
-          }
-          : {
-            meta: null,
-            pairs: [],
-            provider: cloudflareProvider,
-            generatedAt: null,
-          },
-        providers: {
-          ...snapshot.providers,
-          cloudflare_radar: cloudflareProvider || snapshot.providers.cloudflare_radar || current.providers?.cloudflare_radar,
-        },
+        cloudflareRadar: { web: webLayer, ddos: ddosLayer },
+        providers: snapshot.providers,
         infocon: dashboard.infocon?.status || null,
         kev,
         rbIndex: dashboard.recentBreaches?.index || null,
@@ -679,21 +748,17 @@ export default function ThreatMap() {
         rbLeaks: Array.isArray(dashboard.recentBreaches?.leaks) ? dashboard.recentBreaches.leaks.slice(0, 4) : [],
         timeline: {
           dshield: dshieldEvents,
-          dshieldPorts: dshieldPortEvents,
-          nvd: nvdEvents,
-          kev: kevEvents,
-          threatfox: threatFoxEvents,
         },
       }))
       setErrors(nextErrors)
       setUpdatedAt(snapshot.generatedAt ? new Date(snapshot.generatedAt) : null)
     } catch (error) {
-      if (mounted.current) {
+      if (mounted.current && generation === loadGenerationRef.current) {
         console.error(`Threat-intel snapshot unavailable: ${error.message}`)
         setErrors({ snapshot: error.message, dshield: error.message })
       }
     } finally {
-      if (mounted.current) {
+      if (mounted.current && generation === loadGenerationRef.current) {
         setLoading(false)
         setRefreshing(false)
       }
@@ -710,17 +775,17 @@ export default function ThreatMap() {
     }
   }, [load])
 
-  // Interval change: refetch the selected interval's Cloudflare file and
-  // leave any historical playback behind (it belongs to the old interval).
+  // Interval change: refetch that interval's Cloudflare files and leave
+  // any historical playback behind (it belongs to the old interval).
   const firstIntervalRun = useRef(true)
   useEffect(() => {
     if (firstIntervalRun.current) {
       firstIntervalRun.current = false
       return
     }
-    historicalCfFetchedRef.current = null
-    setHistoricalCf(null)
-    setCfPreviousPairs(null)
+    historicalCfFetchedRef.current = { web: null, ddos: null }
+    setHistoricalCf({ web: null, ddos: null })
+    setCfPreviousPairs({ web: null, ddos: null })
     load(true)
   }, [cfInterval, load])
 
@@ -730,7 +795,9 @@ export default function ThreatMap() {
     let cancelled = false
     fetchJson(CLOUDFLARE_HISTORY_MANIFEST)
       .then((manifest) => {
-        if (!cancelled && manifest && typeof manifest === 'object' && manifest.intervals) {
+        const hasEntries = manifest && typeof manifest === 'object' &&
+          (manifest.intervals || manifest.pairs || manifest.timeseries)
+        if (!cancelled && hasEntries) {
           setCfManifest(manifest)
         } else if (!cancelled) {
           setCfManifest(null)
@@ -742,66 +809,111 @@ export default function ThreatMap() {
     return () => { cancelled = true }
   }, [])
 
-  // Previous retained snapshot for the selected interval, so the alerts
-  // panel can report real Cloudflare pair changes. Null = no prior
-  // snapshot retained, so no Cloudflare-change alert is shown.
+  // Previous retained snapshot per layer, so the alerts panel can report
+  // real Cloudflare pair changes. Null per layer = no prior snapshot
+  // retained for that layer, so no pair-change alert is shown for it.
   useEffect(() => {
-    const entries = cfManifest?.intervals?.[cfInterval]
-    if (!Array.isArray(entries) || entries.length < 2) {
-      setCfPreviousPairs(null)
-      return undefined
-    }
-    const previous = entries[entries.length - 2]
-    const path = typeof previous?.path === 'string' ? previous.path.replace(/^\//, '') : null
-    if (!path) {
-      setCfPreviousPairs(null)
-      return undefined
-    }
+    setCfPreviousPairs({ web: null, ddos: null })
     let cancelled = false
-    fetchJson(`${import.meta.env.BASE_URL}${path}`)
-      .then((snapshot) => {
-        if (!cancelled) setCfPreviousPairs(Array.isArray(snapshot?.pairs) ? snapshot.pairs : null)
-      })
-      .catch(() => {
-        if (!cancelled) setCfPreviousPairs(null)
-      })
+    for (const [layer, product] of [['web', 'WAF'], ['ddos', 'DDOS']]) {
+      const entries = manifestEntries(cfManifest, cfInterval, product, 'pairs')
+      if (!Array.isArray(entries) || entries.length < 2) continue
+      const previous = entries[entries.length - 2]
+      const path = typeof previous?.path === 'string' ? previous.path.replace(/^\//, '') : null
+      if (!path) continue
+      fetchJson(`${import.meta.env.BASE_URL}${path}`)
+        .then((snapshot) => {
+          if (!cancelled && Array.isArray(snapshot?.pairs)) {
+            setCfPreviousPairs((current) => ({ ...current, [layer]: snapshot.pairs }))
+          }
+        })
+        .catch(() => {
+          // No prior snapshot usable for this layer — no alert, no crash.
+        })
+    }
     return () => { cancelled = true }
   }, [cfManifest, cfInterval])
 
+  // Retained snapshot at/before the playhead, per layer, for the ACTIVE
+  // interval. When a layer has none at/before the playhead (and the
+  // playhead is before that layer's live snapshot), that layer shows NO
+  // pairs and a "no historical data" note — never today's pairs
+  // presented as history.
+  const selectedHistoricalEntries = useMemo(() => {
+    if (playhead === null) return { web: null, ddos: null }
+    return {
+      web: selectHistoricalSnapshotForProduct(cfManifest, cfInterval, 'WAF', playhead),
+      ddos: selectHistoricalSnapshotForProduct(cfManifest, cfInterval, 'DDOS', playhead),
+    }
+  }, [playhead, cfManifest, cfInterval])
+  const liveWebGeneratedAt = data.cloudflareRadar.web.generatedAt
+  const liveDdosGeneratedAt = data.cloudflareRadar.ddos.generatedAt
+  const cfHistoryGap = useMemo(() => ({
+    web: playhead !== null &&
+      !selectedHistoricalEntries.web &&
+      (liveWebGeneratedAt === null || playhead < Date.parse(liveWebGeneratedAt)),
+    ddos: playhead !== null &&
+      !selectedHistoricalEntries.ddos &&
+      (liveDdosGeneratedAt === null || playhead < Date.parse(liveDdosGeneratedAt)),
+  }), [playhead, selectedHistoricalEntries, liveWebGeneratedAt, liveDdosGeneratedAt])
+
   // Historical playback: when the playhead sits at/after a retained
-  // Cloudflare snapshot, swap the map to that snapshot's pairs.
+  // snapshot for a layer, swap that layer to that snapshot's pairs.
   useEffect(() => {
     if (playhead === null) {
-      if (historicalCf !== null) setHistoricalCf(null)
-      historicalCfFetchedRef.current = null
+      setHistoricalCf((current) => (current.web === null && current.ddos === null
+        ? current
+        : { web: null, ddos: null }))
+      historicalCfFetchedRef.current = { web: null, ddos: null }
       return undefined
     }
-    const entries = cfManifest?.intervals?.[cfInterval]
-    const selected = selectHistoricalSnapshot(entries, playhead)
-    const liveGeneratedAt = data.cloudflareRadar.generatedAt
-    if (!selected || (liveGeneratedAt && selected.generatedAt === liveGeneratedAt)) {
-      if (historicalCf !== null) setHistoricalCf(null)
-      historicalCfFetchedRef.current = null
-      return undefined
-    }
-    if (historicalCfFetchedRef.current === selected.generatedAt) return undefined
-    historicalCfFetchedRef.current = selected.generatedAt
-    const path = typeof selected.path === 'string' ? selected.path.replace(/^\//, '') : null
-    if (!path) return undefined
     let cancelled = false
-    fetchJson(`${import.meta.env.BASE_URL}${path}`)
-      .then((snapshot) => {
-        if (!cancelled && Array.isArray(snapshot?.pairs)) {
-          setHistoricalCf({ generatedAt: selected.generatedAt, pairs: snapshot.pairs, meta: snapshot.meta || null })
-        } else if (!cancelled) {
-          setHistoricalCf(null)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setHistoricalCf(null)
-      })
+    for (const layer of ['web', 'ddos']) {
+      const selected = selectedHistoricalEntries[layer]
+      const liveAt = layer === 'web' ? liveWebGeneratedAt : liveDdosGeneratedAt
+      if (!selected || (liveAt && selected.generatedAt === liveAt)) {
+        setHistoricalCf((current) => (current[layer] === null
+          ? current
+          : { ...current, [layer]: null }))
+        historicalCfFetchedRef.current[layer] = null
+        continue
+      }
+      if (historicalCfFetchedRef.current[layer] === selected.generatedAt) continue
+      historicalCfFetchedRef.current[layer] = selected.generatedAt
+      const path = typeof selected.path === 'string' ? selected.path.replace(/^\//, '') : null
+      if (!path) continue
+      const entryGeneratedAt = selected.generatedAt
+      const product = layer === 'web' ? 'WAF' : 'DDOS'
+      fetchJson(`${import.meta.env.BASE_URL}${path}`)
+        .then((snapshot) => {
+          // Guard: apply only if this entry is still the selected one
+          // for the active interval+layer, and the snapshot matches them.
+          if (
+            !cancelled &&
+            historicalCfFetchedRef.current[layer] === entryGeneratedAt &&
+            Array.isArray(snapshot?.pairs) &&
+            responseMatchesRequest(snapshot, cfIntervalRef.current, product)
+          ) {
+            setHistoricalCf((current) => ({
+              ...current,
+              [layer]: {
+                generatedAt: entryGeneratedAt,
+                pairs: snapshot.pairs,
+                meta: snapshot.meta || null,
+                window: snapshot.window || null,
+                windowShiftMinutes: computeWindowShiftMinutes(snapshot),
+              },
+            }))
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setHistoricalCf((current) => ({ ...current, [layer]: null }))
+          }
+        })
+    }
     return () => { cancelled = true }
-  }, [playhead, cfManifest, cfInterval, data.cloudflareRadar.generatedAt, historicalCf])
+  }, [playhead, selectedHistoricalEntries, liveWebGeneratedAt, liveDdosGeneratedAt])
 
   const projection = useMemo(() => geoNaturalEarth1().fitSize([MAP_W, MAP_H], LAND), [])
   const path = useMemo(() => geoPath(projection), [projection])
@@ -899,7 +1011,9 @@ export default function ThreatMap() {
   const countrySourceFreshness = providerFreshness(countrySourceFeed)
   const countrySourceLastRefresh = countrySourceFeed?.fetchedAt || countrySourceFeed?.lastSuccessfulAt || null
   const timelineNow = updatedAt?.getTime() ?? INITIAL_TIMELINE_TIME
-  const defaultTimelineStart = timelineNow - 6 * 24 * 60 * 60 * 1000
+  // Default timeline window is 1 hour, matching the reference
+  // recording's 1-hour interval; the axis shows a NOW marker at the end.
+  const defaultTimelineStart = timelineNow - 60 * 60 * 1000
   const timelineWindowStart = timeWindow?.start ?? defaultTimelineStart
   const timelineWindowEnd = timeWindow?.end ?? timelineNow
   const activeTimeWindow = { start: timelineWindowStart, end: timelineWindowEnd }
@@ -912,7 +1026,7 @@ export default function ThreatMap() {
     () => buildCountryActivity(visibleSources, COUNTRY_NUMERIC).activity,
     [visibleSources],
   )
-  const cloudflareNeedsDetailedGeometry = data.cloudflareRadar.pairs.some((pair) =>
+  const cloudflareNeedsDetailedGeometry = [...data.cloudflareRadar.web.pairs, ...data.cloudflareRadar.ddos.pairs].some((pair) =>
     !COUNTRY_FEATURE_IDS.has(COUNTRY_NUMERIC[pair.originCountryAlpha2]) ||
     !COUNTRY_FEATURE_IDS.has(COUNTRY_NUMERIC[pair.targetCountryAlpha2]),
   )
@@ -931,30 +1045,96 @@ export default function ThreatMap() {
     return () => { cancelled = true }
   }, [cloudflareNeedsDetailedGeometry])
   const cloudflareCountryFeatures = detailedCountryFeatures || COUNTRIES.features
-  const effectiveCloudflarePairs = historicalCf ? historicalCf.pairs : data.cloudflareRadar.pairs
-  const effectiveCloudflareMeta = historicalCf ? historicalCf.meta : data.cloudflareRadar.meta
-  // Computed here (before the provider panel below) so the memoised
-  // map does not read a not-yet-declared binding.
-  const cloudflareLiveStatus = cloudflareFreshness(data.providers?.cloudflare_radar)
-  const cloudflareDisplayStatus = historicalCf ? 'HISTORICAL' : cloudflareLiveStatus
-  const cloudflareMapData = useMemo(
+  // Effective pairs per layer: the historical snapshot when playback
+  // shows one, live pairs otherwise, empty when that layer has no
+  // retained snapshot at/before the playhead — never today's pairs as
+  // history.
+  const effectiveWebPairs = cfHistoryGap.web
+    ? EMPTY_PAIRS
+    : (historicalCf.web ? historicalCf.web.pairs : data.cloudflareRadar.web.pairs)
+  const effectiveDdosPairs = cfHistoryGap.ddos
+    ? EMPTY_PAIRS
+    : (historicalCf.ddos ? historicalCf.ddos.pairs : data.cloudflareRadar.ddos.pairs)
+  const effectiveLayerMeta = useMemo(() => ({
+    web: cfHistoryGap.web ? null : (historicalCf.web ? historicalCf.web.meta : data.cloudflareRadar.web.meta),
+    ddos: cfHistoryGap.ddos ? null : (historicalCf.ddos ? historicalCf.ddos.meta : data.cloudflareRadar.ddos.meta),
+  }), [cfHistoryGap, historicalCf, data.cloudflareRadar])
+  const effectiveLayerGeneratedAt = useMemo(() => ({
+    web: historicalCf.web?.generatedAt || (cfHistoryGap.web ? null : data.cloudflareRadar.web.generatedAt),
+    ddos: historicalCf.ddos?.generatedAt || (cfHistoryGap.ddos ? null : data.cloudflareRadar.ddos.generatedAt),
+  }), [cfHistoryGap, historicalCf, data.cloudflareRadar])
+  const effectiveLayerWindow = useMemo(() => ({
+    web: cfHistoryGap.web ? null : (historicalCf.web ? historicalCf.web.window : data.cloudflareRadar.web.window),
+    ddos: cfHistoryGap.ddos ? null : (historicalCf.ddos ? historicalCf.ddos.window : data.cloudflareRadar.ddos.window),
+  }), [cfHistoryGap, historicalCf, data.cloudflareRadar])
+  const effectiveLayerShift = useMemo(() => ({
+    web: cfHistoryGap.web ? null : (historicalCf.web ? historicalCf.web.windowShiftMinutes : data.cloudflareRadar.web.windowShiftMinutes),
+    ddos: cfHistoryGap.ddos ? null : (historicalCf.ddos ? historicalCf.ddos.windowShiftMinutes : data.cloudflareRadar.ddos.windowShiftMinutes),
+  }), [cfHistoryGap, historicalCf, data.cloudflareRadar])
+  // One shared Cloudflare state: rankings, map arcs, highlights,
+  // country details and pair details all read this one combined list of
+  // the currently ENABLED layers' pairs. A disabled layer contributes
+  // nothing; when neither layer is enabled the list is empty and the
+  // rankings show the disabled state, never the 'all' aggregate.
+  const effectiveCloudflarePairs = useMemo(() => combineCloudflareLayerPairs({
+    web: { pairs: effectiveWebPairs, enabled: attackFilters.web !== false },
+    ddos: { pairs: effectiveDdosPairs, enabled: attackFilters.ddos !== false },
+  }), [effectiveWebPairs, effectiveDdosPairs, attackFilters.web, attackFilters.ddos])
+  const layerAvailable = {
+    web: data.cloudflareRadar.web.status !== 'unavailable' && !cfHistoryGap.web,
+    ddos: data.cloudflareRadar.ddos.status !== 'unavailable' && !cfHistoryGap.ddos,
+  }
+  const webLayers = cloudflareLayerVisibility(attackFilters, 'web', layerAvailable.web)
+  const ddosLayers = cloudflareLayerVisibility(attackFilters, 'ddos', layerAvailable.ddos)
+  const layerDisplayStatus = (layer) => {
+    if (cfHistoryGap[layer]) return 'NO HISTORY'
+    if (historicalCf[layer]) return 'HISTORICAL'
+    return cloudflareFreshness(data.cloudflareRadar[layer].provider || data.providers?.cloudflare_radar)
+  }
+  const webLiveStatus = layerDisplayStatus('web')
+  const ddosLiveStatus = layerDisplayStatus('ddos')
+  // Map data is built per layer so each layer's arcs, highlights and
+  // arrowheads can be shown, hidden, and styled independently.
+  const webMapData = useMemo(
     () => buildCloudflareRadarMap(
-      effectiveCloudflarePairs,
+      attackFilters.web !== false ? effectiveWebPairs : [],
       cloudflareCountryFeatures,
       projection,
       path,
       COUNTRY_NUMERIC,
+      'web',
     ),
-    [effectiveCloudflarePairs, cloudflareCountryFeatures, projection, path],
+    [effectiveWebPairs, attackFilters.web, cloudflareCountryFeatures, projection, path],
   )
-  // Travelling pulses run along real aggregate arcs only, only while the
-  // Cloudflare layer is enabled and its status is LIVE/RECENT.
+  const ddosMapData = useMemo(
+    () => buildCloudflareRadarMap(
+      attackFilters.ddos !== false ? effectiveDdosPairs : [],
+      cloudflareCountryFeatures,
+      projection,
+      path,
+      COUNTRY_NUMERIC,
+      'ddos',
+    ),
+    [effectiveDdosPairs, attackFilters.ddos, cloudflareCountryFeatures, projection, path],
+  )
+  const cloudflareCountryCodeById = useMemo(
+    () => new Map([...webMapData.countryCodeById, ...ddosMapData.countryCodeById]),
+    [webMapData, ddosMapData],
+  )
+  // Travelling pulses run along real aggregate arcs only, only while a
+  // layer is enabled, its file loaded, and its status is LIVE/RECENT.
+  // There is no under-attack indicator on this page: pair values are
+  // percentage shares, not absolute volumes, and no baseline exists to
+  // define a defensible threshold — any threshold would be arbitrary.
   const cloudflarePulses = useMemo(() => {
-    if (!attackFilters.cloudflare || historicalCf) return []
-    if (cloudflareLiveStatus !== 'LIVE' && cloudflareLiveStatus !== 'RECENT') return []
-    return arcPulsePlan(cloudflareMapData.arcs, 12)
-  }, [attackFilters.cloudflare, historicalCf, cloudflareLiveStatus, cloudflareMapData.arcs])
-  const layers = layerVisibility(attackFilters)
+    const liveArcs = [
+      ...(webLayers.arcs && !historicalCf.web && (webLiveStatus === 'LIVE' || webLiveStatus === 'RECENT') ? webMapData.arcs : []),
+      ...(ddosLayers.arcs && !historicalCf.ddos && (ddosLiveStatus === 'LIVE' || ddosLiveStatus === 'RECENT') ? ddosMapData.arcs : []),
+    ]
+    return arcPulsePlan(liveArcs, 12)
+  }, [webLayers.arcs, ddosLayers.arcs, historicalCf, webLiveStatus, ddosLiveStatus, webMapData.arcs, ddosMapData.arcs])
+  // Cloudflare map layers come from webLayers/ddosLayers (layer toggle +
+  // file availability); DShield layers read attackFilters directly.
 
   // Country fills use verified source records only; destination geography
   // is unavailable from the currently permitted map feeds.
@@ -1037,13 +1217,20 @@ export default function ThreatMap() {
     () => rankCloudflareCountries(effectiveCloudflarePairs, 'target').slice(0, 5),
     [effectiveCloudflarePairs],
   )
+  // Rankings sum pair values across the currently ENABLED Cloudflare
+  // layers only. When neither layer is enabled there is no ranking —
+  // the disabled state, never the 'all' aggregate.
+  const enabledCfLayerLabels = [
+    ...(attackFilters.web !== false ? ['Web Attackers (WAF)'] : []),
+    ...(attackFilters.ddos !== false ? ['DDoS Attackers (DDOS)'] : []),
+  ]
+  const cfRankingsDisabled = enabledCfLayerLabels.length === 0
   const sumCfOriginTotals = Math.max(1, cfOriginRanking.reduce((sum, c) => sum + c.total, 0))
   const sumCfTargetTotals = Math.max(1, cfTargetRanking.reduce((sum, c) => sum + c.total, 0))
 
   const sumCountryReports = Math.max(1, countries.reduce((sum, c) => sum + c.reports, 0))
   const maxPortRecords = Math.max(1, ...data.ports.map((p) => p.records))
   const totalReports = data.sources.reduce((sum, s) => sum + s.reports, 0)
-  const topPortRecords = data.ports.reduce((sum, p) => sum + p.records, 0)
   const sumViolationCount = Math.max(1, data.violations.reduce((sum, v) => sum + v.count, 0))
   const timelineStart = activeTimeWindow.start
   const timelineEnd = activeTimeWindow.end
@@ -1051,55 +1238,83 @@ export default function ThreatMap() {
   const timelineTicks = Array.from({ length: 7 }, (_, i) => timelineStart + (timelineSpan * i) / 6)
   const providerData = data.providers || {}
   const dshieldFeeds = providerData.dshield?.subfeeds || {}
-  const timelineProviders = {
-    dshield: dshieldFeeds.daily_summary,
-    dshieldPorts: dshieldFeeds.top_ports,
-    nvd: providerData.nvd,
-    kev: providerData.cisa_kev,
-    cloudflare: providerData.cloudflare_radar,
-    threatfox: providerData.threatfox,
-  }
-  // Cloudflare timeline events are REAL retained-snapshot timestamps from
-  // the history manifest (one event per snapshot; value = pair count).
-  // No manifest on older deploys -> no events, honestly, never invented.
-  const cloudflareTimelineEvents = useMemo(() => {
-    const entries = cfManifest?.intervals?.[cfInterval]
-    if (!Array.isArray(entries)) return []
-    return entries
-      .map((entry) => {
-        const timestamp = Date.parse(entry?.generatedAt || '')
-        return Number.isFinite(timestamp) && Number.isFinite(Number(entry?.pairCount))
-          ? { timestamp, value: Number(entry.pairCount) }
-          : null
-      })
-      .filter(Boolean)
-  }, [cfManifest, cfInterval])
+  const dshieldDailyProvider = dshieldFeeds.daily_summary
+  // Five timeline tracks, one per attack layer. Web/DDoS render their
+  // layer's REAL timeseries serie points at the file's real aggregation
+  // resolution (15m bins for 1h/6h, hourly for 24h, daily for 7d), with
+  // no interpolation. Scanners render DShield DAILY points only — sparse.
+  // Intruders/Anonymizers have no source, so their tracks show DISABLED.
+  // NVD and KEV live in alerts + sidebar panels, not as tracks.
+  const webTimeseries = cfTimeseriesByProduct.WAF || emptyTimeseries()
+  const ddosTimeseries = cfTimeseriesByProduct.DDOS || emptyTimeseries()
+  const layerTimeseries = { web: webTimeseries, ddos: ddosTimeseries }
   const timelineRows = TIMELINE_TRACKS
-    .filter((track) => timelineTrackVisible(track.key, attackFilters))
+    .filter((track) => track.key === 'web' || track.key === 'ddos'
+      ? timeseriesTrackVisible(track.key, attackFilters)
+      : timelineTrackVisible(track.key, attackFilters))
     .map((track) => {
-      const events = track.key === 'cloudflare' ? cloudflareTimelineEvents : data.timeline[track.key] || []
-      const eventsInWindow = events.filter((event) =>
-        event.timestamp >= timelineStart && event.timestamp <= timelineEnd,
-      )
-      const status = track.key === 'cloudflare' && historicalCf
-        ? 'HISTORICAL'
-        : timelineSourceStatus(timelineProviders[track.key], eventsInWindow, timelineNow)
-      return { ...track, events, status }
+      let events = []
+      let status = 'NO DATA'
+      let resolution = track.resolution
+      if (track.key === 'web' || track.key === 'ddos') {
+        const series = layerTimeseries[track.key]
+        events = series.points
+        status = cfHistoryGap[track.key]
+          ? 'NO HISTORY'
+          : timeseriesStatusLabel({ timeseriesStatus: series.status, points: series.points })
+        resolution = series.aggInterval || cloudflareAggInterval(cfInterval)
+      } else if (track.key === 'scanners') {
+        events = data.timeline.dshield
+        const eventsInWindow = events.filter((event) =>
+          event.timestamp >= timelineStart && event.timestamp <= timelineEnd,
+        )
+        status = timelineSourceStatus(dshieldDailyProvider, eventsInWindow, timelineNow)
+      } else {
+        // Intruders / Anonymizers: no enabled source — disabled track.
+        status = 'DISABLED'
+      }
+      return { ...track, events, status, resolution }
     })
   const hasTimelineEvents = timelineRows.some((track) =>
     track.events.some((event) => event.timestamp >= timelineStart && event.timestamp <= timelineEnd),
   )
   // Alerts derived ONLY from data already in the snapshots. Cloudflare
-  // pair-change alerts need a previous retained snapshot; without one
-  // there is simply no such alert (see the panel note).
-  const threatAlerts = useMemo(() => buildThreatAlerts({
-    nvd: data.nvdRecent,
-    kev: data.kev?.recent || [],
-    dailySummary: data.dailySummary,
-    cloudflareCurrentPairs: effectiveCloudflarePairs,
-    cloudflarePreviousPairs: cfPreviousPairs,
-    cloudflareAsOf: cfIntervalMeta?.generatedAt || data.cloudflareRadar.generatedAt,
-  }), [data.nvdRecent, data.kev, data.dailySummary, effectiveCloudflarePairs, cfPreviousPairs, cfIntervalMeta, data.cloudflareRadar.generatedAt])
+  // pair-change alerts are computed per layer against that layer's
+  // previous retained snapshot; without one there is simply no such
+  // alert for that layer (see the panel note).
+  const threatAlerts = useMemo(() => {
+    const base = buildThreatAlerts({
+      nvd: data.nvdRecent,
+      kev: data.kev?.recent || [],
+      dailySummary: data.dailySummary,
+    })
+    const webAlerts = buildThreatAlerts({
+      cloudflareCurrentPairs: attackFilters.web !== false ? effectiveWebPairs : [],
+      cloudflarePreviousPairs: cfPreviousPairs.web,
+      cloudflareAsOf: effectiveLayerGeneratedAt.web,
+      cloudflareLayer: 'web',
+      cloudflareLayerLabel: 'Web Attackers (WAF)',
+    })
+    const ddosAlerts = buildThreatAlerts({
+      cloudflareCurrentPairs: attackFilters.ddos !== false ? effectiveDdosPairs : [],
+      cloudflarePreviousPairs: cfPreviousPairs.ddos,
+      cloudflareAsOf: effectiveLayerGeneratedAt.ddos,
+      cloudflareLayer: 'ddos',
+      cloudflareLayerLabel: 'DDoS Attackers (DDOS)',
+    })
+    return [...base, ...webAlerts, ...ddosAlerts].sort((a, b) => b.timestamp - a.timestamp)
+  }, [data.nvdRecent, data.kev, data.dailySummary, attackFilters.web, attackFilters.ddos, effectiveWebPairs, effectiveDdosPairs, cfPreviousPairs, effectiveLayerGeneratedAt])
+  // Attack vectors, computed ONLY from per-mitigation-product timeseries
+  // totals (see computeAttackVectorsFromTimeseries). DShield ports are
+  // never converted into flood values.
+  const attackVectors = useMemo(() => computeAttackVectorsFromTimeseries(
+    CLOUDFLARE_PRODUCTS.filter((product) => product !== 'all').map((product) => ({
+      product,
+      label: CLOUDFLARE_PRODUCT_LABELS[product],
+      points: cfTimeseriesByProduct[product]?.points || [],
+      normalization: cfTimeseriesByProduct[product]?.normalization || null,
+    })),
+  ), [cfTimeseriesByProduct])
 
   useEffect(() => {
     if (!isPlaying) return undefined
@@ -1141,11 +1356,14 @@ export default function ThreatMap() {
 
   const categoryCounts = {
     scanning: visibleSources.length,
-    cloudflare: effectiveCloudflarePairs.length,
-    ransomware: data.rbLeaks.length,
-    exploited: data.kev?.recent?.length || 0,
-    breaches: (data.rbGeo?.targets || []).length,
+    web: effectiveWebPairs.length,
+    ddos: effectiveDdosPairs.length,
+    intruders: 0,
+    anonymizers: 0,
   }
+  // Per-layer provider freshness: each Cloudflare layer reports its own
+  // file's provider (upstream lastUpdated + status); the snapshot's
+  // cloudflare_radar provider is the fallback where a layer has none.
   const freshnessItems = [
     { key: 'dshield-sources', label: 'DShield sources', provider: dshieldFeeds.source_locations },
     { key: 'dshield-ports', label: 'DShield ports', provider: dshieldFeeds.top_ports },
@@ -1154,7 +1372,8 @@ export default function ThreatMap() {
     { key: 'ipwho', label: 'ipwho.is geolocation', provider: providerData.ip_geolocation },
     { key: 'nvd', label: 'NIST NVD', provider: providerData.nvd },
     { key: 'kev', label: 'CISA KEV', provider: providerData.cisa_kev },
-    { key: 'cloudflare-radar', label: 'Cloudflare Radar', provider: providerData.cloudflare_radar },
+    { key: 'cloudflare-waf', label: 'Cloudflare Radar · Web (WAF)', layer: 'web', provider: data.cloudflareRadar.web.provider || providerData.cloudflare_radar },
+    { key: 'cloudflare-ddos', label: 'Cloudflare Radar · DDoS (DDOS)', layer: 'ddos', provider: data.cloudflareRadar.ddos.provider || providerData.cloudflare_radar },
     { key: 'threatfox', label: 'ThreatFox', provider: providerData.threatfox },
     { key: 'recent-breaches', label: 'Recent Breaches', provider: providerData.recent_breaches },
   ]
@@ -1168,23 +1387,111 @@ export default function ThreatMap() {
       .slice(0, 8)
     : []
   const selectedCountryAlpha2 = selectedIntel?.type === 'country'
-    ? cloudflareMapData.countryCodeById.get(selectedIntel.id)
+    ? cloudflareCountryCodeById.get(selectedIntel.id)
     : null
-  const selectedCountryPairs = selectedCountryAlpha2
-    ? pairsForCountry(effectiveCloudflarePairs, selectedCountryAlpha2)
+  // Country pair details are per layer — the same country can have
+  // different pairs in the WAF and DDoS datasets.
+  const selectedWebPairs = selectedCountryAlpha2
+    ? pairsForCountry(attackFilters.web !== false ? effectiveWebPairs : [], selectedCountryAlpha2)
     : { outbound: [], inbound: [] }
-  const selectedOutboundPairs = selectedCountryPairs.outbound
-  const selectedInboundPairs = selectedCountryPairs.inbound
+  const selectedDdosPairs = selectedCountryAlpha2
+    ? pairsForCountry(attackFilters.ddos !== false ? effectiveDdosPairs : [], selectedCountryAlpha2)
+    : { outbound: [], inbound: [] }
   const selectedSource = selectedIntel?.type === 'source'
     ? data.sources.find((source) => source.ip === selectedIntel.id)
     : null
   const selectedCloudflareArc = selectedIntel?.type === 'cloudflare-pair'
-    ? cloudflareMapData.arcs.find((arc) => arc.key === selectedIntel.id)
+    ? [...webMapData.arcs, ...ddosMapData.arcs].find((arc) => arc.key === selectedIntel.id)
     : null
+  const selectedArcLayer = selectedCloudflareArc?.layer === 'ddos' ? 'ddos' : 'web'
+  const selectedArcMeta = effectiveLayerMeta[selectedArcLayer]
+  const selectedArcGeneratedAt = effectiveLayerGeneratedAt[selectedArcLayer]
+  const selectedArcWindow = effectiveLayerWindow[selectedArcLayer]
+  const selectedArcShift = effectiveLayerShift[selectedArcLayer]
   const selectedPort = selectedIntel?.type === 'port'
     ? data.ports.find((port) => String(port.port) === selectedIntel.id) || null
     : null
   const selectedPortRank = selectedPort ? data.ports.findIndex((port) => port.port === selectedPort.port) + 1 : null
+
+  // One layer's map rendering: country highlights + directional arcs
+  // with arrowheads, styled distinctly per layer (Web solid, DDoS
+  // dashed) so the two Cloudflare datasets stay distinguishable in
+  // monochrome. A layer renders only when its toggle is on and its file
+  // loaded; each arc carries its layer for the pair-detail panel.
+  const renderCloudflareLayer = (layer, mapData, visibility, liveStatus) => (
+    <>
+      {visibility.highlights && (
+        <g className="gtw__cf-country-highlights" pointerEvents="none">
+          {[...mapData.roles].map(([countryId, role]) => {
+            const country = mapData.countryFeatureById.get(countryId)
+            if (!country) return null
+            const d = path(country) || undefined
+            return (
+              <g key={`radar-country-${layer}-${countryId}`}>
+                {role.originValue !== undefined && (
+                  <path
+                    d={d}
+                    className={`gtw__cf-origin gtw__cf-origin--${layer}`}
+                    fillOpacity={role.originOpacity}
+                  >
+                    <title>{`${country.properties?.name} · ${CLOUDFLARE_LAYER_LABELS[layer]} origin country · ${role.originValue.toFixed(2)} summed pair share`}</title>
+                  </path>
+                )}
+                {role.targetValue !== undefined && (
+                  <path
+                    d={d}
+                    className={`gtw__cf-target gtw__cf-target--${layer}`}
+                    fillOpacity={role.targetOpacity}
+                  >
+                    <title>{`${country.properties?.name} · ${CLOUDFLARE_LAYER_LABELS[layer]} target country · ${role.targetValue.toFixed(2)} summed pair share`}</title>
+                  </path>
+                )}
+              </g>
+            )
+          })}
+        </g>
+      )}
+      {visibility.arcs && mapData.arcs.map((arc) => (
+        <g key={arc.key}>
+          <path
+            d={arc.d}
+            className="gtw__cf-arc-hit"
+            role="button"
+            tabIndex={0}
+            aria-label={`Inspect aggregated Cloudflare Radar pair (${CLOUDFLARE_LAYER_LABELS[layer]}) from ${arc.originCountryName} to ${arc.targetCountryName}, ${arc.value}%`}
+            onClick={(event) => {
+              event.stopPropagation()
+              setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                event.stopPropagation()
+                setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
+              }
+            }}
+          >
+            <title>{`${arc.originCountryName} → ${arc.targetCountryName} · ${arc.value}% · ${CLOUDFLARE_LAYER_LABELS[layer]}`}</title>
+          </path>
+          <path
+            id={arc.pathId}
+            d={arc.d}
+            markerEnd={(liveStatus === 'LIVE' || liveStatus === 'RECENT') && !historicalCf[layer] ? 'url(#gtw-cf-arrow)' : undefined}
+            className={`gtw__cf-arc gtw__cf-arc--${layer}${liveStatus !== 'LIVE' && liveStatus !== 'RECENT' ? ' gtw__cf-arc--static' : ''}${selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key ? ' is-selected' : ''}`}
+            style={{
+              strokeWidth: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
+                ? Math.max(arc.strokeWidth, 3)
+                : arc.strokeWidth,
+              opacity: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
+                ? 1
+                : arc.opacity,
+            }}
+            aria-hidden="true"
+          />
+        </g>
+      ))}
+    </>
+  )
 
   return (
     <div
@@ -1226,76 +1533,8 @@ export default function ThreatMap() {
                 <rect width={MAP_W} height={MAP_H} fill="url(#gtw-grid)" />
                 <path d={graticulePath || undefined} className="gtw__graticule" />
                 {countryPaths}
-                {layers.cloudflareHighlights && (
-                <g className="gtw__cf-country-highlights" pointerEvents="none">
-                  {[...cloudflareMapData.roles].map(([countryId, role]) => {
-                    const country = cloudflareMapData.countryFeatureById.get(countryId)
-                    if (!country) return null
-                    const d = path(country) || undefined
-                    return (
-                      <g key={`radar-country-${countryId}`}>
-                        {role.originValue !== undefined && (
-                          <path
-                            d={d}
-                            className="gtw__cf-origin"
-                            fillOpacity={role.originOpacity}
-                          >
-                            <title>{`${country.properties?.name} · Cloudflare Radar origin country · ${role.originValue.toFixed(2)} summed pair share`}</title>
-                          </path>
-                        )}
-                        {role.targetValue !== undefined && (
-                          <path
-                            d={d}
-                            className="gtw__cf-target"
-                            fillOpacity={role.targetOpacity}
-                          >
-                            <title>{`${country.properties?.name} · Cloudflare Radar target country · ${role.targetValue.toFixed(2)} summed pair share`}</title>
-                          </path>
-                        )}
-                      </g>
-                    )
-                  })}
-                </g>
-                )}
-                {layers.cloudflareArcs && cloudflareMapData.arcs.map((arc) => (
-                  <g key={arc.key}>
-                    <path
-                      d={arc.d}
-                      className="gtw__cf-arc-hit"
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Inspect aggregated Cloudflare Radar pair from ${arc.originCountryName} to ${arc.targetCountryName}, ${arc.value}%`}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          event.stopPropagation()
-                          setSelectedIntel({ type: 'cloudflare-pair', id: arc.key })
-                        }
-                      }}
-                    >
-                      <title>{`${arc.originCountryName} → ${arc.targetCountryName} · ${arc.value}%`}</title>
-                    </path>
-                    <path
-                      id={arc.pathId}
-                      d={arc.d}
-                      markerEnd={(cloudflareLiveStatus === 'LIVE' || cloudflareLiveStatus === 'RECENT') && !historicalCf ? 'url(#gtw-cf-arrow)' : undefined}
-                      className={`gtw__cf-arc${cloudflareLiveStatus !== 'LIVE' && cloudflareLiveStatus !== 'RECENT' ? ' gtw__cf-arc--static' : ''}${selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key ? ' is-selected' : ''}`}
-                      style={{
-                        strokeWidth: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
-                          ? Math.max(arc.strokeWidth, 3)
-                          : arc.strokeWidth,
-                        opacity: selectedIntel?.type === 'cloudflare-pair' && selectedIntel.id === arc.key
-                          ? 1
-                          : arc.opacity,
-                      }}
-                      aria-hidden="true"
-                    />
-                  </g>
-                ))}
+                {renderCloudflareLayer('web', webMapData, webLayers, webLiveStatus)}
+                {renderCloudflareLayer('ddos', ddosMapData, ddosLayers, ddosLiveStatus)}
                 {cloudflarePulses.length > 0 && (
                   <g className="gtw__cf-pulses" pointerEvents="none" aria-hidden="true">
                     {cloudflarePulses.map((pulse) => (
@@ -1343,7 +1582,7 @@ export default function ThreatMap() {
             </div>
             <span className="gtw__zoom-level" aria-live="polite">{Math.round(mapTransform.scale * 100)}%</span>
 
-            {(historicalMapFilterActive || historicalCf) && (
+            {(historicalMapFilterActive || historicalCf.web || historicalCf.ddos || cfHistoryGap.web || cfHistoryGap.ddos) && (
               <div className="gtw__map-history-statuses" role="status">
                 {historicalMapFilterActive && (
                   <p className="gtw__map-history-status">
@@ -1352,9 +1591,22 @@ export default function ThreatMap() {
                       : 'No timestamped DShield source locations exist for this time window; current snapshot locations are hidden.'}
                   </p>
                 )}
-                {historicalCf && (
+                {(historicalCf.web || historicalCf.ddos) && (
                   <p className="gtw__map-history-status">
-                    Historical Cloudflare snapshot {fmtUtcTimestamp(historicalCf.generatedAt)} — pairs, highlights, arcs and rankings are from that retained snapshot, not live data. Select “Latest snapshot” to return to live data.
+                    Historical Cloudflare snapshot
+                    {historicalCf.web ? ` Web ${fmtUtcTimestamp(historicalCf.web.generatedAt)}` : ''}
+                    {historicalCf.ddos ? ` · DDoS ${fmtUtcTimestamp(historicalCf.ddos.generatedAt)}` : ''}
+                    {' '}— pairs, highlights, arcs and rankings are from the retained snapshot(s), not live data. Select “Latest snapshot” to return to live data.
+                  </p>
+                )}
+                {cfHistoryGap.web && (
+                  <p className="gtw__map-history-status">
+                    No retained Web Attackers (WAF) snapshot exists at or before {fmtUtcTimestamp(playhead)} for the {cfInterval} interval — that layer is empty rather than showing current data as history.
+                  </p>
+                )}
+                {cfHistoryGap.ddos && (
+                  <p className="gtw__map-history-status">
+                    No retained DDoS Attackers (DDOS) snapshot exists at or before {fmtUtcTimestamp(playhead)} for the {cfInterval} interval — that layer is empty rather than showing current data as history.
                   </p>
                 )}
               </div>
@@ -1399,25 +1651,54 @@ export default function ThreatMap() {
                       <p className="gtw__aside-note">No verified DShield source locations for this country in the selected view.</p>
                     )}
                     <section className="gtw__intel-radar">
-                      <h3>Cloudflare Radar · aggregated Layer 7 · {cfInterval}{historicalCf ? ' · historical snapshot' : ''}</h3>
-                      {historicalCf && (
-                        <p>Historical snapshot {fmtUtcTimestamp(historicalCf.generatedAt)} — pairs below are from that retained snapshot.</p>
-                      )}
+                      <h3>Cloudflare Radar · aggregated Layer 7 · {cfInterval}</h3>
                       {selectedCountryAlpha2 ? (
                         <>
-                          <p>Outbound pairs in returned top 50: {selectedOutboundPairs.length}</p>
+                          <h4>Web Attackers (WAF)</h4>
+                          {historicalCf.web && (
+                            <p>Historical snapshot {fmtUtcTimestamp(historicalCf.web.generatedAt)} — pairs below are from that retained snapshot.</p>
+                          )}
+                          {cfHistoryGap.web && (
+                            <p>No retained Web Attackers snapshot exists at or before the playhead — this layer is empty rather than showing current data as history.</p>
+                          )}
+                          <p>Outbound pairs in returned top 50: {selectedWebPairs.outbound.length}</p>
                           <ul>
-                            {selectedOutboundPairs.map((pair) => (
-                              <li key={`out:${pair.targetCountryAlpha2}`}>
+                            {selectedWebPairs.outbound.map((pair) => (
+                              <li key={`web-out:${pair.targetCountryAlpha2}`}>
                                 <span>To {pair.targetCountryName}</span>
                                 <strong>{pair.value}%</strong>
                               </li>
                             ))}
                           </ul>
-                          <p>Inbound pairs in returned top 50: {selectedInboundPairs.length}</p>
+                          <p>Inbound pairs in returned top 50: {selectedWebPairs.inbound.length}</p>
                           <ul>
-                            {selectedInboundPairs.map((pair) => (
-                              <li key={`in:${pair.originCountryAlpha2}`}>
+                            {selectedWebPairs.inbound.map((pair) => (
+                              <li key={`web-in:${pair.originCountryAlpha2}`}>
+                                <span>From {pair.originCountryName}</span>
+                                <strong>{pair.value}%</strong>
+                              </li>
+                            ))}
+                          </ul>
+                          <h4>DDoS Attackers (DDOS)</h4>
+                          {historicalCf.ddos && (
+                            <p>Historical snapshot {fmtUtcTimestamp(historicalCf.ddos.generatedAt)} — pairs below are from that retained snapshot.</p>
+                          )}
+                          {cfHistoryGap.ddos && (
+                            <p>No retained DDoS Attackers snapshot exists at or before the playhead — this layer is empty rather than showing current data as history.</p>
+                          )}
+                          <p>Outbound pairs in returned top 50: {selectedDdosPairs.outbound.length}</p>
+                          <ul>
+                            {selectedDdosPairs.outbound.map((pair) => (
+                              <li key={`ddos-out:${pair.targetCountryAlpha2}`}>
+                                <span>To {pair.targetCountryName}</span>
+                                <strong>{pair.value}%</strong>
+                              </li>
+                            ))}
+                          </ul>
+                          <p>Inbound pairs in returned top 50: {selectedDdosPairs.inbound.length}</p>
+                          <ul>
+                            {selectedDdosPairs.inbound.map((pair) => (
+                              <li key={`ddos-in:${pair.originCountryAlpha2}`}>
                                 <span>From {pair.originCountryName}</span>
                                 <strong>{pair.value}%</strong>
                               </li>
@@ -1438,12 +1719,22 @@ export default function ThreatMap() {
                         <dt>Origin</dt><dd>{selectedCloudflareArc.originCountryName} ({selectedCloudflareArc.originCountryAlpha2})</dd>
                         <dt>Target</dt><dd>{selectedCloudflareArc.targetCountryName} ({selectedCloudflareArc.targetCountryAlpha2})</dd>
                         <dt>Reported percentage</dt><dd>{selectedCloudflareArc.value}%</dd>
-                        <dt>Interval</dt><dd>{cfInterval}{historicalCf ? ` · historical snapshot ${fmtUtcTimestamp(historicalCf.generatedAt)}` : ''}</dd>
-                        <dt>Snapshot generated</dt><dd>{fmtUtcTimestamp(historicalCf?.generatedAt || cfIntervalMeta?.generatedAt || data.cloudflareRadar.generatedAt)}</dd>
-                        <dt>Upstream updated</dt><dd>{fmtUtcTimestamp(effectiveCloudflareMeta?.lastUpdated)}</dd>
+                        <dt>Layer</dt><dd>{CLOUDFLARE_LAYER_LABELS[selectedArcLayer]} ({selectedArcLayer === 'web' ? 'mitigationProduct=WAF' : 'mitigationProduct=DDOS'})</dd>
+                        <dt>Interval</dt><dd>{cfInterval}{historicalCf[selectedArcLayer] ? ` · historical snapshot ${fmtUtcTimestamp(historicalCf[selectedArcLayer].generatedAt)}` : ''}</dd>
+                        <dt>Snapshot generated</dt><dd>{fmtUtcTimestamp(selectedArcGeneratedAt)}</dd>
+                        <dt>Upstream updated</dt><dd>{fmtUtcTimestamp(selectedArcMeta?.lastUpdated)}</dd>
                         <dt>Range / units</dt>
-                        <dd>{formatCloudflareDateRange(effectiveCloudflareMeta?.dateRange)} · {formatCloudflareUnits(effectiveCloudflareMeta?.units)}</dd>
-                        <dt>Status</dt><dd>{cloudflareDisplayStatus}</dd>
+                        <dd>{formatCloudflareDateRange(selectedArcMeta?.dateRange)} · {formatCloudflareUnits(selectedArcMeta?.units)}</dd>
+                        {Number.isFinite(selectedArcShift) && selectedArcShift !== 0 && (
+                          <>
+                            <dt>Window shift</dt>
+                            <dd>
+                              Cloudflare returned the latest fully aggregated window, which starts {Math.abs(selectedArcShift)} min {selectedArcShift > 0 ? 'earlier' : 'later'} than the requested window
+                              {selectedArcWindow ? ` (${fmtUtcTimestamp(selectedArcWindow.dateStart)} – ${fmtUtcTimestamp(selectedArcWindow.dateEnd)})` : ''}. The range above is the actual returned window.
+                            </dd>
+                          </>
+                        )}
+                        <dt>Status</dt><dd>{layerDisplayStatus(selectedArcLayer)}</dd>
                       </dl>
                       <p className="gtw__aside-note">This is an aggregated country pair, not an individual attack, packet, or DShield route. Pulses on the map are aggregate motion along real arcs, not individual packets.</p>
                     </>
@@ -1452,7 +1743,7 @@ export default function ThreatMap() {
                   selectedPort ? (
                     <dl>
                       <dt>Port</dt><dd>{selectedPort.port}</dd>
-                      <dt>Protocol</dt><dd>{PORT_PROTOCOL[selectedPort.port] || 'not verified'}</dd>
+                      <dt>Protocol</dt><dd>{verifiedPortProtocol(selectedPort) || 'not verified'}</dd>
                       <dt>Service</dt><dd>{PORT_NAMES[selectedPort.port] || 'Service'}</dd>
                       <dt>Reports</dt><dd>{selectedPort.records.toLocaleString('en-US')}</dd>
                       <dt>Ranking</dt><dd>#{selectedPortRank} of {data.ports.length} most-probed ports</dd>
@@ -1530,10 +1821,12 @@ export default function ThreatMap() {
               <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--moderate" />Moderate</span>
               <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--low" />Low</span>
               <span><i className="gtw__map-activity-swatch gtw__map-activity-swatch--none" />No verified source activity</span>
-              <span><i className="gtw__radar-swatch gtw__radar-swatch--origin" />Cloudflare origins</span>
-              <span><i className="gtw__radar-swatch gtw__radar-swatch--target" />Cloudflare targets</span>
-              <span><i className="gtw__radar-swatch gtw__radar-swatch--arc" />Aggregated pair arcs</span>
-              <small>Cloudflare Radar — Aggregated Layer 7 attack intelligence.</small>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--origin" />Web origins (WAF, solid)</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--target" />Web targets (WAF, solid)</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--arc" />Web pair arcs (WAF, solid)</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--arc-ddos" />DDoS pair arcs (DDOS, dashed)</span>
+              <span><i className="gtw__radar-swatch gtw__radar-swatch--origin-ddos" />DDoS origins/targets (DDOS, outlined)</span>
+              <small>Cloudflare Radar — Aggregated Layer 7 attack intelligence. Web Attackers use the WAF dataset only; DDoS Attackers use the DDOS dataset only.</small>
               <small>DShield source counts are separate; arc dashes and travelling pulses are aggregate motion, not individual events or packets. Arrowheads show origin → target direction.</small>
             </div>
 
@@ -1558,11 +1851,13 @@ export default function ThreatMap() {
                           <small>
                             {c.key === 'scanning'
                               ? `${categoryCounts[c.key].toLocaleString('en-US')} verified DShield locations`
-                              : c.key === 'cloudflare'
-                                ? `${categoryCounts[c.key].toLocaleString('en-US')} aggregated country pairs · ${cfInterval} interval${historicalCf ? ' · historical snapshot' : ''}`
-                                : c.noSource
-                                  ? 'No enabled, licensed geographic source — toggling this only shows or hides this notice; nothing is plotted.'
-                                  : `${categoryCounts[c.key].toLocaleString('en-US')} provider records · no verified map coordinates`}
+                              : c.key === 'web'
+                                ? `${categoryCounts[c.key].toLocaleString('en-US')} aggregated country pairs · ${cfInterval} interval · WAF dataset${historicalCf.web ? ' · historical snapshot' : ''}${cfHistoryGap.web ? ' · no historical data for this time' : ''}${!attackFilters.web ? ' · hidden by filter' : ''}`
+                                : c.key === 'ddos'
+                                  ? `${categoryCounts[c.key].toLocaleString('en-US')} aggregated country pairs · ${cfInterval} interval · DDOS dataset${historicalCf.ddos ? ' · historical snapshot' : ''}${cfHistoryGap.ddos ? ' · no historical data for this time' : ''}${!attackFilters.ddos ? ' · hidden by filter' : ''}`
+                                  : c.noSource
+                                    ? 'No enabled source — toggling this only shows or hides this notice; nothing is plotted.'
+                                    : `${categoryCounts[c.key].toLocaleString('en-US')} provider records · no verified map coordinates`}
                           </small>
                         </span>
                       </button>
@@ -1570,19 +1865,19 @@ export default function ThreatMap() {
                   ))}
                 </ul>
                 <p className="gtw__aside-note">
-                  Only DShield source locations are currently geolocated. KEV records and the disabled ransomware/breach feeds do not provide enabled map coordinates. Exploited flaws have no map geography — that filter shows or hides the KEV/NVD panels and timeline tracks instead.
+                  Only DShield source locations are geolocated as points. Cloudflare Radar supplies aggregated origin-to-target country pairs (WAF and DDoS datasets separately), not individual routes. Country fills follow the active layers: DShield shading plus Web/DDoS origin and target highlights — disabling a layer removes its fills, arcs, highlights, timeline track and statistics contribution.
                 </p>
-                {!attackFilters.cloudflare && (
-                  <p className="gtw__aside-note">Cloudflare Radar pairs hidden — enable the Cloudflare Radar pairs filter to show arcs, country highlights and pair details.</p>
+                {!attackFilters.web && (
+                  <p className="gtw__aside-note">Web Attackers hidden — enable the Web Attackers filter to show its arcs, country highlights, timeline track and ranking contribution.</p>
                 )}
-                {!attackFilters.exploited && (
-                  <p className="gtw__aside-note">Exploited flaws hidden — the vulnerability-weakness panel and the NVD/KEV timeline tracks are hidden until the filter is enabled again.</p>
+                {!attackFilters.ddos && (
+                  <p className="gtw__aside-note">DDoS Attackers hidden — enable the DDoS Attackers filter to show its arcs, country highlights, timeline track and ranking contribution.</p>
                 )}
-                {attackFilters.ransomware && (
-                  <p className="gtw__aside-note">Ransomware: no enabled, licensed geographic source exists for this map, so nothing is plotted for this filter and no activity is invented.</p>
+                {attackFilters.intruders && (
+                  <p className="gtw__aside-note">Intruders: no enabled source exists for this map, so nothing is plotted for this layer and no activity is invented. An event-level intrusion/IDS feed is required to enable it.</p>
                 )}
-                {attackFilters.breaches && (
-                  <p className="gtw__aside-note">Breaches: the breach feed is disabled pending permission, so nothing is plotted for this filter and no activity is invented.</p>
+                {attackFilters.anonymizers && (
+                  <p className="gtw__aside-note">Anonymizers: no enabled source exists for this map, so nothing is plotted for this layer and no activity is invented. A Tor/anonymizer-exit-node feed is required to enable it.</p>
                 )}
               </section>
 
@@ -1600,7 +1895,7 @@ export default function ThreatMap() {
                     </li>
                   ))}
                 </ol>
-                {cfPreviousPairs === null && (
+                {cfPreviousPairs.web === null && cfPreviousPairs.ddos === null && (
                   <p className="gtw__aside-note">No retained prior Cloudflare snapshot is available to compare against, so no Cloudflare pair-change alert is shown.</p>
                 )}
                 <p className="gtw__aside-note">
@@ -1670,8 +1965,8 @@ export default function ThreatMap() {
                     playheadRef.current = null
                     setPlayhead(null)
                     setIsPlaying(false)
-                    historicalCfFetchedRef.current = null
-                    setHistoricalCf(null)
+                    historicalCfFetchedRef.current = { web: null, ddos: null }
+                    setHistoricalCf({ web: null, ddos: null })
                   }}
                   aria-label="Return map to the latest source snapshot"
                 >
@@ -1776,9 +2071,9 @@ export default function ThreatMap() {
                 </ul>
               </div>
               <p className="gtw__timeline-note">
-                DShield reports, ports and CISA KEV use provider-supplied daily dates; NVD and available ThreatFox use hourly timestamps.
+                Five tracks, one per attack layer. Web Attackers and DDoS Attackers render their layer&apos;s published timeseries serie points at the file&apos;s real aggregation resolution (15m bins for 1h/6h, hourly for 24h, daily for 7d), with no interpolation; a missing or erroring timeseries file shows UNAVAILABLE. Scanners render DShield DAILY points only — sparse, one point per day, never dozens of fake hourly spikes. Intruders and Anonymizers have no source, so their tracks show DISABLED. NVD and CISA KEV live in alerts and sidebar panels, not as tracks.
                 DShield source-location records in this snapshot have no per-IP observation time, so historical selections hide those markers instead of presenting current locations as historical. Playback follows provider-timestamped timeline events; destination routes are not available.
-                The Cloudflare Radar track shows one event per retained snapshot (value = pair count, resolution “snapshot”); playback into a retained snapshot swaps the map to that snapshot and labels Cloudflare HISTORICAL. When no history manifest exists, the track is empty and playback stays on the current snapshot — history is never invented.
+                Playback into a retained snapshot swaps that layer&apos;s map to the snapshot and labels it HISTORICAL; when no retained snapshot exists at or before the playhead, that layer is empty and labelled NO HISTORY — history is never invented, and the current serie is never presented as historical.
               </p>
             </section>
           )}
@@ -1808,23 +2103,59 @@ export default function ThreatMap() {
                   </button>
                 ))}
               </div>
-              <p className="gtw__interval-note">
-                Window: {cfIntervalMeta?.window
-                  ? `${fmtUtcTimestamp(cfIntervalMeta.window.dateStart)} – ${fmtUtcTimestamp(cfIntervalMeta.window.dateEnd)}`
-                  : formatCloudflareDateRange(effectiveCloudflareMeta?.dateRange)}
-                {' · '}Upstream updated: {fmtUtcTimestamp(effectiveCloudflareMeta?.lastUpdated)}
-                {' · '}Snapshot generated: {fmtUtcTimestamp(historicalCf?.generatedAt || cfIntervalMeta?.generatedAt || data.cloudflareRadar.generatedAt)}
-                {' · '}Status: {cfIntervalMeta?.intervalStatus === 'unavailable' ? 'UNAVAILABLE' : cloudflareDisplayStatus}
-              </p>
-              {cfIntervalMeta?.intervalError && (
-                <p className="gtw__error" role="alert">The {cfInterval} Cloudflare file is unavailable right now ({cfIntervalMeta.intervalError}). Showing no pairs for this interval rather than stale data.</p>
+              {['web', 'ddos'].map((layer) => {
+                const meta = effectiveLayerMeta[layer]
+                const shift = effectiveLayerShift[layer]
+                const window = effectiveLayerWindow[layer]
+                const series = layerTimeseries[layer]
+                const seriesStatus = cfHistoryGap[layer]
+                  ? 'NO HISTORY'
+                  : timeseriesStatusLabel({ timeseriesStatus: series.status, points: series.points })
+                return (
+                  <p className="gtw__interval-note" key={`layer-note-${layer}`}>
+                    {CLOUDFLARE_LAYER_LABELS[layer]} ({layer === 'web' ? 'WAF' : 'DDOS'}) — Window (actual, as returned by Cloudflare): {formatCloudflareDateRange(meta?.dateRange)}
+                    {' · '}Upstream updated: {fmtUtcTimestamp(meta?.lastUpdated)}
+                    {' · '}Snapshot generated: {fmtUtcTimestamp(effectiveLayerGeneratedAt[layer])}
+                    {' · '}Status: {layerDisplayStatus(layer)}
+                    {Number.isFinite(shift) && shift !== 0 && (
+                      <>
+                        {' · '}Window shift: Cloudflare returned the latest fully aggregated window, starting {Math.abs(shift)} min {shift > 0 ? 'earlier' : 'later'} than requested
+                        {window ? ` (requested ${fmtUtcTimestamp(window.dateStart)} – ${fmtUtcTimestamp(window.dateEnd)})` : ''}
+                      </>
+                    )}
+                    {' · '}Timeseries: {seriesStatus}
+                    {series.aggInterval ? ` · ${series.aggInterval} bins` : ''}
+                    {series.points.length > 0 ? ` · ${series.points.length} points` : ''}
+                    {series.error && series.status === 'unavailable' ? ` (${series.error})` : ''}
+                  </p>
+                )
+              })}
+              {cfHistoryGap.web && (
+                <p className="gtw__error" role="alert">No retained Web Attackers snapshot exists at or before {fmtUtcTimestamp(playhead)} for the {cfInterval} interval — showing no pairs for that layer rather than current data as history.</p>
+              )}
+              {cfHistoryGap.ddos && (
+                <p className="gtw__error" role="alert">No retained DDoS Attackers snapshot exists at or before {fmtUtcTimestamp(playhead)} for the {cfInterval} interval — showing no pairs for that layer rather than current data as history.</p>
+              )}
+              {data.cloudflareRadar.web.status === 'unavailable' && (
+                <p className="gtw__error" role="alert">The Web Attackers (WAF) file for the {cfInterval} interval is unavailable right now ({data.cloudflareRadar.web.error}). Showing no pairs for this layer rather than stale data.</p>
+              )}
+              {data.cloudflareRadar.ddos.status === 'unavailable' && (
+                <p className="gtw__error" role="alert">The DDoS Attackers (DDOS) file for the {cfInterval} interval is unavailable right now ({data.cloudflareRadar.ddos.error}). Showing no pairs for this layer rather than stale data.</p>
               )}
               <p className="gtw__interval-note">DShield, NVD and CISA KEV are daily-resolution — their rankings do not change with this selector. Provider snapshots refresh every 15 minutes. Freshness is shown per feed.</p>
             </div>
             <ul className="gtw__provider-freshness" aria-label="Provider freshness">
-              {freshnessItems.map(({ key, label, provider }) => {
-                const isCloudflare = key === 'cloudflare-radar'
-                const freshness = isCloudflare ? cloudflareFreshness(provider) : providerFreshness(provider)
+              {freshnessItems.map(({ key, label, provider, layer }) => {
+                const isCloudflare = Boolean(layer)
+                // A layer row reports its own layer status (live file,
+                // historical playback, history gap, or unavailable) so
+                // the panel, map, rankings and timeline cannot disagree
+                // about freshness.
+                const freshness = isCloudflare
+                  ? (data.cloudflareRadar[layer].status === 'unavailable'
+                    ? 'OFFLINE'
+                    : layerDisplayStatus(layer))
+                  : providerFreshness(provider)
                 const timestamp = isCloudflare
                   ? provider?.lastUpdated || null
                   : provider?.fetchedAt || provider?.lastSuccessfulAt || null
@@ -1854,7 +2185,9 @@ export default function ThreatMap() {
                     {isCloudflare && Number.isInteger(provider?.pairCount) && (
                       <span className="gtw__provider-freshness-date">{provider.pairCount} valid country pairs</span>
                     )}
-                    {isCloudflare && provider?.error && <span className="gtw__provider-freshness-error">{provider.error}</span>}
+                    {isCloudflare && data.cloudflareRadar[layer].error && (
+                      <span className="gtw__provider-freshness-error">{data.cloudflareRadar[layer].error}</span>
+                    )}
                     {isCloudflare && cloudflareNeedsDetailedGeometry && cloudflareGeometryError && (
                       <span className="gtw__provider-freshness-error">Country geometry unavailable: {cloudflareGeometryError}</span>
                     )}
@@ -1866,12 +2199,12 @@ export default function ThreatMap() {
 
           <section className="gtw__panel" aria-labelledby="attackers-h">
             <h2 id="attackers-h" className="gtw__panel-title">Top attackers</h2>
-            {!attackFilters.cloudflare && <p className="gtw__aside-note">Cloudflare Radar pairs are hidden by the filter — enable it to show this ranking.</p>}
-            {attackFilters.cloudflare && cfOriginRanking.length === 0 && !errors.cloudflare && <p className="gtw__empty">Loading…</p>}
-            {attackFilters.cloudflare && cfOriginRanking.length === 0 && errors.cloudflare && (
-              <p className="gtw__aside-note">No Cloudflare Radar pairs for the {cfInterval} interval ({errors.cloudflare}).</p>
+            {cfRankingsDisabled && <p className="gtw__aside-note">No Cloudflare layer is enabled — enable Web Attackers or DDoS Attackers to show this ranking. The &lsquo;all&rsquo; aggregate is never substituted.</p>}
+            {!cfRankingsDisabled && cfOriginRanking.length === 0 && !errors.cloudflareWeb && !errors.cloudflareDdos && <p className="gtw__empty">Loading…</p>}
+            {!cfRankingsDisabled && cfOriginRanking.length === 0 && (errors.cloudflareWeb || errors.cloudflareDdos) && (
+              <p className="gtw__aside-note">No Cloudflare Radar pairs for the {cfInterval} interval ({[errors.cloudflareWeb, errors.cloudflareDdos].filter(Boolean).join('; ')}).</p>
             )}
-            {attackFilters.cloudflare && (
+            {!cfRankingsDisabled && (
               <>
             <ol className="gtw__bars">
               {cfOriginRanking.map((c) => (
@@ -1884,7 +2217,7 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Cloudflare Radar origin-country totals (sum of reported pair %) for the selected {cfInterval} interval{historicalCf ? ' · historical snapshot' : ''}. Source: Cloudflare Radar.</p>
+            <p className="gtw__aside-note">Cloudflare Radar origin-country totals (sum of reported pair %) for the selected {cfInterval} interval, summed across the enabled layers: {enabledCfLayerLabels.join(' + ')}{(historicalCf.web || historicalCf.ddos) ? ' · historical snapshot' : ''}. Source: Cloudflare Radar.</p>
               </>
             )}
           </section>
@@ -1908,12 +2241,12 @@ export default function ThreatMap() {
 
           <section className="gtw__panel" aria-labelledby="attacked-h">
             <h2 id="attacked-h" className="gtw__panel-title">Top attacked</h2>
-            {!attackFilters.cloudflare && <p className="gtw__aside-note">Cloudflare Radar pairs are hidden by the filter — enable it to show this ranking.</p>}
-            {attackFilters.cloudflare && cfTargetRanking.length === 0 && !errors.cloudflare && <p className="gtw__empty">Loading…</p>}
-            {attackFilters.cloudflare && cfTargetRanking.length === 0 && errors.cloudflare && (
-              <p className="gtw__aside-note">No Cloudflare Radar pairs for the {cfInterval} interval ({errors.cloudflare}).</p>
+            {cfRankingsDisabled && <p className="gtw__aside-note">No Cloudflare layer is enabled — enable Web Attackers or DDoS Attackers to show this ranking. The &lsquo;all&rsquo; aggregate is never substituted.</p>}
+            {!cfRankingsDisabled && cfTargetRanking.length === 0 && !errors.cloudflareWeb && !errors.cloudflareDdos && <p className="gtw__empty">Loading…</p>}
+            {!cfRankingsDisabled && cfTargetRanking.length === 0 && (errors.cloudflareWeb || errors.cloudflareDdos) && (
+              <p className="gtw__aside-note">No Cloudflare Radar pairs for the {cfInterval} interval ({[errors.cloudflareWeb, errors.cloudflareDdos].filter(Boolean).join('; ')}).</p>
             )}
-            {attackFilters.cloudflare && (
+            {!cfRankingsDisabled && (
               <>
             <ol className="gtw__bars">
               {cfTargetRanking.map((t) => (
@@ -1926,60 +2259,61 @@ export default function ThreatMap() {
                 </li>
               ))}
             </ol>
-            <p className="gtw__aside-note">Cloudflare Radar target-country totals (sum of reported pair %) for the selected {cfInterval} interval{historicalCf ? ' · historical snapshot' : ''}. Source: Cloudflare Radar. Breach geography is not shown while the Recent Breaches feed is disabled pending permission.</p>
+            <p className="gtw__aside-note">Cloudflare Radar target-country totals (sum of reported pair %) for the selected {cfInterval} interval, summed across the enabled layers: {enabledCfLayerLabels.join(' + ')}{(historicalCf.web || historicalCf.ddos) ? ' · historical snapshot' : ''}. Source: Cloudflare Radar. Breach geography is not shown while the Recent Breaches feed is disabled pending permission.</p>
               </>
             )}
           </section>
 
           <section className="gtw__panel" aria-labelledby="vectors-h">
             <h2 id="vectors-h" className="gtw__panel-title">Top network attack vectors</h2>
-            {data.ports.length === 0 && !errors.ports && <p className="gtw__empty">Loading…</p>}
-            {data.ports.length === 0 && errors.ports && (
-              <p className="gtw__error" role="alert">The DShield top ports feed is unavailable right now ({errors.ports}).</p>
+            {!attackVectors.available && (
+              <p className="gtw__aside-note">DISABLED — {attackVectors.reason} DShield ports are most-probed services, not flood-type vectors, and are never converted into attack-vector values.</p>
             )}
-            <ol className="gtw__bars">
-              {data.ports.map((p) => (
-                <li key={p.port}>
-                  <span className="gtw__bars-label" style={{ color: CAT_BY_KEY.ransomware.color }}>{PORT_NAMES[p.port] || 'Service'} · {p.port}</span>
-                  <span className="gtw__bars-track">
-                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (p.records / maxPortRecords) * 100)}%` }} />
-                  </span>
-                  <span className="gtw__bars-num">
-                    {topPortRecords ? `${Math.round((p.records / topPortRecords) * 100)} %` : '—'}
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <p className="gtw__aside-note">Most-probed services, as a share of the most-probed ports&rsquo; reports. There is no free live feed of flood-type vector volumes, so the vectors are shown by probed port. Source: DShield.</p>
+            {attackVectors.available && (
+              <>
+                <ol className="gtw__bars">
+                  {attackVectors.vectors.slice(0, 5).map((v) => (
+                    <li key={v.product}>
+                      <span className="gtw__bars-label">{v.label}</span>
+                      <span className="gtw__bars-track">
+                        <span className="gtw__bars-fill" style={{ width: `${Math.max(4, v.share * 100)}%` }} />
+                      </span>
+                      <span className="gtw__bars-num">{Math.round(v.share * 100)} %</span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="gtw__aside-note">Share of summed per-mitigation-product timeseries totals (raw counts) for the selected {cfInterval} interval. Source: Cloudflare Radar timeseries.</p>
+              </>
+            )}
+          </section>
+
+          <section className="gtw__panel" aria-labelledby="app-violations-h">
+            <h2 id="app-violations-h" className="gtw__panel-title">Top application violations</h2>
+            <p className="gtw__aside-note">DISABLED — no source on this page supplies WAF/application violation categories. The Cloudflare Radar aggregates used here carry no violation taxonomy. Enabling this panel needs a WAF event-level feed with a violation taxonomy. The panel below shows published vulnerability weaknesses (NVD classifications), not observed violations.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="violations-h">
             <h2 id="violations-h" className="gtw__panel-title">Top Published Vulnerability Weaknesses</h2>
-            {!attackFilters.exploited && (
-              <p className="gtw__aside-note">Exploited flaws are hidden by the filter — enable “Exploited flaws” to show this panel and the NVD/KEV timeline tracks. Exploited flaws have no map geography.</p>
-            )}
-            {attackFilters.exploited && data.violations.length === 0 && !errors.nvd && <p className="gtw__empty">Loading…</p>}
-            {attackFilters.exploited && errors.nvd && (
+            {data.violations.length === 0 && !errors.nvd && <p className="gtw__empty">Loading…</p>}
+            {errors.nvd && (
               <p className="gtw__error" role="alert">The NVD feed is unavailable right now ({errors.nvd}).</p>
             )}
-            {attackFilters.exploited && (
-              <ol className="gtw__bars">
-                {data.violations.map((v) => (
-                  <li key={v.id}>
-                    <span className="gtw__bars-label" style={{ color: CAT_BY_KEY.scanning.color }}>{v.name}</span>
-                    <span className="gtw__bars-track">
-                      <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (v.count / sumViolationCount) * 100)}%` }} />
-                    </span>
-                    <span className="gtw__bars-num">{v.id} · {v.count}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
+            <ol className="gtw__bars">
+              {data.violations.map((v) => (
+                <li key={v.id}>
+                  <span className="gtw__bars-label" style={{ color: CAT_BY_KEY.scanning.color }}>{v.name}</span>
+                  <span className="gtw__bars-track">
+                    <span className="gtw__bars-fill" style={{ width: `${Math.max(4, (v.count / sumViolationCount) * 100)}%` }} />
+                  </span>
+                  <span className="gtw__bars-num">{v.id} · {v.count}</span>
+                </li>
+              ))}
+            </ol>
             <p className="gtw__aside-note">Weakness types (CWE) in the vulnerabilities published in the last 48 hours — published classifications, not observed violations. Source: NIST NVD.</p>
           </section>
 
           <section className="gtw__panel" aria-labelledby="ports-h">
-            <h2 id="ports-h" className="gtw__panel-title">Top scanned UDP / TCP ports</h2>
+            <h2 id="ports-h" className="gtw__panel-title">Most-scanned ports · DShield</h2>
             {data.ports.length === 0 && !errors.ports && <p className="gtw__empty">Loading…</p>}
             {data.ports.length === 0 && errors.ports && (
               <p className="gtw__error" role="alert">The DShield top ports feed is unavailable right now ({errors.ports}).</p>
@@ -1993,14 +2327,17 @@ export default function ThreatMap() {
                   onClick={() => setSelectedIntel({ type: 'port', id: String(p.port) })}
                   aria-label={`Inspect port ${p.port}, ${PORT_NAMES[p.port] || 'service'}, ${p.records.toLocaleString('en-US')} reports`}
                 >
-                  <span className="gtw__port-num">{p.port}</span>
-                  <span className="gtw__port-proto">{PORT_PROTOCOL[p.port] || '—'}</span>
+                  <span
+                    className="gtw__port-num"
+                    style={i === 0 ? undefined : { fontSize: `${Math.round(16 + Math.sqrt(p.records / maxPortRecords) * 12)}px` }}
+                  >{p.port}</span>
+                  <span className="gtw__port-proto">{verifiedPortProtocol(p) || '—'}</span>
                   <span className="gtw__port-name">{PORT_NAMES[p.port] || 'Service'}</span>
                   <span className="gtw__port-records">{p.records.toLocaleString('en-US')} reports</span>
                 </button>
               ))}
             </div>
-            <p className="gtw__aside-note">Ports the sensors saw probed most, by report count. Source: DShield. {totalReports > 0 && `${totalReports.toLocaleString('en-US')} reports from the ${data.sources.length} plotted sources in the current window.`}</p>
+            <p className="gtw__aside-note">Ports the sensors saw probed most, by report count. DShield&rsquo;s records carry no protocol field, so protocol is shown only where verified, otherwise &ldquo;not verified&rdquo; — it is never inferred from the port number. Source: DShield. {totalReports > 0 && `${totalReports.toLocaleString('en-US')} reports from the ${data.sources.length} plotted sources in the current window.`}</p>
           </section>
         </aside>
       </div>

@@ -112,10 +112,13 @@ export function countryFillStyle(activity, countryNumericId) {
 }
 
 /**
- * Filter audit: which map/dashboard layers each attack-type filter
- * controls. Every filter maps to at least one visible layer; ransomware
- * and breaches have no enabled geographic source, so they control only
- * the visibility of their honest disabled notice (never invented data).
+ * Filter audit: which map/dashboard layers each attack layer controls.
+ * The five layers are Web Attackers (Cloudflare WAF), DDoS Attackers
+ * (Cloudflare DDOS), Scanners (DShield), Intruders and Anonymizers.
+ * Intruders and Anonymizers have no enabled geographic source, so they
+ * control only the visibility of their honest disabled notice (never
+ * invented data). One Cloudflare dataset is never duplicated as two
+ * layers: web and ddos gate independently.
  */
 export function layerVisibility(filters = {}) {
   return {
@@ -123,22 +126,77 @@ export function layerVisibility(filters = {}) {
     dshieldShading: Boolean(filters.scanning),
     dshieldMarkers: Boolean(filters.scanning),
     dshieldPorts: Boolean(filters.scanning),
-    cloudflareArcs: filters.cloudflare !== false,
-    cloudflareHighlights: filters.cloudflare !== false,
-    cloudflarePairs: filters.cloudflare !== false,
-    cloudflareTimeline: filters.cloudflare !== false,
-    exploitedPanels: Boolean(filters.exploited),
-    exploitedTimeline: Boolean(filters.exploited),
-    ransomwareNotice: Boolean(filters.ransomware),
-    breachesNotice: Boolean(filters.breaches),
+    webArcs: filters.web !== false,
+    webHighlights: filters.web !== false,
+    webPairs: filters.web !== false,
+    webTimeline: filters.web !== false,
+    ddosArcs: filters.ddos !== false,
+    ddosHighlights: filters.ddos !== false,
+    ddosPairs: filters.ddos !== false,
+    ddosTimeline: filters.ddos !== false,
+    intrudersNotice: Boolean(filters.intruders),
+    anonymizersNotice: Boolean(filters.anonymizers),
   }
 }
 
 /** Whether a timeline track is shown for the current filter state. */
 export function timelineTrackVisible(trackKey, filters = {}) {
-  if (trackKey === 'cloudflare') return filters.cloudflare !== false
-  if (trackKey === 'nvd' || trackKey === 'kev') return Boolean(filters.exploited)
+  if (trackKey === 'web') return filters.web !== false
+  if (trackKey === 'ddos') return filters.ddos !== false
+  if (trackKey === 'scanners') return Boolean(filters.scanning)
+  if (trackKey === 'intruders') return filters.intruders !== false
+  if (trackKey === 'anonymizers') return filters.anonymizers !== false
   return true
+}
+
+/**
+ * Visibility of a Cloudflare timeseries track: it belongs to its layer,
+ * so it hides only with that layer's toggle. A missing/erroring
+ * timeseries file does NOT hide the track — the track stays visible
+ * with an UNAVAILABLE status so the gap is honest.
+ */
+export function timeseriesTrackVisible(trackKey, filters = {}) {
+  if (trackKey === 'web' || trackKey === 'ddos') return timelineTrackVisible(trackKey, filters)
+  return false
+}
+
+/**
+ * Layer → map-layer map for one Cloudflare layer. One shared state: the
+ * layer toggle plus that layer's file availability gate every part of
+ * that dataset together. A layer whose file is missing, stale, or
+ * erroring (`layerAvailable` false) gates all of its layers off — never
+ * another layer's data — while the toggle gates the layer regardless of
+ * availability. Scanning / intruders / anonymizers are untouched
+ * (see layerVisibility).
+ */
+export function cloudflareLayerVisibility(filters = {}, layer = 'web', layerAvailable = true) {
+  const masterOn = layer === 'web'
+    ? filters.web !== false
+    : layer === 'ddos'
+      ? filters.ddos !== false
+      : false
+  const enabled = masterOn && Boolean(layerAvailable)
+  return {
+    layer,
+    available: Boolean(layerAvailable),
+    arcs: enabled,
+    highlights: enabled,
+    pairs: enabled,
+    timeline: enabled,
+    timeseriesTrack: masterOn,
+  }
+}
+
+/**
+ * Protocol for a DShield top-port record, from the record itself only.
+ * DShield's top-port records carry no protocol field (verified against
+ * the published snapshot: rank, targetport, records, targets, sources,
+ * date only), so this returns null unless a record actually supplies
+ * one — a protocol is never inferred from the port number.
+ */
+export function verifiedPortProtocol(record) {
+  const protocol = record?.protocol
+  return typeof protocol === 'string' && protocol.trim() !== '' ? protocol : null
 }
 
 function alertTimestamp(value) {
@@ -164,6 +222,8 @@ export function buildThreatAlerts({
   cloudflareCurrentPairs = null,
   cloudflarePreviousPairs = null,
   cloudflareAsOf = null,
+  cloudflareLayer = null,
+  cloudflareLayerLabel = null,
 } = {}) {
   const alerts = []
 
@@ -243,10 +303,12 @@ export function buildThreatAlerts({
       .slice(0, 3)
     for (const [index, change] of changes.entries()) {
       alerts.push({
-        id: `cloudflare-change:${index}:${change.pair.originCountryAlpha2}-${change.pair.targetCountryAlpha2}`,
+        id: `cloudflare-change${cloudflareLayer ? `:${cloudflareLayer}` : ''}:${index}:${change.pair.originCountryAlpha2}-${change.pair.targetCountryAlpha2}`,
         provider: 'Cloudflare Radar',
         kind: 'cloudflare-pair-change',
-        title: 'Cloudflare Radar pair change vs previous retained snapshot',
+        title: cloudflareLayerLabel
+          ? `Cloudflare Radar pair change (${cloudflareLayerLabel}) vs previous retained snapshot`
+          : 'Cloudflare Radar pair change vs previous retained snapshot',
         detail: change.text,
         timestamp: cloudflareAsOfTimestamp,
         href: 'https://radar.cloudflare.com/',
