@@ -52,6 +52,13 @@ export const SEO_COVERS = {
     type: 'image/webp',
     alt: 'Cover collage with the Microsoft logo, the headline \u201cEntra Connect Health Flaw\u201d and the line \u201cExposed Admin Emails and Tenant Data,\u201d a cracked tablet screen labeled Microsoft Entra Connect Health with cards for Admin Emails and Tenant Data and a red warning triangle, torn rust-red paper, clouds, and a building along the bottom.',
   },
+  onePasswordIncident: {
+    filePrefix: 'cover-1password-incident-1536',
+    width: 1536,
+    height: 1024,
+    type: 'image/webp',
+    alt: 'Cover collage on aged ivory paper with the headline \u201c1Password\u201d and the line \u201cCustomer records copied. The vaults stayed shut.\u201d on a torn rust-red strip, a heavy round vault door with a spoked handle and a plate reading \u201cVault,\u201d closed, in front of a cobalt circle, a tractor-feed printout labeled \u201cPrivate Repository\u201d whose last lines turn rust red, a black strip with a commit graph and the words \u201cgit push,\u201d a dotted rust trail leading to a ledger titled \u201cAccount Records\u201d with columns for name, email, user ID and last sign-in blacked out and stamped \u201cCopied,\u201d and a halftone keyboard scrap.',
+  },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',
     width: 1536,
