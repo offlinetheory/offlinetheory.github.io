@@ -75,6 +75,25 @@ const CLOUDFLARE_TIMESERIES_AGG_INTERVAL_MS = {
   '1h': 60 * 60 * 1000,
   '1d': 24 * 60 * 60 * 1000,
 }
+// Cloudflare reports the aggregation resolution in timeseries responses
+// with enum-style values (FIFTEEN_MINUTES, ONE_HOUR, ONE_DAY, ONE_WEEK)
+// while the request parameter uses short values (15m, 1h, 1d, 1w). The
+// validator must compare in one vocabulary: map the API's enum to the
+// requested short value. An unrecognized value is kept as-is so a genuine
+// mismatch still names what the API actually returned. (Run #9 on
+// 2026-11-26 failed every timeseries cell on this: the API returned
+// FIFTEEN_MINUTES where the validator expected '15m'.)
+export const CLOUDFLARE_TIMESERIES_AGG_INTERVAL_ENUM = {
+  FIFTEEN_MINUTES: '15m',
+  ONE_HOUR: '1h',
+  ONE_DAY: '1d',
+  ONE_WEEK: '1w',
+}
+export function normalizeCloudflareTimeseriesAggInterval(value) {
+  if (typeof value !== 'string') return value
+  const trimmed = value.trim()
+  return CLOUDFLARE_TIMESERIES_AGG_INTERVAL_ENUM[trimmed] ?? trimmed
+}
 // The matrix runs 64 cells per run (4 intervals × 8 products × 2 kinds)
 // with at most 6 requests in flight and a 10-minute total budget, so a
 // run stays well inside the 15-minute workflow cadence even if requests
@@ -571,7 +590,11 @@ export function validateCloudflareTimeseriesMeta(meta, window, aggInterval) {
   if (typeof meta?.aggInterval !== 'string' || meta.aggInterval.trim() === '') {
     return 'Cloudflare Radar timeseries response meta.aggInterval is missing or unparseable'
   }
-  if (meta.aggInterval !== aggInterval) {
+  // The API reports the resolution as an enum (FIFTEEN_MINUTES, ONE_HOUR,
+  // ONE_DAY, ONE_WEEK); compare it in the requested short vocabulary.
+  // The mismatch message still names the raw value the API returned.
+  const returnedAggInterval = normalizeCloudflareTimeseriesAggInterval(meta.aggInterval)
+  if (returnedAggInterval !== aggInterval) {
     return `Cloudflare Radar timeseries returned aggInterval ${meta.aggInterval} instead of the requested ${aggInterval}`
   }
   return null
@@ -740,7 +763,16 @@ export async function collectCloudflareRadarCell(
       )
     }
     if (kind === 'timeseries') {
-      const serieError = validateCloudflareTimeseriesSerie(normalized.serie, window, aggInterval)
+      // Validate the serie against the window the API actually returned,
+      // not the requested one: the returned window can be shifted (the
+      // latest fully aggregated window) while keeping the same duration,
+      // and the point count must match the data actually returned.
+      const returnedRange = normalized.meta.dateRange[0]
+      const serieWindow = {
+        dateStart: returnedRange.startTime,
+        dateEnd: returnedRange.endTime,
+      }
+      const serieError = validateCloudflareTimeseriesSerie(normalized.serie, serieWindow, aggInterval)
       if (serieError) throw new Error(serieError)
     }
     const fetchedAt = now().toISOString()
@@ -1666,6 +1698,26 @@ async function main() {
       `timeseries live ${liveCount(cloudflareMatrix.timeseries, 'timeseriesStatus')}/32; ` +
       `history snapshots added: ${history.historyEntries.length + history.timeseriesHistoryEntries.length}; pruned: ${history.pruned.length}.`,
     )
+    // Group the non-live cells by their recorded error so the run log
+    // diagnoses a systematic failure (run #9 reported only "timeseries
+    // live 0/32" with no reason anywhere in the log).
+    const nonLiveReasons = (section, statusField, errorField) => {
+      const counts = new Map()
+      for (const interval of CLOUDFLARE_INTERVALS) {
+        for (const product of CLOUDFLARE_PRODUCTS) {
+          const snapshot = section[interval][product]
+          if (snapshot && snapshot[statusField] !== 'live' && snapshot[errorField]) {
+            const reason = String(snapshot[errorField]).slice(0, 200)
+            counts.set(reason, (counts.get(reason) ?? 0) + 1)
+          }
+        }
+      }
+      return [...counts.entries()].map(([reason, count]) => `${count}× ${reason}`).join('; ')
+    }
+    const pairsReasons = nonLiveReasons(cloudflareMatrix.pairs, 'intervalStatus', 'intervalError')
+    const timeseriesReasons = nonLiveReasons(cloudflareMatrix.timeseries, 'timeseriesStatus', 'timeseriesError')
+    if (pairsReasons) console.log(`Cloudflare Radar pairs non-live: ${pairsReasons}`)
+    if (timeseriesReasons) console.log(`Cloudflare Radar timeseries non-live: ${timeseriesReasons}`)
   } else {
     // Token absent (e.g. a local run): leave every per-interval,
     // per-product, timeseries, history and manifest Cloudflare file
