@@ -49,7 +49,7 @@ jobs:
         run: |
           git config user.name "Offline Theory snapshot bot"
           git config user.email "snapshot@offlinetheory.github.io"
-          git add public/data/threat-intel-snapshot.json public/data/cloudflare-attack-pairs.json public/data/cloudflare-attack-pairs-1h.json public/data/cloudflare-attack-pairs-6h.json public/data/cloudflare-attack-pairs-24h.json public/data/cloudflare-attack-pairs-7d.json public/data/history/cloudflare-manifest.json public/data/sources-snapshot.json public/data/kev-snapshot.json
-          git add -A public/data/history/cloudflare
+          git add public/data/threat-intel-snapshot.json public/data/cloudflare-attack-pairs.json public/data/cloudflare-attack-pairs-*.json public/data/cloudflare-timeseries-*.json public/data/history/cloudflare-manifest.json public/data/sources-snapshot.json public/data/kev-snapshot.json
+          git add -A public/data/history/cloudflare public/data/history/cloudflare-timeseries
           git diff --cached --quiet || git commit -m "Threat map: refresh snapshots"
           git push
