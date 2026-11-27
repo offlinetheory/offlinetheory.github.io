@@ -1,24 +1,24 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-27T08:41:38.619Z",
+  "generatedAt": "2026-11-27T18:30:15.466Z",
   "dataDate": null,
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-27T08:41:39.052Z",
+      "fetchedAt": "2026-11-27T18:30:15.912Z",
       "dataDate": null,
       "feeds": {
         "topips": "ok",
         "topipsText": "ok",
         "top10": "ok",
         "block": "ok",
-        "dailySources": "ok"
+        "dailySources": "cached"
       }
     },
     "ip_geolocation": {
       "status": "ok",
-      "fetchedAt": "2026-11-27T08:41:53.126Z",
+      "fetchedAt": "2026-11-27T18:30:29.829Z",
       "successfulLookups": 12,
       "requestedLookups": 12,
       "error": null
@@ -296,7 +296,7 @@
         "network": "193.163.125.0/24",
         "startIp": "193.163.125.0",
         "endIp": "193.163.125.255",
-        "reports": 357,
+        "reports": 359,
         "asn": "INTERNET-MEASUREMENT",
         "country": "GB",
         "abuse": ">>UNKNOWN<<"
@@ -305,7 +305,7 @@
         "network": "199.165.159.0/24",
         "startIp": "199.165.159.0",
         "endIp": "199.165.159.255",
-        "reports": 356,
+        "reports": 357,
         "asn": null,
         "country": null,
         "abuse": null
@@ -329,6 +329,15 @@
         "abuse": null
       },
       {
+        "network": "205.210.31.0/24",
+        "startIp": "205.210.31.0",
+        "endIp": "205.210.31.255",
+        "reports": 348,
+        "asn": "GOOGLE-CLOUD-PLATFORM",
+        "country": "US",
+        "abuse": "None"
+      },
+      {
         "network": "69.5.169.0/24",
         "startIp": "69.5.169.0",
         "endIp": "69.5.169.255",
@@ -338,19 +347,10 @@
         "abuse": "abuse@omnis.com"
       },
       {
-        "network": "205.210.31.0/24",
-        "startIp": "205.210.31.0",
-        "endIp": "205.210.31.255",
-        "reports": 347,
-        "asn": "GOOGLE-CLOUD-PLATFORM",
-        "country": "US",
-        "abuse": "None"
-      },
-      {
         "network": "156.225.1.0/24",
         "startIp": "156.225.1.0",
         "endIp": "156.225.1.255",
-        "reports": 345,
+        "reports": 346,
         "asn": "OCTL-AS-AP",
         "country": "OceanBlue",
         "abuse": "Cloud"
@@ -359,7 +359,7 @@
         "network": "66.132.172.0/24",
         "startIp": "66.132.172.0",
         "endIp": "66.132.172.255",
-        "reports": 344,
+        "reports": 345,
         "asn": null,
         "country": null,
         "abuse": null
@@ -368,7 +368,7 @@
         "network": "66.132.186.0/24",
         "startIp": "66.132.186.0",
         "endIp": "66.132.186.255",
-        "reports": 343,
+        "reports": 344,
         "asn": null,
         "country": null,
         "abuse": null
@@ -386,10 +386,19 @@
         "network": "195.184.76.0/24",
         "startIp": "195.184.76.0",
         "endIp": "195.184.76.255",
-        "reports": 338,
+        "reports": 339,
         "asn": "EAJ-GLOBAL",
         "country": "GB",
         "abuse": ">>UNKNOWN<<"
+      },
+      {
+        "network": "66.132.195.0/24",
+        "startIp": "66.132.195.0",
+        "endIp": "66.132.195.255",
+        "reports": 337,
+        "asn": null,
+        "country": null,
+        "abuse": null
       },
       {
         "network": "216.180.246.0/24",
@@ -401,13 +410,22 @@
         "abuse": "abuse@networktransit.net"
       },
       {
-        "network": "66.132.195.0/24",
-        "startIp": "66.132.195.0",
-        "endIp": "66.132.195.255",
-        "reports": 336,
-        "asn": null,
-        "country": null,
-        "abuse": null
+        "network": "45.156.129.0/24",
+        "startIp": "45.156.129.0",
+        "endIp": "45.156.129.255",
+        "reports": 334,
+        "asn": "AS-BITSIGHT",
+        "country": "PT",
+        "abuse": ">>UNKNOWN<<"
+      },
+      {
+        "network": "147.185.133.0/24",
+        "startIp": "147.185.133.0",
+        "endIp": "147.185.133.255",
+        "reports": 334,
+        "asn": "GOOGLE-CLOUD-PLATFORM",
+        "country": "US",
+        "abuse": "None"
       },
       {
         "network": "91.230.168.0/24",
@@ -417,24 +435,6 @@
         "asn": "BHA",
         "country": "FR",
         "abuse": "abuse@bha-conseil.com"
-      },
-      {
-        "network": "147.185.133.0/24",
-        "startIp": "147.185.133.0",
-        "endIp": "147.185.133.255",
-        "reports": 333,
-        "asn": "GOOGLE-CLOUD-PLATFORM",
-        "country": "US",
-        "abuse": "None"
-      },
-      {
-        "network": "45.156.129.0/24",
-        "startIp": "45.156.129.0",
-        "endIp": "45.156.129.255",
-        "reports": 332,
-        "asn": "AS-BITSIGHT",
-        "country": "PT",
-        "abuse": ">>UNKNOWN<<"
       },
       {
         "network": "151.243.11.0/24",
@@ -458,19 +458,19 @@
         "network": "66.132.159.0/24",
         "startIp": "66.132.159.0",
         "endIp": "66.132.159.255",
-        "reports": 328,
+        "reports": 329,
         "asn": null,
         "country": null,
         "abuse": null
       },
       {
-        "network": "64.62.197.0/24",
-        "startIp": "64.62.197.0",
-        "endIp": "64.62.197.255",
-        "reports": 326,
-        "asn": "HURRICANE",
-        "country": "US",
-        "abuse": "abuse@he.net"
+        "network": "185.242.226.0/24",
+        "startIp": "185.242.226.0",
+        "endIp": "185.242.226.255",
+        "reports": 327,
+        "asn": "AS49870-BV",
+        "country": "NL",
+        "abuse": "abuse@westcall.ru"
       }
     ]
   },
