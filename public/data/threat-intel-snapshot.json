@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T22:34:07.807Z",
+  "generatedAt": "2026-11-27T01:23:52.789Z",
   "refreshIntervalMinutes": 15,
   "providers": {
     "dshield": {
@@ -9,37 +9,37 @@
       "attribution": "SANS Technology Institute / Internet Storm Center (DShield)",
       "license": "Commercial use is permitted with attribution; do not resell. See the provider’s published license terms.",
       "status": "live",
-      "fetchedAt": "2026-11-26T22:34:07.777Z",
+      "fetchedAt": "2026-11-27T01:23:51.568Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "Best effort; on HTTP 429 the job pauses for 5 minutes before retrying.",
       "subfeeds": {
         "source_locations": {
           "status": "live",
-          "fetchedAt": "2026-11-26T22:33:49.623Z",
+          "fetchedAt": "2026-11-27T01:23:33.214Z",
           "dataDate": null,
           "error": null
         },
         "top_ports": {
           "status": "live",
-          "fetchedAt": "2026-11-26T22:34:03.814Z",
-          "dataDate": "2026-11-25",
+          "fetchedAt": "2026-11-27T01:23:47.688Z",
+          "dataDate": "2026-11-26",
           "error": null
         },
         "infocon": {
           "status": "live",
-          "fetchedAt": "2026-11-26T22:34:04.013Z",
+          "fetchedAt": "2026-11-27T01:23:47.883Z",
           "dataDate": null,
           "error": null
         },
         "daily_summary": {
           "status": "live",
-          "fetchedAt": "2026-11-26T22:34:07.777Z",
-          "dataDate": "2026-11-26",
+          "fetchedAt": "2026-11-27T01:23:51.568Z",
+          "dataDate": "2026-11-27",
           "error": null
         }
       },
-      "sourceDataLastSuccessfulAt": "2026-11-26T22:33:49.623Z",
+      "sourceDataLastSuccessfulAt": "2026-11-27T01:23:33.214Z",
       "sourceDataDate": null
     },
     "threatfox": {
@@ -59,7 +59,7 @@
       "attribution": "NIST National Vulnerability Database (NVD)",
       "license": "Public NVD data; NIST does not endorse products or services.",
       "status": "live",
-      "fetchedAt": "2026-11-26T22:34:06.232Z",
+      "fetchedAt": "2026-11-27T01:23:49.637Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "One unauthenticated request per refresh; NVD unauthenticated limit is 5 requests per 30 seconds."
@@ -70,7 +70,7 @@
       "attribution": "CISA Known Exploited Vulnerabilities catalog",
       "license": "U.S. government work; source attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-26T22:33:49.018Z",
+      "fetchedAt": "2026-11-27T01:23:32.744Z",
       "error": null,
       "cacheIntervalMinutes": 15
     },
@@ -80,13 +80,13 @@
       "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
       "license": "Cloudflare Radar aggregated attack data; attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-26T22:34:04.698Z",
+      "fetchedAt": "2026-11-27T01:23:50.092Z",
       "error": null,
-      "lastUpdated": "2026-11-26T20:30:00Z",
+      "lastUpdated": "2026-11-26T23:30:00Z",
       "dateRange": [
         {
-          "startTime": "2026-11-25T22:00:00Z",
-          "endTime": "2026-11-26T22:00:00Z"
+          "startTime": "2026-11-26T01:00:00Z",
+          "endTime": "2026-11-27T01:00:00Z"
         }
       ],
       "units": [
@@ -115,7 +115,7 @@
       "url": "https://ipwho.is/",
       "attribution": "ipwho.is",
       "status": "live",
-      "fetchedAt": "2026-11-26T22:34:03.338Z",
+      "fetchedAt": "2026-11-27T01:23:47.137Z",
       "cacheIntervalMinutes": 60,
       "license": "Public IP geolocation lookups; only routable public IPs are sent.",
       "successfulLookups": 12,
@@ -123,7 +123,7 @@
       "error": null
     }
   },
-  "eventCount": 3837,
+  "eventCount": 3862,
   "events": [
     {
       "id": "dshield:13.94.254.200",
@@ -393,10 +393,10 @@
       "id": "dshield:port:22",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "Port 22 scanned",
-      "summary": "1,298,093 reports",
+      "summary": "646,012 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -404,23 +404,23 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
         "port": 22,
-        "reports": 1298093,
+        "reports": 646012,
         "rank": 1,
-        "targets": 353,
-        "sources": 16741
+        "targets": 293,
+        "sources": 11348
       }
     },
     {
       "id": "dshield:port:443",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "Port 443 scanned",
-      "summary": "1,131,871 reports",
+      "summary": "602,893 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -428,23 +428,23 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
         "port": 443,
-        "reports": 1131871,
+        "reports": 602893,
         "rank": 2,
-        "targets": 701,
-        "sources": 35144
+        "targets": 307,
+        "sources": 19240
       }
     },
     {
       "id": "dshield:port:2222",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "Port 2222 scanned",
-      "summary": "530,841 reports",
+      "summary": "297,365 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -452,47 +452,23 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
         "port": 2222,
-        "reports": 530841,
+        "reports": 297365,
         "rank": 3,
-        "targets": 323,
-        "sources": 9740
-      }
-    },
-    {
-      "id": "dshield:port:8080",
-      "provider": "dshield",
-      "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
-      "title": "Port 8080 scanned",
-      "summary": "496,822 reports",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
-      "details": {
-        "port": 8080,
-        "reports": 496822,
-        "rank": 4,
-        "targets": 330,
-        "sources": 10238
+        "targets": 289,
+        "sources": 6403
       }
     },
     {
       "id": "dshield:port:23",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "Port 23 scanned",
-      "summary": "484,011 reports",
+      "summary": "283,691 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -500,71 +476,47 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
         "port": 23,
-        "reports": 484011,
+        "reports": 283691,
+        "rank": 4,
+        "targets": 286,
+        "sources": 11282
+      }
+    },
+    {
+      "id": "dshield:port:8080",
+      "provider": "dshield",
+      "category": "scanned_service",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
+      "title": "Port 8080 scanned",
+      "summary": "273,555 reports",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
+      "details": {
+        "port": 8080,
+        "reports": 273555,
         "rank": 5,
-        "targets": 328,
-        "sources": 18132
-      }
-    },
-    {
-      "id": "dshield:port:8000",
-      "provider": "dshield",
-      "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
-      "title": "Port 8000 scanned",
-      "summary": "414,351 reports",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
-      "details": {
-        "port": 8000,
-        "reports": 414351,
-        "rank": 6,
-        "targets": 333,
-        "sources": 7331
-      }
-    },
-    {
-      "id": "dshield:port:9000",
-      "provider": "dshield",
-      "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
-      "title": "Port 9000 scanned",
-      "summary": "376,070 reports",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
-      "details": {
-        "port": 9000,
-        "reports": 376070,
-        "rank": 7,
-        "targets": 308,
-        "sources": 5471
+        "targets": 287,
+        "sources": 6808
       }
     },
     {
       "id": "dshield:port:80",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "Port 80 scanned",
-      "summary": "319,525 reports",
+      "summary": "238,577 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -572,23 +524,71 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
         "port": 80,
-        "reports": 319525,
+        "reports": 238577,
+        "rank": 6,
+        "targets": 285,
+        "sources": 9200
+      }
+    },
+    {
+      "id": "dshield:port:8000",
+      "provider": "dshield",
+      "category": "scanned_service",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
+      "title": "Port 8000 scanned",
+      "summary": "222,287 reports",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
+      "details": {
+        "port": 8000,
+        "reports": 222287,
+        "rank": 7,
+        "targets": 289,
+        "sources": 5063
+      }
+    },
+    {
+      "id": "dshield:port:9000",
+      "provider": "dshield",
+      "category": "scanned_service",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
+      "title": "Port 9000 scanned",
+      "summary": "207,800 reports",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
+      "details": {
+        "port": 9000,
+        "reports": 207800,
         "rank": 8,
-        "targets": 356,
-        "sources": 13523
+        "targets": 271,
+        "sources": 4166
       }
     },
     {
-      "id": "dshield:port:7547",
+      "id": "dshield:port:53140",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
-      "title": "Port 7547 scanned",
-      "summary": "277,389 reports",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
+      "title": "Port 53140 scanned",
+      "summary": "195,417 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -596,23 +596,23 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
-        "port": 7547,
-        "reports": 277389,
+        "port": 53140,
+        "reports": 195417,
         "rank": 9,
-        "targets": 276,
-        "sources": 4438
+        "targets": 10,
+        "sources": 4471
       }
     },
     {
-      "id": "dshield:port:16767",
+      "id": "dshield:port:7680",
       "provider": "dshield",
       "category": "scanned_service",
-      "firstObservedAt": "2026-11-25T00:00:00.000Z",
-      "lastObservedAt": "2026-11-25T00:00:00.000Z",
-      "title": "Port 16767 scanned",
-      "summary": "252,063 reports",
+      "firstObservedAt": "2026-11-26T00:00:00.000Z",
+      "lastObservedAt": "2026-11-26T00:00:00.000Z",
+      "title": "Port 7680 scanned",
+      "summary": "183,043 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -620,33 +620,13 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-25?json",
+      "sourceUrl": "https://isc.sans.edu/api/topports/records/10/2026-11-26?json",
       "details": {
-        "port": 16767,
-        "reports": 252063,
+        "port": 7680,
+        "reports": 183043,
         "rank": 10,
-        "targets": 189,
-        "sources": 6706
-      }
-    },
-    {
-      "id": "dshield:daily:2026-11-20",
-      "provider": "dshield",
-      "category": "daily_sensor_summary",
-      "firstObservedAt": "2026-11-20T00:00:00.000Z",
-      "lastObservedAt": "2026-11-20T00:00:00.000Z",
-      "title": "DShield daily reports · 2026-11-20",
-      "summary": "18,210,553 reports",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://isc.sans.edu/api/dailysummary/2026-11-20?json",
-      "details": {
-        "reports": 18210553
+        "targets": 41,
+        "sources": 2945
       }
     },
     {
@@ -756,7 +736,7 @@
       "firstObservedAt": "2026-11-26T00:00:00.000Z",
       "lastObservedAt": "2026-11-26T00:00:00.000Z",
       "title": "DShield daily reports · 2026-11-26",
-      "summary": "11,356,165 reports",
+      "summary": "14,406,791 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -766,17 +746,17 @@
       },
       "sourceUrl": "https://isc.sans.edu/api/dailysummary/2026-11-26?json",
       "details": {
-        "reports": 11356165
+        "reports": 14406791
       }
     },
     {
-      "id": "nvd:CVE-2026-122676",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T23:19:24.940Z",
-      "lastObservedAt": "2026-11-20T18:18:42.183Z",
-      "title": "CVE-2026-122676",
-      "summary": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in PublishPress PublishPress Authors publishpress-authors allows Blind SQL Injection.This issue affects PublishPress Authors: from n/a through 4.18.0.",
+      "id": "dshield:daily:2026-11-27",
+      "provider": "dshield",
+      "category": "daily_sensor_summary",
+      "firstObservedAt": "2026-11-27T00:00:00.000Z",
+      "lastObservedAt": "2026-11-27T00:00:00.000Z",
+      "title": "DShield daily reports · 2026-11-27",
+      "summary": "4,693 reports",
       "indicator": null,
       "location": {
         "country": null,
@@ -784,451 +764,9 @@
         "latitude": null,
         "longitude": null
       },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-122676",
+      "sourceUrl": "https://isc.sans.edu/api/dailysummary/2026-11-27?json",
       "details": {
-        "weaknesses": [
-          "CWE-89"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133327",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T23:19:29.040Z",
-      "lastObservedAt": "2026-11-25T04:17:24.223Z",
-      "title": "CVE-2026-133327",
-      "summary": "A vulnerability was identified in Dolibarr ERP CRM up to 23.0.4. This affects the function dol_convert_file in the library htdocs/core/lib/files.lib.php of the component Document Upload. Such manipulation leads to code injection. The attack can be launched remotely. The exploit is publicly available and might be used. Upgrading to version 24.0.0 is able to mitigate this issue. The name of the patch is 9b6368b2a9eae3eec690b2ce22c4f291f0051540. Upgrading the affected component is advised.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133327",
-      "details": {
-        "weaknesses": [
-          "CWE-74",
-          "CWE-94"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133435",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-19T23:19:29.293Z",
-      "lastObservedAt": "2026-11-20T22:17:49.563Z",
-      "title": "CVE-2026-133435",
-      "summary": "A flaw was found in Keycloak. When configured with a database that uses case-insensitive collation, Keycloak resolves realm URLs regardless of letter casing. A remote attacker can exploit this behavior by sending requests with alternate letter casing to bypass upstream reverse proxy access controls that rely on case-sensitive path matching. This issue can expose restricted authentication endpoints intended only for internal access, though Keycloak's internal authentication mechanisms remain intact.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133435",
-      "details": {
-        "weaknesses": [
-          "CWE-178"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-22062",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T00:17:26.170Z",
-      "lastObservedAt": "2026-11-23T16:06:05.540Z",
-      "title": "CVE-2026-22062",
-      "summary": "StorageGRID (formerly StorageGRID Webscale) versions 12.1.0 and higher are susceptible to an information exposure vulnerability which allows a remote unauthenticated attacker to acquire low-sensitivity credentials via a Man-in-the-middle attack when certain non-default features are enabled.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-22062",
-      "details": {
-        "weaknesses": [],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2025-71473",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:07.597Z",
-      "lastObservedAt": "2026-11-25T04:17:23.760Z",
-      "title": "CVE-2025-71473",
-      "summary": "lwext4 through 1.0.0 contains a heap buffer overflow in ext4_fs_init_inode_bitmap() in src/ext4_fs.c because it does not validate s_inodes_per_group against the inode bitmap size. Attackers can supply a crafted ext4 image with an oversized s_inodes_per_group so memset writes past the heap buffer, corrupting memory and crashing the mounting application.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2025-71473",
-      "details": {
-        "weaknesses": [
-          "CWE-787"
-        ],
-        "vulnStatus": "Received"
-      }
-    },
-    {
-      "id": "nvd:CVE-2025-71474",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:08.690Z",
-      "lastObservedAt": "2026-11-20T14:17:42.473Z",
-      "title": "CVE-2025-71474",
-      "summary": "lwext4 through 1.0.0 contains an out-of-bounds write vulnerability in ext4_fs_init_block_bitmap() that allows attackers to corrupt heap memory via crafted superblock geometry fields. Attackers can supply an ext4 image with oversized s_reserved_gdt_blocks and BLOCK_UNINIT groups to write past the bitmap buffer, crashing applications that mount it.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2025-71474",
-      "details": {
-        "weaknesses": [
-          "CWE-787"
-        ],
-        "vulnStatus": "Received"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126540",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:08.843Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126540",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via quadratic bigint loop in os2ip.\n\nEvery INTEGER or ENUMERATED longer than four content octets reaches os2ip, which iterates over each content octet with $result = ($result * 256) + $octet. Each multiplication operates on a bigint that grows by one octet per step, so decoding an n-octet value takes O(n^2) bigint work. Nothing limits content length before this loop runs.\n\nAn attacker who controls the decoded data can exhaust CPU with a single oversized INTEGER or ENUMERATED value.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126540",
-      "details": {
-        "weaknesses": [
-          "CWE-407"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126568",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:08.970Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126568",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unbounded MSG_PEEK buffer doubling in asn_recv.\n\nasn_recv peeks the socket in a loop, doubling the buffer size on each pass until a tag and length can be decoded. An inverted boolean guard ($tb || rather than $tb &&) prevents the need-more-data exit from firing once a tag byte has been decoded. When asn_decode_length returns no value because the length is absent or incomplete, no exit fires for that case either. MSG_PEEK leaves socket data unconsumed, so each re-peek returns at once while the buffer size doubles.\n\nA single truncated BER header sent to a process calling asn_recv doubles the peek buffer until memory is exhausted. Perl's realloc failure is fatal and not catchable with eval.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126568",
-      "details": {
-        "weaknesses": [
-          "CWE-835"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126576",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.083Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126576",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unchecked exponent length in binary REAL decoding.\n\nBinary REAL decoding never bounds-checks the exponent length against the available content. For a minimal one-byte binary REAL, the exponent byte is read from outside the element, making the mantissa length -1. Perl reads a negative length as an offset from the end of the string, so the mantissa is nearly all of the input that follows the element. The long-form exponent path also omits the extra length octet when sizing the mantissa.\n\nAn attacker who controls the decoded data can exhaust CPU with a list of such values, as each mantissa loop iterates over the remaining input. The decoded values are also computed from bytes outside each element.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126576",
-      "details": {
-        "weaknesses": [
-          "CWE-130",
-          "CWE-407"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126682",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.197Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126682",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via exponent-notation string in INTEGER encoding.\n\nThe encoder routes any value with abs >= 2**31 to i2osp without validating that it is an integer. A string in exponent notation such as \"1e8000\" passes that threshold. Math::BigInt expands it to an 8001-digit integer, and i2osp's per-octet conversion loop is quadratic in that size.\n\nAn attacker who controls encoded INTEGER values can exhaust CPU with a short exponent-notation string.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126682",
-      "details": {
-        "weaknesses": [
-          "CWE-407",
-          "CWE-1284"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126819",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.313Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126819",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via zero-length BIT STRING content.\n\nA BIT STRING with zero content octets passes -1 to substr as the length. Perl reads a negative length as an offset from the end of the string, so the decoded value is nearly all of the input that follows the element. In the constructed form each zero-length segment copies the rest of the input again, so memory grows with the square of the input size.\n\nAn attacker who controls the decoded data can exhaust memory with a short constructed BIT STRING. The resulting value also contains bytes from adjacent input.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126819",
-      "details": {
-        "weaknesses": [
-          "CWE-1284"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-126956",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.427Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-126956",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unlimited recursion depth in constructed-form string decoding.\n\nAny constructed-form string element causes the decoder to recurse on the element's contents. The BER encoding controls nesting depth at four bytes per level, with no bound checked. Perl recursion is heap-allocated, so the process grows without a stack crash.\n\nAn attacker who controls the decoded data can exhaust memory with a small deeply nested constructed string.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-126956",
-      "details": {
-        "weaknesses": [
-          "CWE-674"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-131868",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.543Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-131868",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via a declared element length passed unchecked to sysread in asn_read and asn_get.\n\nThe length an element declares in its BER header is passed to sysread as the read size. Perl grows the target buffer to that size before reading, so memory is allocated from the declared length, not from the data received. A 6-byte header can declare a length of up to 4GB.\n\nA single header makes the reading process allocate the declared size. Where the allocation fails, perl exits with \"Out of memory\", which eval cannot catch.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-131868",
-      "details": {
-        "weaknesses": [
-          "CWE-789"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-131877",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.660Z",
-      "lastObservedAt": "2026-11-24T19:10:01.980Z",
-      "title": "CVE-2026-131877",
-      "summary": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unbounded arc length in OBJECT IDENTIFIER decoding and encoding.\n\nThe content of an OBJECT IDENTIFIER or RELATIVE-OID element is passed to unpack \"w*\" on decode, and the arcs of an OID string to pack \"w*\" on encode. Perl converts each arc to or from its decimal string in time quadratic in the arc's length, and nothing limits that length.\n\nAn attacker who controls the decoded data, or an OID string passed to encode, can exhaust CPU with a single oversized arc.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-131877",
-      "details": {
-        "weaknesses": [
-          "CWE-407"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133406",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:09.923Z",
-      "lastObservedAt": "2026-11-20T14:17:50.720Z",
-      "title": "CVE-2026-133406",
-      "summary": "A vulnerability was determined in aoiflux mutant 2.3.0/2.4.0/2.5.0. This vulnerability affects unknown code of the file builtin/hive_builtins.go of the component Forensic Parser. This manipulation of the argument Count causes uncontrolled memory allocation. It is possible to launch the attack on the local host. Upgrading to version 2.6.0 is able to resolve this issue. Patch name: c4b1a7dec6c603115e2a05d1e8970a142f0b9774. Upgrading the affected component is recommended.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133406",
-      "details": {
-        "weaknesses": [
-          "CWE-770",
-          "CWE-789"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133519",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:10.133Z",
-      "lastObservedAt": "2026-11-20T21:17:34.900Z",
-      "title": "CVE-2026-133519",
-      "summary": "FFmpeg 7.0 through 9.0.2 contains an out-of-bounds read vulnerability in dvdvideo_menu_next_ps_block() in libavformat/dvdvideodec.c when demuxing DVD menu domains. Attackers can craft a DVD image whose last cell sector and NAV next-VOBU pointer bypass the end-of-cell check, overreading pgc->cell_playback and crashing the process.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133519",
-      "details": {
-        "weaknesses": [
-          "CWE-125"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133520",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:10.303Z",
-      "lastObservedAt": "2026-11-20T18:18:50.150Z",
-      "title": "CVE-2026-133520",
-      "summary": "Dokploy 0.28.0 before 0.31.1 contains a path traversal vulnerability in the patch.readRepoDirectories tRPC procedure that allows authenticated organization members to list tracked files of arbitrary git repositories. Attackers with service read permission can supply a crafted repoPath, which is passed to git ls-tree unconfined, to enumerate other organizations' application and compose source trees.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133520",
-      "details": {
-        "weaknesses": [
-          "CWE-22"
-        ],
-        "vulnStatus": "Deferred"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133521",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:10.480Z",
-      "lastObservedAt": "2026-11-20T17:18:19.203Z",
-      "title": "CVE-2026-133521",
-      "summary": "Bar Assistant 3.0.0 before 6.11.0 contains an authorization bypass vulnerability in BarController::join that allows authenticated users to join bars without a valid invite code. Attackers can send POST requests to /api/bars/join omitting invite_code, matching invite-disabled bars with NULL codes, to read cocktails, ingredients, members, settings and search tokens.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133521",
-      "details": {
-        "weaknesses": [
-          "CWE-639"
-        ],
-        "vulnStatus": "Received"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-133528",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:10.633Z",
-      "lastObservedAt": "2026-11-25T04:17:25.537Z",
-      "title": "CVE-2026-133528",
-      "summary": "BeamNG.drive before 0.40.6 contains an out-of-bounds write vulnerability because JIT-compiled LuaJIT traces omit FFI array bounds checks, letting untrusted Lua escape the sandbox. Attackers supplying a malicious mod can JIT-compile an FFI store loop, write out of range using a tostring() address leak, re-enable ffi.load, and run commands as the game user.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133528",
-      "details": {
-        "weaknesses": [
-          "CWE-787"
-        ],
-        "vulnStatus": "Awaiting Analysis"
-      }
-    },
-    {
-      "id": "nvd:CVE-2026-82091",
-      "provider": "nvd",
-      "category": "vulnerability",
-      "firstObservedAt": "2026-11-20T01:17:10.807Z",
-      "lastObservedAt": "2026-11-20T17:18:27.583Z",
-      "title": "CVE-2026-82091",
-      "summary": "The Canva Desktop App before 1.128.0 stores encrypted application state on disk. The encryption key is hardcoded as a plaintext string in the main.js file and is identical across all Canva installations on Windows and macOS.",
-      "indicator": null,
-      "location": {
-        "country": null,
-        "countryCode": null,
-        "latitude": null,
-        "longitude": null
-      },
-      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-82091",
-      "details": {
-        "weaknesses": [
-          "CWE-321"
-        ],
-        "vulnStatus": "Received"
+        "reports": 4693
       }
     },
     {
@@ -85685,6 +85223,1054 @@
       }
     },
     {
+      "id": "nvd:CVE-2026-135107",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T23:17:01.237Z",
+      "lastObservedAt": "2026-11-26T23:17:01.363Z",
+      "title": "CVE-2026-135107",
+      "summary": "An **uncontrolled memory allocation** flaw has been found in the smbd_smb2_ioctl_pipe_write_done() function in source3/smbd/smb2_ioctl_named_pipe.c of the SMB2 named-pipe ioctl handling in the samba package. The file server reserves memory for a named-pipe response using a size chosen by the client. It does not keep that size within the maximum the client and the server have already agreed. A low-privileged network attacker or user who can open a named pipe can request a very large response. The file server reserves that memory before it reads the pipe and holds it until the request ends. Repeating this on more connections can exhaust memory and keep the file service unavailable while those requests continue.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135107",
+      "details": {
+        "weaknesses": [
+          "CWE-789"
+        ],
+        "vulnStatus": "Awaiting Analysis"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137596",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T23:17:01.490Z",
+      "lastObservedAt": "2026-11-26T23:17:01.607Z",
+      "title": "CVE-2026-137596",
+      "summary": "A server-side request forgery (SSRF) flaw was found in KubeVirt's decentralized live migration. The connectURL field of a VirtualMachineInstanceMigration object is not validated at admission, and the privileged synchronization-controller dials the attacker-specified URL. Connection and DNS errors from the dial are exposed in a condition readable in the tenant's namespace. A user with the kubevirt.io:migrate role (a role designed for tenant delegation) can use this behavior as a blind network-reconnaissance oracle to determine the existence and connectivity of internal hosts and ports from the controller's network vantage, including services isolated from the tenant by network policy. TLS certificate pinning prevents session completion with non-KubeVirt hosts, limiting the impact to information disclosure of internal network topology; no data content, integrity, or availability impact is possible.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137596",
+      "details": {
+        "weaknesses": [
+          "CWE-918"
+        ],
+        "vulnStatus": "Awaiting Analysis"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137602",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T23:17:01.640Z",
+      "lastObservedAt": "2026-11-26T23:17:01.757Z",
+      "title": "CVE-2026-137602",
+      "summary": "A flaw was found in Keycloak. This vulnerability enables information disclosure when the parameterized-scopes feature is enabled. The protocol mapper fails to enforce authorization checks for certain scope parameter types during token and authorization requests. An authenticated remote attacker can exploit this flaw by supplying a crafted scope parameter to retrieve sensitive profile attributes of other users without authorization.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137602",
+      "details": {
+        "weaknesses": [
+          "CWE-639"
+        ],
+        "vulnStatus": "Awaiting Analysis"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137653",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T23:17:01.793Z",
+      "lastObservedAt": "2026-11-26T23:17:01.910Z",
+      "title": "CVE-2026-137653",
+      "summary": "A flaw was found in spice-server. A malicious SPICE client can send a message header declaring an arbitrarily large message body. The server sizes the receive-buffer allocation from this declared size before any message content is received; when the allocation fails, the process hosting the SPICE server terminates abruptly, causing a denial of service for the virtual machine it serves. On hosts with sufficient free memory, the same technique can instead hold large amounts of memory per connection. Exploitation requires network access to the SPICE port; credential requirements depend on the server's authentication configuration.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137653",
+      "details": {
+        "weaknesses": [
+          "CWE-770"
+        ],
+        "vulnStatus": "Awaiting Analysis"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137660",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-26T23:17:01.960Z",
+      "lastObservedAt": "2026-11-26T23:17:02.127Z",
+      "title": "CVE-2026-137660",
+      "summary": "A vulnerability has been found in stylefeng Guns up to 2.2. Affected by this issue is the function TokenAndPermissionInterceptor.preHandle of the file TokenAndPermissionInterceptor.java of the component JWT Signing. Such manipulation leads to use of hard-coded cryptographic key\r . It is possible to launch the attack remotely. The project was informed of the problem early through an issue report but has not responded yet.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137660",
+      "details": {
+        "weaknesses": [
+          "CWE-320",
+          "CWE-321"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-114454",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:39.503Z",
+      "lastObservedAt": "2026-11-27T00:16:39.610Z",
+      "title": "CVE-2026-114454",
+      "summary": "Path traversal in TPM device management in Canonical LXD from 4.8 before 5.0.12, 5.21.10, 6.10.2 allows a remote authenticated user with project access to recursively delete arbitrary files and directories on the host as root via a crafted device name during instance or device removal.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-114454",
+      "details": {
+        "weaknesses": [
+          "CWE-22",
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-115843",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:39.650Z",
+      "lastObservedAt": "2026-11-27T00:16:39.760Z",
+      "title": "CVE-2026-115843",
+      "summary": "In LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2, an improper limitation of a pathname to a restricted directory vulnerability allows an authenticated client restricted to a single project to write and delete files at arbitrary host filesystem paths as root.\n\n When a custom storage volume is pushed to a LXD daemon, the snapshot names supplied by the migration peer are never validated and are used to build the filesystem path of each received snapshot. This allows an attacker to place attacker-controlled files into any host directory as root, gaining root-level code execution on the host, and to recursively delete an attacker-chosen path.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-115843",
+      "details": {
+        "weaknesses": [
+          "CWE-20",
+          "CWE-22"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-115844",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:39.810Z",
+      "lastObservedAt": "2026-11-27T00:16:39.917Z",
+      "title": "CVE-2026-115844",
+      "summary": "In LXD before 5.21.0 and 6.10.0, an OS command injection vulnerability allows an authenticated client restricted to a single project to execute arbitrary code as root on the host.\n\n The raw.dnsmasq bridge network configuration key is not restricted to server administrators and is copied verbatim into the dnsmasq configuration file, so a user whose project keeps the default features.networks=false can have a bridge network created in the default project with an injected dhcp-script directive. This allows an attacker to make the host dnsmasq execute attacker-chosen code as root on a DHCP lease event and fully compromise the host.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-115844",
+      "details": {
+        "weaknesses": [
+          "CWE-78"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-122225",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:39.967Z",
+      "lastObservedAt": "2026-11-27T00:16:40.070Z",
+      "title": "CVE-2026-122225",
+      "summary": "Symbolic link following in imported VM backup config drive preparation in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project-scoped permissions to disclose sensitive host files, including LXD server and cluster keys, and overwrite host files as root via importing and starting a VM backup with a symlinked config directory.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-122225",
+      "details": {
+        "weaknesses": [
+          "CWE-61"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127151",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.113Z",
+      "lastObservedAt": "2026-11-27T00:16:40.223Z",
+      "title": "CVE-2026-127151",
+      "summary": "Exposure of resource to wrong sphere in VM disk migration, export, and attach NBD servers in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an unprivileged local user in the host network namespace to read and modify a guest VM's disk and execute code inside the guest via connecting to abstract Unix sockets while an operation is active.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127151",
+      "details": {
+        "weaknesses": [
+          "CWE-668"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127152",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.260Z",
+      "lastObservedAt": "2026-11-27T00:16:40.367Z",
+      "title": "CVE-2026-127152",
+      "summary": "Improper privilege management during container rebuild in Canonical LXD before 5.21.10, 6.10.2 allows a local user with container permissions to gain root privileges on the host via rebuilding a never-started unprivileged container so it starts without a user namespace or privileged-container hardening.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127152",
+      "details": {
+        "weaknesses": [
+          "CWE-269",
+          "CWE-271"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127153",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.407Z",
+      "lastObservedAt": "2026-11-27T00:16:40.520Z",
+      "title": "CVE-2026-127153",
+      "summary": "Path traversal in proxy and CDI GPU device name handling in Canonical LXD before 5.0.12, 5.21.10, and 6.10.2 allows an authenticated user with access to a restricted project permitting proxy or GPU devices to read, overwrite, or delete arbitrary host files as root and terminate host processes via crafted device names containing path traversal sequences.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127153",
+      "details": {
+        "weaknesses": [
+          "CWE-22"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127154",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.560Z",
+      "lastObservedAt": "2026-11-27T00:16:40.663Z",
+      "title": "CVE-2026-127154",
+      "summary": "Improper link resolution in image metadata tarball unpacking in Canonical LXD before 5.0.12, 5.21.10, and 6.10.2 allows an authenticated user with a restricted client certificate to write arbitrary host files as root and execute code on the host via a crafted rootfs symlink in an image metadata tarball.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127154",
+      "details": {
+        "weaknesses": [
+          "CWE-59",
+          "CWE-73"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127157",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.707Z",
+      "lastObservedAt": "2026-11-27T00:16:40.810Z",
+      "title": "CVE-2026-127157",
+      "summary": "Exposure of sensitive information in token operation events in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user restricted to a project to gain full server access and cancel pending token operations via capturing certificate or cluster join token secrets broadcast to default project event listeners.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127157",
+      "details": {
+        "weaknesses": [
+          "CWE-200"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127158",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:40.850Z",
+      "lastObservedAt": "2026-11-27T00:16:40.960Z",
+      "title": "CVE-2026-127158",
+      "summary": "Exposure of sensitive information and missing requestor validation in instance, volume, and snapshot migration operations in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project event or operation read access to read migrating configuration and filesystem data and disrupt the migration via capturing per-connection websocket secrets from operation metadata and racing the migration's data channels.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127158",
+      "details": {
+        "weaknesses": [
+          "CWE-200",
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127160",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.000Z",
+      "lastObservedAt": "2026-11-27T00:16:41.103Z",
+      "title": "CVE-2026-127160",
+      "summary": "Configuration injection in virtual machine disk device handling in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with VM creation permissions in a restricted project to bypass low-level VM restrictions and control the root QEMU process via quotes and line breaks in a disk device's guest path.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127160",
+      "details": {
+        "weaknesses": [
+          "CWE-74",
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127161",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.143Z",
+      "lastObservedAt": "2026-11-27T00:16:41.247Z",
+      "title": "CVE-2026-127161",
+      "summary": "Exposure of sensitive information in live and stateful migration operations in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project event or operation read access to read a migrating instance's checkpointed runtime state and disrupt the migration via capturing the state connection secret from operation events or queries.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127161",
+      "details": {
+        "weaknesses": [
+          "CWE-200"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127162",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.297Z",
+      "lastObservedAt": "2026-11-27T00:16:41.403Z",
+      "title": "CVE-2026-127162",
+      "summary": "Improper output encoding in Prometheus metrics exposition in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows a user controlling a virtual machine to forge host metric labels and break metrics scraping via unescaped guest-controlled filesystem mountpoints and network interface names.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127162",
+      "details": {
+        "weaknesses": [
+          "CWE-116"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-127163",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.440Z",
+      "lastObservedAt": "2026-11-27T00:16:41.440Z",
+      "title": "CVE-2026-127163",
+      "summary": "Improper certificate validation in websocket connections in Canonical pylxd before 2.4.3 allows a network attacker to read command stdin and spoof command output via impersonating a remote LXD endpoint.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-127163",
+      "details": {
+        "weaknesses": [
+          "CWE-295"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-133530",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.570Z",
+      "lastObservedAt": "2026-11-27T00:16:41.570Z",
+      "title": "CVE-2026-133530",
+      "summary": "The Android application \"Tokyo Fire Department Official App\" contains a path traversal vulnerability that allows a malicious application installed on a user's device to obtain sensitive information from the affected application.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-133530",
+      "details": {
+        "weaknesses": [
+          "CWE-22"
+        ],
+        "vulnStatus": "Received"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135372",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.717Z",
+      "lastObservedAt": "2026-11-27T00:16:41.813Z",
+      "title": "CVE-2026-135372",
+      "summary": "Incorrect authorization in custom storage volume, backup, and storage bucket endpoints in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with a project-restricted certificate or per-object authorization to read, rename, move, replace, or delete other projects' storage resources and bypass cluster group restrictions via missing project or object ownership checks.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135372",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135373",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:41.860Z",
+      "lastObservedAt": "2026-11-27T00:16:41.963Z",
+      "title": "CVE-2026-135373",
+      "summary": "Path traversal in container device path resolution and VM disk format detection in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project access, including an unprivileged local user through lxd-user, to read and modify arbitrary host files or Ceph RBD images and gain root privileges on the host via crafted device paths or QCOW2 backing file references.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135373",
+      "details": {
+        "weaknesses": [
+          "CWE-22"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135374",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.000Z",
+      "lastObservedAt": "2026-11-27T00:16:42.103Z",
+      "title": "CVE-2026-135374",
+      "summary": "Insufficient verification of data authenticity in shared image handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user restricted to a single project to export private images, replace public image contents, remove other projects' images, and pin daemon memory via abusing fingerprint-based image sharing, partial fingerprints, and non-expiring push upload tokens.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135374",
+      "details": {
+        "weaknesses": [
+          "CWE-345"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135375",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.147Z",
+      "lastObservedAt": "2026-11-27T00:16:42.250Z",
+      "title": "CVE-2026-135375",
+      "summary": "Untrusted search path and context handling in host-side instance helpers in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access or root inside an unprivileged container to execute arbitrary code as root on the host, read daemon memory, remount read-only shifted disks as read-write, and disrupt other projects' mounts via file API, SFTP, syscall interception, and disk hot-plug operations.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135375",
+      "details": {
+        "weaknesses": [
+          "CWE-426"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135376",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.290Z",
+      "lastObservedAt": "2026-11-27T00:16:42.393Z",
+      "title": "CVE-2026-135376",
+      "summary": "Incorrect authorization in project restriction enforcement in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to bypass project limits and access forbidden storage pools, volumes, network addresses, and CPU resources via instance moves, backup imports with overrides, received snapshots, or unvalidated volatile keys.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135376",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135377",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.433Z",
+      "lastObservedAt": "2026-11-27T00:16:42.540Z",
+      "title": "CVE-2026-135377",
+      "summary": "Exposure of sensitive information in API responses, exports, and host-side artifacts in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated lower-privileged user or a local host user to read credentials, private keys, and other projects' metadata and inject arguments into Ceph administration commands via unfiltered endpoints, exported configurations, log files, process command lines, and unvalidated bucket parameters.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135377",
+      "details": {
+        "weaknesses": [
+          "CWE-200"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135378",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.580Z",
+      "lastObservedAt": "2026-11-27T00:16:42.690Z",
+      "title": "CVE-2026-135378",
+      "summary": "Incorrect authorization in NIC, managed network, network zone, and ACL handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user of a restricted project or root inside an instance to manipulate host interfaces and firewall rules, read fragments of root-owned files through error messages, and disrupt or intercept other projects' networks and DNS records via unvalidated device and network configurations.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135378",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135379",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.730Z",
+      "lastObservedAt": "2026-11-27T00:16:42.833Z",
+      "title": "CVE-2026-135379",
+      "summary": "Improper control of code generation and project restriction enforcement in container configuration handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to execute arbitrary commands as root on the host, crash the daemon, and alter shared bridge DHCP assignments via image-supplied LXC configuration, concurrent rename races during updates, and unvalidated syscall or hardware address settings.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135379",
+      "details": {
+        "weaknesses": [
+          "CWE-94"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135380",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:42.873Z",
+      "lastObservedAt": "2026-11-27T00:16:42.977Z",
+      "title": "CVE-2026-135380",
+      "summary": "Incorrect authorization in instance, snapshot, and image operations in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project or per-object permissions to read and modify other clients' resources and execute arbitrary code as root on the host via missing entitlement checks on secondary objects and push-mode container migrations.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135380",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135381",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.017Z",
+      "lastObservedAt": "2026-11-27T00:16:43.117Z",
+      "title": "CVE-2026-135381",
+      "summary": "Incorrect permission assignment for critical resources in rsync transfer sockets, instance storage directories, proxy socket paths, and disk staging mounts in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an unprivileged local user to gain root privileges on the host, read or modify transferred volumes, alter host file permissions, and inject AppArmor rules via connecting to unauthenticated abstract Unix sockets, running setuid binaries, or racing path and mount operations.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135381",
+      "details": {
+        "weaknesses": [
+          "CWE-732"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135382",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.157Z",
+      "lastObservedAt": "2026-11-27T00:16:43.260Z",
+      "title": "CVE-2026-135382",
+      "summary": "Path traversal in backup, image, storage volume, and migration handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and write arbitrary host files as root and exhaust daemon memory via crafted symlinks, unvalidated path components, or oversized metadata.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135382",
+      "details": {
+        "weaknesses": [
+          "CWE-22"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135383",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.300Z",
+      "lastObservedAt": "2026-11-27T00:16:43.403Z",
+      "title": "CVE-2026-135383",
+      "summary": "Incorrect authorization in TLS certificate trust store and revocation handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated client with a restricted or revoked TLS certificate to gain unrestricted administrative access to the server or cluster via trust-lookup races, forwarded cluster identity headers, CA-issued certificate detaching, or stale revocation and session state.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135383",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135384",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.450Z",
+      "lastObservedAt": "2026-11-27T00:16:43.560Z",
+      "title": "CVE-2026-135384",
+      "summary": "Improper authentication in OIDC bearer token verification in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows a remote attacker holding a token signed by the configured identity provider to authenticate to the LXD API and gain unauthorized control or impersonate users via presenting tokens issued for other applications, ID tokens, or unverified email claims.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135384",
+      "details": {
+        "weaknesses": [
+          "CWE-287"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-135385",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.600Z",
+      "lastObservedAt": "2026-11-27T00:16:43.703Z",
+      "title": "CVE-2026-135385",
+      "summary": "Incorrect authorization in backup export and network zone read endpoints in Canonical LXD before 6.10.2 allows an authenticated user with view-only access to export instance and custom storage volume backups and read network zone TSIG peer keys via endpoints enforcing only view permissions.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-135385",
+      "details": {
+        "weaknesses": [
+          "CWE-863"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136972",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.743Z",
+      "lastObservedAt": "2026-11-27T00:16:43.850Z",
+      "title": "CVE-2026-136972",
+      "summary": "Exposure of resource to wrong sphere in image template handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and overwrite host block and character devices via importing device nodes in an image's templates directory and accessing them through instance template endpoints.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136972",
+      "details": {
+        "weaknesses": [
+          "CWE-668"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136973",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:43.893Z",
+      "lastObservedAt": "2026-11-27T00:16:44.000Z",
+      "title": "CVE-2026-136973",
+      "summary": "Exposure of resource to wrong sphere in optimized ZFS backup imports in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to mount an attacker-controlled filesystem over arbitrary host paths and execute code as root on the host via importing a filesystem ZFS stream declared as a block volume.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136973",
+      "details": {
+        "weaknesses": [
+          "CWE-20",
+          "CWE-668"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136974",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.047Z",
+      "lastObservedAt": "2026-11-27T00:16:44.153Z",
+      "title": "CVE-2026-136974",
+      "summary": "Configuration injection in liblxc instance configuration generation in Canonical LXD before 6.10.2, 5.21.10, 5.0.12, 4.0.16 allows an authenticated user with restricted project access or a local user of the LXD user socket to execute arbitrary commands as root on the host via line breaks in instance configuration keys and values.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136974",
+      "details": {
+        "weaknesses": [
+          "CWE-93",
+          "CWE-269"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136975",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.193Z",
+      "lastObservedAt": "2026-11-27T00:16:44.310Z",
+      "title": "CVE-2026-136975",
+      "summary": "Authentication bypass by spoofing in bridged NIC MAC filtering in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows a privileged user inside an instance sharing a managed bridge to intercept and deny inbound network traffic addressed to a neighbour instance via sending frames with a spoofed source MAC address before filtering drops them.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136975",
+      "details": {
+        "weaknesses": [
+          "CWE-290"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136976",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.347Z",
+      "lastObservedAt": "2026-11-27T00:16:44.450Z",
+      "title": "CVE-2026-136976",
+      "summary": "Improper link resolution before file access in recursive file pull in Canonical LXD before 4.0.15, 5.0.11, 5.21.9, and 6.8 on case-insensitive client filesystems allows an authenticated user with write access to an instance directory or custom volume to write arbitrary files outside the target directory and execute code as the operator via case-variant symlinks.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136976",
+      "details": {
+        "weaknesses": [
+          "CWE-22"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136977",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.497Z",
+      "lastObservedAt": "2026-11-27T00:16:44.600Z",
+      "title": "CVE-2026-136977",
+      "summary": "Improper authentication in the guest API connection handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows a root user inside an unisolated instance to impersonate another instance and read its configuration, metadata, and devices across project boundaries via holding open connections across PID wrap-around.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136977",
+      "details": {
+        "weaknesses": [
+          "CWE-287"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-136978",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.640Z",
+      "lastObservedAt": "2026-11-27T00:16:44.743Z",
+      "title": "CVE-2026-136978",
+      "summary": "Exposure of resource to wrong sphere in the instance file transfer API in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and write arbitrary host block or character devices, compromise the host, and hang file transfer requests via importing device nodes or named pipes outside /dev in an image or backup and opening them on a stopped instance.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-136978",
+      "details": {
+        "weaknesses": [
+          "CWE-668"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137114",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.783Z",
+      "lastObservedAt": "2026-11-27T00:16:44.890Z",
+      "title": "CVE-2026-137114",
+      "summary": "Exposure of resource to wrong sphere in image and backup metadata handling in Canonical LXD before 6.10.2, 5.21.10, 5.0.12, 4.0.16 allows an authenticated user with restricted project access to read and overwrite arbitrary host files, access other projects' data, and block the daemon via importing device nodes, hard links, symlinks, or named pipes.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137114",
+      "details": {
+        "weaknesses": [
+          "CWE-20",
+          "CWE-668"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137667",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:44.927Z",
+      "lastObservedAt": "2026-11-27T00:16:45.087Z",
+      "title": "CVE-2026-137667",
+      "summary": "A vulnerability was detected in ONNX ONNXMLTools up to 1.16.0. This affects the function get_set_node of the file onnxmltools/utils/visualize.py of the component Model Visualization. The manipulation results in cross site scripting. The attack can be executed remotely. The exploit is now public and may be used. The pull request to fix this issue awaits acceptance.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137667",
+      "details": {
+        "weaknesses": [
+          "CWE-79",
+          "CWE-94"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137668",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T00:16:45.143Z",
+      "lastObservedAt": "2026-11-27T00:16:45.297Z",
+      "title": "CVE-2026-137668",
+      "summary": "A flaw has been found in ONNX ONNXMLTools up to 1.16.0. This impacts the function visualize_model of the file onnxmltools/utils/visualize.py. This manipulation of the argument producer_name causes basic cross site scripting. The attack is possible to be carried out remotely. The exploit has been published and may be used. The pull request to fix this issue awaits acceptance.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137668",
+      "details": {
+        "weaknesses": [
+          "CWE-74",
+          "CWE-80"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
+      "id": "nvd:CVE-2026-137677",
+      "provider": "nvd",
+      "category": "vulnerability",
+      "firstObservedAt": "2026-11-27T01:16:40.270Z",
+      "lastObservedAt": "2026-11-27T01:16:40.423Z",
+      "title": "CVE-2026-137677",
+      "summary": "A vulnerability has been found in code-projects Simple Laundry System 1.0. This affects an unknown function of the file viewdetailforuser.php. The manipulation of the argument serviceId leads to sql injection. The attack is possible to be carried out remotely. The exploit has been disclosed to the public and may be used.",
+      "indicator": null,
+      "location": {
+        "country": null,
+        "countryCode": null,
+        "latitude": null,
+        "longitude": null
+      },
+      "sourceUrl": "https://nvd.nist.gov/vuln/detail/CVE-2026-137677",
+      "details": {
+        "weaknesses": [
+          "CWE-74",
+          "CWE-89"
+        ],
+        "vulnStatus": "Deferred"
+      }
+    },
+    {
       "id": "cisa_kev:CVE-2026-103406",
       "provider": "cisa_kev",
       "category": "known_exploited_vulnerability",
@@ -88169,87 +88755,87 @@
       }
     ],
     "ports": {
-      "date": "2026-11-25",
+      "date": "2026-11-26",
       "topports": [
         {
           "rank": 1,
           "targetport": 22,
-          "records": 1298093,
-          "targets": 353,
-          "sources": 16741,
-          "date": "2026-11-25"
+          "records": 646012,
+          "targets": 293,
+          "sources": 11348,
+          "date": "2026-11-26"
         },
         {
           "rank": 2,
           "targetport": 443,
-          "records": 1131871,
-          "targets": 701,
-          "sources": 35144,
-          "date": "2026-11-25"
+          "records": 602893,
+          "targets": 307,
+          "sources": 19240,
+          "date": "2026-11-26"
         },
         {
           "rank": 3,
           "targetport": 2222,
-          "records": 530841,
-          "targets": 323,
-          "sources": 9740,
-          "date": "2026-11-25"
+          "records": 297365,
+          "targets": 289,
+          "sources": 6403,
+          "date": "2026-11-26"
         },
         {
           "rank": 4,
-          "targetport": 8080,
-          "records": 496822,
-          "targets": 330,
-          "sources": 10238,
-          "date": "2026-11-25"
+          "targetport": 23,
+          "records": 283691,
+          "targets": 286,
+          "sources": 11282,
+          "date": "2026-11-26"
         },
         {
           "rank": 5,
-          "targetport": 23,
-          "records": 484011,
-          "targets": 328,
-          "sources": 18132,
-          "date": "2026-11-25"
+          "targetport": 8080,
+          "records": 273555,
+          "targets": 287,
+          "sources": 6808,
+          "date": "2026-11-26"
         },
         {
           "rank": 6,
-          "targetport": 8000,
-          "records": 414351,
-          "targets": 333,
-          "sources": 7331,
-          "date": "2026-11-25"
+          "targetport": 80,
+          "records": 238577,
+          "targets": 285,
+          "sources": 9200,
+          "date": "2026-11-26"
         },
         {
           "rank": 7,
-          "targetport": 9000,
-          "records": 376070,
-          "targets": 308,
-          "sources": 5471,
-          "date": "2026-11-25"
+          "targetport": 8000,
+          "records": 222287,
+          "targets": 289,
+          "sources": 5063,
+          "date": "2026-11-26"
         },
         {
           "rank": 8,
-          "targetport": 80,
-          "records": 319525,
-          "targets": 356,
-          "sources": 13523,
-          "date": "2026-11-25"
+          "targetport": 9000,
+          "records": 207800,
+          "targets": 271,
+          "sources": 4166,
+          "date": "2026-11-26"
         },
         {
           "rank": 9,
-          "targetport": 7547,
-          "records": 277389,
-          "targets": 276,
-          "sources": 4438,
-          "date": "2026-11-25"
+          "targetport": 53140,
+          "records": 195417,
+          "targets": 10,
+          "sources": 4471,
+          "date": "2026-11-26"
         },
         {
           "rank": 10,
-          "targetport": 16767,
-          "records": 252063,
-          "targets": 189,
-          "sources": 6706,
-          "date": "2026-11-25"
+          "targetport": 7680,
+          "records": 183043,
+          "targets": 41,
+          "sources": 2945,
+          "date": "2026-11-26"
         }
       ]
     },
@@ -88257,10 +88843,6 @@
       "status": "green"
     },
     "dailySummary": [
-      {
-        "date": "2026-11-20",
-        "records": 18210553
-      },
       {
         "date": "2026-11-21",
         "records": 18063902
@@ -88283,518 +88865,16 @@
       },
       {
         "date": "2026-11-26",
-        "records": 11356165
+        "records": 14406791
+      },
+      {
+        "date": "2026-11-27",
+        "records": 4693
       }
     ],
     "nvd": {
-      "totalResults": 3736,
+      "totalResults": 3762,
       "vulnerabilities": [
-        {
-          "cve": {
-            "id": "CVE-2026-122676",
-            "published": "2026-11-19T23:19:24.940Z",
-            "lastModified": "2026-11-20T18:18:42.183Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in PublishPress PublishPress Authors publishpress-authors allows Blind SQL Injection.This issue affects PublishPress Authors: from n/a through 4.18.0."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-89"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133327",
-            "published": "2026-11-19T23:19:29.040Z",
-            "lastModified": "2026-11-25T04:17:24.223Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability was identified in Dolibarr ERP CRM up to 23.0.4. This affects the function dol_convert_file in the library htdocs/core/lib/files.lib.php of the component Document Upload. Such manipulation leads to code injection. The attack can be launched remotely. The exploit is publicly available and might be used. Upgrading to version 24.0.0 is able to mitigate this issue. The name of the patch is 9b6368b2a9eae3eec690b2ce22c4f291f0051540. Upgrading the affected component is advised."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-74"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-94"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133435",
-            "published": "2026-11-19T23:19:29.293Z",
-            "lastModified": "2026-11-20T22:17:49.563Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A flaw was found in Keycloak. When configured with a database that uses case-insensitive collation, Keycloak resolves realm URLs regardless of letter casing. A remote attacker can exploit this behavior by sending requests with alternate letter casing to bypass upstream reverse proxy access controls that rely on case-sensitive path matching. This issue can expose restricted authentication endpoints intended only for internal access, though Keycloak's internal authentication mechanisms remain intact."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-178"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-22062",
-            "published": "2026-11-20T00:17:26.170Z",
-            "lastModified": "2026-11-23T16:06:05.540Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "StorageGRID (formerly StorageGRID Webscale) versions 12.1.0 and higher are susceptible to an information exposure vulnerability which allows a remote unauthenticated attacker to acquire low-sensitivity credentials via a Man-in-the-middle attack when certain non-default features are enabled."
-              }
-            ],
-            "weaknesses": []
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2025-71473",
-            "published": "2026-11-20T01:17:07.597Z",
-            "lastModified": "2026-11-25T04:17:23.760Z",
-            "vulnStatus": "Received",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "lwext4 through 1.0.0 contains a heap buffer overflow in ext4_fs_init_inode_bitmap() in src/ext4_fs.c because it does not validate s_inodes_per_group against the inode bitmap size. Attackers can supply a crafted ext4 image with an oversized s_inodes_per_group so memset writes past the heap buffer, corrupting memory and crashing the mounting application."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-787"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2025-71474",
-            "published": "2026-11-20T01:17:08.690Z",
-            "lastModified": "2026-11-20T14:17:42.473Z",
-            "vulnStatus": "Received",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "lwext4 through 1.0.0 contains an out-of-bounds write vulnerability in ext4_fs_init_block_bitmap() that allows attackers to corrupt heap memory via crafted superblock geometry fields. Attackers can supply an ext4 image with oversized s_reserved_gdt_blocks and BLOCK_UNINIT groups to write past the bitmap buffer, crashing applications that mount it."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-787"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126540",
-            "published": "2026-11-20T01:17:08.843Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via quadratic bigint loop in os2ip.\n\nEvery INTEGER or ENUMERATED longer than four content octets reaches os2ip, which iterates over each content octet with $result = ($result * 256) + $octet. Each multiplication operates on a bigint that grows by one octet per step, so decoding an n-octet value takes O(n^2) bigint work. Nothing limits content length before this loop runs.\n\nAn attacker who controls the decoded data can exhaust CPU with a single oversized INTEGER or ENUMERATED value."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-407"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126568",
-            "published": "2026-11-20T01:17:08.970Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unbounded MSG_PEEK buffer doubling in asn_recv.\n\nasn_recv peeks the socket in a loop, doubling the buffer size on each pass until a tag and length can be decoded. An inverted boolean guard ($tb || rather than $tb &&) prevents the need-more-data exit from firing once a tag byte has been decoded. When asn_decode_length returns no value because the length is absent or incomplete, no exit fires for that case either. MSG_PEEK leaves socket data unconsumed, so each re-peek returns at once while the buffer size doubles.\n\nA single truncated BER header sent to a process calling asn_recv doubles the peek buffer until memory is exhausted. Perl's realloc failure is fatal and not catchable with eval."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-835"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126576",
-            "published": "2026-11-20T01:17:09.083Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unchecked exponent length in binary REAL decoding.\n\nBinary REAL decoding never bounds-checks the exponent length against the available content. For a minimal one-byte binary REAL, the exponent byte is read from outside the element, making the mantissa length -1. Perl reads a negative length as an offset from the end of the string, so the mantissa is nearly all of the input that follows the element. The long-form exponent path also omits the extra length octet when sizing the mantissa.\n\nAn attacker who controls the decoded data can exhaust CPU with a list of such values, as each mantissa loop iterates over the remaining input. The decoded values are also computed from bytes outside each element."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-130"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-407"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126682",
-            "published": "2026-11-20T01:17:09.197Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via exponent-notation string in INTEGER encoding.\n\nThe encoder routes any value with abs >= 2**31 to i2osp without validating that it is an integer. A string in exponent notation such as \"1e8000\" passes that threshold. Math::BigInt expands it to an 8001-digit integer, and i2osp's per-octet conversion loop is quadratic in that size.\n\nAn attacker who controls encoded INTEGER values can exhaust CPU with a short exponent-notation string."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-407"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-1284"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126819",
-            "published": "2026-11-20T01:17:09.313Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via zero-length BIT STRING content.\n\nA BIT STRING with zero content octets passes -1 to substr as the length. Perl reads a negative length as an offset from the end of the string, so the decoded value is nearly all of the input that follows the element. In the constructed form each zero-length segment copies the rest of the input again, so memory grows with the square of the input size.\n\nAn attacker who controls the decoded data can exhaust memory with a short constructed BIT STRING. The resulting value also contains bytes from adjacent input."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-1284"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-126956",
-            "published": "2026-11-20T01:17:09.427Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unlimited recursion depth in constructed-form string decoding.\n\nAny constructed-form string element causes the decoder to recurse on the element's contents. The BER encoding controls nesting depth at four bytes per level, with no bound checked. Perl recursion is heap-allocated, so the process grows without a stack crash.\n\nAn attacker who controls the decoded data can exhaust memory with a small deeply nested constructed string."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-674"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-131868",
-            "published": "2026-11-20T01:17:09.543Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via a declared element length passed unchecked to sysread in asn_read and asn_get.\n\nThe length an element declares in its BER header is passed to sysread as the read size. Perl grows the target buffer to that size before reading, so memory is allocated from the declared length, not from the data received. A 6-byte header can declare a length of up to 4GB.\n\nA single header makes the reading process allocate the declared size. Where the allocation fails, perl exits with \"Out of memory\", which eval cannot catch."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-789"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-131877",
-            "published": "2026-11-20T01:17:09.660Z",
-            "lastModified": "2026-11-24T19:10:01.980Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unbounded arc length in OBJECT IDENTIFIER decoding and encoding.\n\nThe content of an OBJECT IDENTIFIER or RELATIVE-OID element is passed to unpack \"w*\" on decode, and the arcs of an OID string to pack \"w*\" on encode. Perl converts each arc to or from its decimal string in time quadratic in the arc's length, and nothing limits that length.\n\nAn attacker who controls the decoded data, or an OID string passed to encode, can exhaust CPU with a single oversized arc."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-407"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133406",
-            "published": "2026-11-20T01:17:09.923Z",
-            "lastModified": "2026-11-20T14:17:50.720Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "A vulnerability was determined in aoiflux mutant 2.3.0/2.4.0/2.5.0. This vulnerability affects unknown code of the file builtin/hive_builtins.go of the component Forensic Parser. This manipulation of the argument Count causes uncontrolled memory allocation. It is possible to launch the attack on the local host. Upgrading to version 2.6.0 is able to resolve this issue. Patch name: c4b1a7dec6c603115e2a05d1e8970a142f0b9774. Upgrading the affected component is recommended."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-770"
-                  },
-                  {
-                    "lang": "en",
-                    "value": "CWE-789"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133519",
-            "published": "2026-11-20T01:17:10.133Z",
-            "lastModified": "2026-11-20T21:17:34.900Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "FFmpeg 7.0 through 9.0.2 contains an out-of-bounds read vulnerability in dvdvideo_menu_next_ps_block() in libavformat/dvdvideodec.c when demuxing DVD menu domains. Attackers can craft a DVD image whose last cell sector and NAV next-VOBU pointer bypass the end-of-cell check, overreading pgc->cell_playback and crashing the process."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-125"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133520",
-            "published": "2026-11-20T01:17:10.303Z",
-            "lastModified": "2026-11-20T18:18:50.150Z",
-            "vulnStatus": "Deferred",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Dokploy 0.28.0 before 0.31.1 contains a path traversal vulnerability in the patch.readRepoDirectories tRPC procedure that allows authenticated organization members to list tracked files of arbitrary git repositories. Attackers with service read permission can supply a crafted repoPath, which is passed to git ls-tree unconfined, to enumerate other organizations' application and compose source trees."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-22"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133521",
-            "published": "2026-11-20T01:17:10.480Z",
-            "lastModified": "2026-11-20T17:18:19.203Z",
-            "vulnStatus": "Received",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "Bar Assistant 3.0.0 before 6.11.0 contains an authorization bypass vulnerability in BarController::join that allows authenticated users to join bars without a valid invite code. Attackers can send POST requests to /api/bars/join omitting invite_code, matching invite-disabled bars with NULL codes, to read cocktails, ingredients, members, settings and search tokens."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-639"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-133528",
-            "published": "2026-11-20T01:17:10.633Z",
-            "lastModified": "2026-11-25T04:17:25.537Z",
-            "vulnStatus": "Awaiting Analysis",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "BeamNG.drive before 0.40.6 contains an out-of-bounds write vulnerability because JIT-compiled LuaJIT traces omit FFI array bounds checks, letting untrusted Lua escape the sandbox. Attackers supplying a malicious mod can JIT-compile an FFI store loop, write out of range using a tostring() address leak, re-enable ffi.load, and run commands as the game user."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-787"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "cve": {
-            "id": "CVE-2026-82091",
-            "published": "2026-11-20T01:17:10.807Z",
-            "lastModified": "2026-11-20T17:18:27.583Z",
-            "vulnStatus": "Received",
-            "descriptions": [
-              {
-                "lang": "en",
-                "value": "The Canva Desktop App before 1.128.0 stores encrypted application state on disk. The encryption key is hardcoded as a plaintext string in the main.js file and is identical across all Canva installations on Windows and macOS."
-              }
-            ],
-            "weaknesses": [
-              {
-                "type": "Secondary",
-                "description": [
-                  {
-                    "lang": "en",
-                    "value": "CWE-321"
-                  }
-                ]
-              }
-            ]
-          }
-        },
         {
           "cve": {
             "id": "CVE-2026-102430",
@@ -178702,6 +178782,1183 @@
               }
             ]
           }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135107",
+            "published": "2026-11-26T23:17:01.237Z",
+            "lastModified": "2026-11-26T23:17:01.363Z",
+            "vulnStatus": "Awaiting Analysis",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "An **uncontrolled memory allocation** flaw has been found in the smbd_smb2_ioctl_pipe_write_done() function in source3/smbd/smb2_ioctl_named_pipe.c of the SMB2 named-pipe ioctl handling in the samba package. The file server reserves memory for a named-pipe response using a size chosen by the client. It does not keep that size within the maximum the client and the server have already agreed. A low-privileged network attacker or user who can open a named pipe can request a very large response. The file server reserves that memory before it reads the pipe and holds it until the request ends. Repeating this on more connections can exhaust memory and keep the file service unavailable while those requests continue."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-789"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137596",
+            "published": "2026-11-26T23:17:01.490Z",
+            "lastModified": "2026-11-26T23:17:01.607Z",
+            "vulnStatus": "Awaiting Analysis",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A server-side request forgery (SSRF) flaw was found in KubeVirt's decentralized live migration. The connectURL field of a VirtualMachineInstanceMigration object is not validated at admission, and the privileged synchronization-controller dials the attacker-specified URL. Connection and DNS errors from the dial are exposed in a condition readable in the tenant's namespace. A user with the kubevirt.io:migrate role (a role designed for tenant delegation) can use this behavior as a blind network-reconnaissance oracle to determine the existence and connectivity of internal hosts and ports from the controller's network vantage, including services isolated from the tenant by network policy. TLS certificate pinning prevents session completion with non-KubeVirt hosts, limiting the impact to information disclosure of internal network topology; no data content, integrity, or availability impact is possible."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-918"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137602",
+            "published": "2026-11-26T23:17:01.640Z",
+            "lastModified": "2026-11-26T23:17:01.757Z",
+            "vulnStatus": "Awaiting Analysis",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A flaw was found in Keycloak. This vulnerability enables information disclosure when the parameterized-scopes feature is enabled. The protocol mapper fails to enforce authorization checks for certain scope parameter types during token and authorization requests. An authenticated remote attacker can exploit this flaw by supplying a crafted scope parameter to retrieve sensitive profile attributes of other users without authorization."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-639"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137653",
+            "published": "2026-11-26T23:17:01.793Z",
+            "lastModified": "2026-11-26T23:17:01.910Z",
+            "vulnStatus": "Awaiting Analysis",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A flaw was found in spice-server. A malicious SPICE client can send a message header declaring an arbitrarily large message body. The server sizes the receive-buffer allocation from this declared size before any message content is received; when the allocation fails, the process hosting the SPICE server terminates abruptly, causing a denial of service for the virtual machine it serves. On hosts with sufficient free memory, the same technique can instead hold large amounts of memory per connection. Exploitation requires network access to the SPICE port; credential requirements depend on the server's authentication configuration."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-770"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137660",
+            "published": "2026-11-26T23:17:01.960Z",
+            "lastModified": "2026-11-26T23:17:02.127Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A vulnerability has been found in stylefeng Guns up to 2.2. Affected by this issue is the function TokenAndPermissionInterceptor.preHandle of the file TokenAndPermissionInterceptor.java of the component JWT Signing. Such manipulation leads to use of hard-coded cryptographic key\r . It is possible to launch the attack remotely. The project was informed of the problem early through an issue report but has not responded yet."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-320"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-321"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-114454",
+            "published": "2026-11-27T00:16:39.503Z",
+            "lastModified": "2026-11-27T00:16:39.610Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Path traversal in TPM device management in Canonical LXD from 4.8 before 5.0.12, 5.21.10, 6.10.2 allows a remote authenticated user with project access to recursively delete arbitrary files and directories on the host as root via a crafted device name during instance or device removal."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-115843",
+            "published": "2026-11-27T00:16:39.650Z",
+            "lastModified": "2026-11-27T00:16:39.760Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2, an improper limitation of a pathname to a restricted directory vulnerability allows an authenticated client restricted to a single project to write and delete files at arbitrary host filesystem paths as root.\n\n When a custom storage volume is pushed to a LXD daemon, the snapshot names supplied by the migration peer are never validated and are used to build the filesystem path of each received snapshot. This allows an attacker to place attacker-controlled files into any host directory as root, gaining root-level code execution on the host, and to recursively delete an attacker-chosen path."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-20"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-115844",
+            "published": "2026-11-27T00:16:39.810Z",
+            "lastModified": "2026-11-27T00:16:39.917Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "In LXD before 5.21.0 and 6.10.0, an OS command injection vulnerability allows an authenticated client restricted to a single project to execute arbitrary code as root on the host.\n\n The raw.dnsmasq bridge network configuration key is not restricted to server administrators and is copied verbatim into the dnsmasq configuration file, so a user whose project keeps the default features.networks=false can have a bridge network created in the default project with an injected dhcp-script directive. This allows an attacker to make the host dnsmasq execute attacker-chosen code as root on a DHCP lease event and fully compromise the host."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-78"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-122225",
+            "published": "2026-11-27T00:16:39.967Z",
+            "lastModified": "2026-11-27T00:16:40.070Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Symbolic link following in imported VM backup config drive preparation in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project-scoped permissions to disclose sensitive host files, including LXD server and cluster keys, and overwrite host files as root via importing and starting a VM backup with a symlinked config directory."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-61"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127151",
+            "published": "2026-11-27T00:16:40.113Z",
+            "lastModified": "2026-11-27T00:16:40.223Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of resource to wrong sphere in VM disk migration, export, and attach NBD servers in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an unprivileged local user in the host network namespace to read and modify a guest VM's disk and execute code inside the guest via connecting to abstract Unix sockets while an operation is active."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-668"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127152",
+            "published": "2026-11-27T00:16:40.260Z",
+            "lastModified": "2026-11-27T00:16:40.367Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper privilege management during container rebuild in Canonical LXD before 5.21.10, 6.10.2 allows a local user with container permissions to gain root privileges on the host via rebuilding a never-started unprivileged container so it starts without a user namespace or privileged-container hardening."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-269"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-271"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127153",
+            "published": "2026-11-27T00:16:40.407Z",
+            "lastModified": "2026-11-27T00:16:40.520Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Path traversal in proxy and CDI GPU device name handling in Canonical LXD before 5.0.12, 5.21.10, and 6.10.2 allows an authenticated user with access to a restricted project permitting proxy or GPU devices to read, overwrite, or delete arbitrary host files as root and terminate host processes via crafted device names containing path traversal sequences."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127154",
+            "published": "2026-11-27T00:16:40.560Z",
+            "lastModified": "2026-11-27T00:16:40.663Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper link resolution in image metadata tarball unpacking in Canonical LXD before 5.0.12, 5.21.10, and 6.10.2 allows an authenticated user with a restricted client certificate to write arbitrary host files as root and execute code on the host via a crafted rootfs symlink in an image metadata tarball."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-59"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-73"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127157",
+            "published": "2026-11-27T00:16:40.707Z",
+            "lastModified": "2026-11-27T00:16:40.810Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of sensitive information in token operation events in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user restricted to a project to gain full server access and cancel pending token operations via capturing certificate or cluster join token secrets broadcast to default project event listeners."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-200"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127158",
+            "published": "2026-11-27T00:16:40.850Z",
+            "lastModified": "2026-11-27T00:16:40.960Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of sensitive information and missing requestor validation in instance, volume, and snapshot migration operations in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project event or operation read access to read migrating configuration and filesystem data and disrupt the migration via capturing per-connection websocket secrets from operation metadata and racing the migration's data channels."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-200"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127160",
+            "published": "2026-11-27T00:16:41.000Z",
+            "lastModified": "2026-11-27T00:16:41.103Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Configuration injection in virtual machine disk device handling in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with VM creation permissions in a restricted project to bypass low-level VM restrictions and control the root QEMU process via quotes and line breaks in a disk device's guest path."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-74"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127161",
+            "published": "2026-11-27T00:16:41.143Z",
+            "lastModified": "2026-11-27T00:16:41.247Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of sensitive information in live and stateful migration operations in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project event or operation read access to read a migrating instance's checkpointed runtime state and disrupt the migration via capturing the state connection secret from operation events or queries."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-200"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127162",
+            "published": "2026-11-27T00:16:41.297Z",
+            "lastModified": "2026-11-27T00:16:41.403Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper output encoding in Prometheus metrics exposition in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows a user controlling a virtual machine to forge host metric labels and break metrics scraping via unescaped guest-controlled filesystem mountpoints and network interface names."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-116"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-127163",
+            "published": "2026-11-27T00:16:41.440Z",
+            "lastModified": "2026-11-27T00:16:41.440Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper certificate validation in websocket connections in Canonical pylxd before 2.4.3 allows a network attacker to read command stdin and spoof command output via impersonating a remote LXD endpoint."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-295"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-133530",
+            "published": "2026-11-27T00:16:41.570Z",
+            "lastModified": "2026-11-27T00:16:41.570Z",
+            "vulnStatus": "Received",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "The Android application \"Tokyo Fire Department Official App\" contains a path traversal vulnerability that allows a malicious application installed on a user's device to obtain sensitive information from the affected application."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135372",
+            "published": "2026-11-27T00:16:41.717Z",
+            "lastModified": "2026-11-27T00:16:41.813Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in custom storage volume, backup, and storage bucket endpoints in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with a project-restricted certificate or per-object authorization to read, rename, move, replace, or delete other projects' storage resources and bypass cluster group restrictions via missing project or object ownership checks."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135373",
+            "published": "2026-11-27T00:16:41.860Z",
+            "lastModified": "2026-11-27T00:16:41.963Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Path traversal in container device path resolution and VM disk format detection in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with project access, including an unprivileged local user through lxd-user, to read and modify arbitrary host files or Ceph RBD images and gain root privileges on the host via crafted device paths or QCOW2 backing file references."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135374",
+            "published": "2026-11-27T00:16:42.000Z",
+            "lastModified": "2026-11-27T00:16:42.103Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Insufficient verification of data authenticity in shared image handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user restricted to a single project to export private images, replace public image contents, remove other projects' images, and pin daemon memory via abusing fingerprint-based image sharing, partial fingerprints, and non-expiring push upload tokens."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-345"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135375",
+            "published": "2026-11-27T00:16:42.147Z",
+            "lastModified": "2026-11-27T00:16:42.250Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Untrusted search path and context handling in host-side instance helpers in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access or root inside an unprivileged container to execute arbitrary code as root on the host, read daemon memory, remount read-only shifted disks as read-write, and disrupt other projects' mounts via file API, SFTP, syscall interception, and disk hot-plug operations."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-426"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135376",
+            "published": "2026-11-27T00:16:42.290Z",
+            "lastModified": "2026-11-27T00:16:42.393Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in project restriction enforcement in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to bypass project limits and access forbidden storage pools, volumes, network addresses, and CPU resources via instance moves, backup imports with overrides, received snapshots, or unvalidated volatile keys."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135377",
+            "published": "2026-11-27T00:16:42.433Z",
+            "lastModified": "2026-11-27T00:16:42.540Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of sensitive information in API responses, exports, and host-side artifacts in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated lower-privileged user or a local host user to read credentials, private keys, and other projects' metadata and inject arguments into Ceph administration commands via unfiltered endpoints, exported configurations, log files, process command lines, and unvalidated bucket parameters."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-200"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135378",
+            "published": "2026-11-27T00:16:42.580Z",
+            "lastModified": "2026-11-27T00:16:42.690Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in NIC, managed network, network zone, and ACL handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user of a restricted project or root inside an instance to manipulate host interfaces and firewall rules, read fragments of root-owned files through error messages, and disrupt or intercept other projects' networks and DNS records via unvalidated device and network configurations."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135379",
+            "published": "2026-11-27T00:16:42.730Z",
+            "lastModified": "2026-11-27T00:16:42.833Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper control of code generation and project restriction enforcement in container configuration handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to execute arbitrary commands as root on the host, crash the daemon, and alter shared bridge DHCP assignments via image-supplied LXC configuration, concurrent rename races during updates, and unvalidated syscall or hardware address settings."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-94"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135380",
+            "published": "2026-11-27T00:16:42.873Z",
+            "lastModified": "2026-11-27T00:16:42.977Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in instance, snapshot, and image operations in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project or per-object permissions to read and modify other clients' resources and execute arbitrary code as root on the host via missing entitlement checks on secondary objects and push-mode container migrations."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135381",
+            "published": "2026-11-27T00:16:43.017Z",
+            "lastModified": "2026-11-27T00:16:43.117Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect permission assignment for critical resources in rsync transfer sockets, instance storage directories, proxy socket paths, and disk staging mounts in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an unprivileged local user to gain root privileges on the host, read or modify transferred volumes, alter host file permissions, and inject AppArmor rules via connecting to unauthenticated abstract Unix sockets, running setuid binaries, or racing path and mount operations."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-732"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135382",
+            "published": "2026-11-27T00:16:43.157Z",
+            "lastModified": "2026-11-27T00:16:43.260Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Path traversal in backup, image, storage volume, and migration handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and write arbitrary host files as root and exhaust daemon memory via crafted symlinks, unvalidated path components, or oversized metadata."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135383",
+            "published": "2026-11-27T00:16:43.300Z",
+            "lastModified": "2026-11-27T00:16:43.403Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in TLS certificate trust store and revocation handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated client with a restricted or revoked TLS certificate to gain unrestricted administrative access to the server or cluster via trust-lookup races, forwarded cluster identity headers, CA-issued certificate detaching, or stale revocation and session state."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135384",
+            "published": "2026-11-27T00:16:43.450Z",
+            "lastModified": "2026-11-27T00:16:43.560Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper authentication in OIDC bearer token verification in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows a remote attacker holding a token signed by the configured identity provider to authenticate to the LXD API and gain unauthorized control or impersonate users via presenting tokens issued for other applications, ID tokens, or unverified email claims."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-287"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-135385",
+            "published": "2026-11-27T00:16:43.600Z",
+            "lastModified": "2026-11-27T00:16:43.703Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Incorrect authorization in backup export and network zone read endpoints in Canonical LXD before 6.10.2 allows an authenticated user with view-only access to export instance and custom storage volume backups and read network zone TSIG peer keys via endpoints enforcing only view permissions."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-863"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136972",
+            "published": "2026-11-27T00:16:43.743Z",
+            "lastModified": "2026-11-27T00:16:43.850Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of resource to wrong sphere in image template handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and overwrite host block and character devices via importing device nodes in an image's templates directory and accessing them through instance template endpoints."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-668"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136973",
+            "published": "2026-11-27T00:16:43.893Z",
+            "lastModified": "2026-11-27T00:16:44.000Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of resource to wrong sphere in optimized ZFS backup imports in Canonical LXD before 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to mount an attacker-controlled filesystem over arbitrary host paths and execute code as root on the host via importing a filesystem ZFS stream declared as a block volume."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-20"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-668"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136974",
+            "published": "2026-11-27T00:16:44.047Z",
+            "lastModified": "2026-11-27T00:16:44.153Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Configuration injection in liblxc instance configuration generation in Canonical LXD before 6.10.2, 5.21.10, 5.0.12, 4.0.16 allows an authenticated user with restricted project access or a local user of the LXD user socket to execute arbitrary commands as root on the host via line breaks in instance configuration keys and values."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-93"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-269"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136975",
+            "published": "2026-11-27T00:16:44.193Z",
+            "lastModified": "2026-11-27T00:16:44.310Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Authentication bypass by spoofing in bridged NIC MAC filtering in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows a privileged user inside an instance sharing a managed bridge to intercept and deny inbound network traffic addressed to a neighbour instance via sending frames with a spoofed source MAC address before filtering drops them."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-290"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136976",
+            "published": "2026-11-27T00:16:44.347Z",
+            "lastModified": "2026-11-27T00:16:44.450Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper link resolution before file access in recursive file pull in Canonical LXD before 4.0.15, 5.0.11, 5.21.9, and 6.8 on case-insensitive client filesystems allows an authenticated user with write access to an instance directory or custom volume to write arbitrary files outside the target directory and execute code as the operator via case-variant symlinks."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-22"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136977",
+            "published": "2026-11-27T00:16:44.497Z",
+            "lastModified": "2026-11-27T00:16:44.600Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Improper authentication in the guest API connection handling in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows a root user inside an unisolated instance to impersonate another instance and read its configuration, metadata, and devices across project boundaries via holding open connections across PID wrap-around."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-287"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-136978",
+            "published": "2026-11-27T00:16:44.640Z",
+            "lastModified": "2026-11-27T00:16:44.743Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of resource to wrong sphere in the instance file transfer API in Canonical LXD before 4.0.16, 5.0.12, 5.21.10, 6.10.2 allows an authenticated user with restricted project access to read and write arbitrary host block or character devices, compromise the host, and hang file transfer requests via importing device nodes or named pipes outside /dev in an image or backup and opening them on a stopped instance."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-668"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137114",
+            "published": "2026-11-27T00:16:44.783Z",
+            "lastModified": "2026-11-27T00:16:44.890Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "Exposure of resource to wrong sphere in image and backup metadata handling in Canonical LXD before 6.10.2, 5.21.10, 5.0.12, 4.0.16 allows an authenticated user with restricted project access to read and overwrite arbitrary host files, access other projects' data, and block the daemon via importing device nodes, hard links, symlinks, or named pipes."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Secondary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-20"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-668"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137667",
+            "published": "2026-11-27T00:16:44.927Z",
+            "lastModified": "2026-11-27T00:16:45.087Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A vulnerability was detected in ONNX ONNXMLTools up to 1.16.0. This affects the function get_set_node of the file onnxmltools/utils/visualize.py of the component Model Visualization. The manipulation results in cross site scripting. The attack can be executed remotely. The exploit is now public and may be used. The pull request to fix this issue awaits acceptance."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-79"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-94"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137668",
+            "published": "2026-11-27T00:16:45.143Z",
+            "lastModified": "2026-11-27T00:16:45.297Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A flaw has been found in ONNX ONNXMLTools up to 1.16.0. This impacts the function visualize_model of the file onnxmltools/utils/visualize.py. This manipulation of the argument producer_name causes basic cross site scripting. The attack is possible to be carried out remotely. The exploit has been published and may be used. The pull request to fix this issue awaits acceptance."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-74"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-80"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "cve": {
+            "id": "CVE-2026-137677",
+            "published": "2026-11-27T01:16:40.270Z",
+            "lastModified": "2026-11-27T01:16:40.423Z",
+            "vulnStatus": "Deferred",
+            "descriptions": [
+              {
+                "lang": "en",
+                "value": "A vulnerability has been found in code-projects Simple Laundry System 1.0. This affects an unknown function of the file viewdetailforuser.php. The manipulation of the argument serviceId leads to sql injection. The attack is possible to be carried out remotely. The exploit has been disclosed to the public and may be used."
+              }
+            ],
+            "weaknesses": [
+              {
+                "type": "Primary",
+                "description": [
+                  {
+                    "lang": "en",
+                    "value": "CWE-74"
+                  },
+                  {
+                    "lang": "en",
+                    "value": "CWE-89"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
@@ -178710,8 +179967,8 @@
       "sourceUrl": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
       "catalogDate": "2026-11-25T19:48:12.4344Z",
       "totalKnownExploited": 1805,
-      "addedLast7Days": 19,
-      "addedLast30Days": 45,
+      "addedLast7Days": 15,
+      "addedLast30Days": 43,
       "topVendors": [
         {
           "vendor": "Microsoft",

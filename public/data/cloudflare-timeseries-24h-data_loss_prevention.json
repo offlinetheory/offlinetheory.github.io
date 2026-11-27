@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-27T01:23:50.782Z",
+  "interval": "24h",
+  "product": "DATA_LOSS_PREVENTION",
+  "window": {
+    "dateStart": "2026-11-26T01:15:00.000Z",
+    "dateEnd": "2026-11-27T01:15:00.000Z"
+  },
+  "returnedWindow": null,
+  "windowShiftMinutes": null,
+  "provider": {
+    "name": "Cloudflare Radar",
+    "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
+    "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
+    "license": "Cloudflare Radar aggregated attack data; attribution provided.",
+    "status": "offline",
+    "fetchedAt": null,
+    "lastUpdated": null,
+    "error": "Cloudflare Radar timeseries returned 22 points for a 24h window at 1h (expected 24 ± 1)",
+    "cacheIntervalMinutes": 15,
+    "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
+    "pairCount": 0,
+    "pointCount": 0
+  },
+  "meta": null,
+  "aggInterval": "1h",
+  "timeseriesStatus": "unavailable",
+  "timeseriesError": "Cloudflare Radar timeseries returned 22 points for a 24h window at 1h (expected 24 ± 1)",
+  "serie": {
+    "timestamps": [],
+    "values": []
+  }
+}
