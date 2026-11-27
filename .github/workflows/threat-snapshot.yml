@@ -49,7 +49,14 @@ jobs:
         run: |
           git config user.name "Offline Theory snapshot bot"
           git config user.email "snapshot@offlinetheory.github.io"
-          git add public/data/threat-intel-snapshot.json public/data/cloudflare-attack-pairs.json public/data/cloudflare-attack-pairs-*.json public/data/cloudflare-timeseries-*.json public/data/history/cloudflare-manifest.json public/data/sources-snapshot.json public/data/kev-snapshot.json
-          git add -A public/data/history/cloudflare public/data/history/cloudflare-timeseries
+          # Stage every snapshot under public/data (the directory holds only
+          # snapshot output). An explicit file list, or a pathspec naming a
+          # history directory, breaks the whole run when that file set is
+          # empty — run #9 on 2026-11-26 failed here because no timeseries
+          # history directory existed yet (every timeseries cell was
+          # non-live), so `git add -A .../cloudflare-timeseries` exited 128
+          # and nothing was committed. Staging the directory instead survives
+          # an empty file set and also stages pruned-history deletions.
+          git add -A public/data
           git diff --cached --quiet || git commit -m "Threat map: refresh snapshots"
           git push
