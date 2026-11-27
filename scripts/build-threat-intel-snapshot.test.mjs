@@ -18,6 +18,7 @@ import {
   dshieldSourceEvent,
   normalizeCloudflareRadarResponse,
   normalizeCloudflareRadarTimeseriesResponse,
+  normalizeCloudflareTimeseriesAggInterval,
   normalizeDshieldPorts,
   normalizeEvent,
   validateCloudflareIntervalMeta,
@@ -805,6 +806,33 @@ test('normalizes Cloudflare Radar timeseries and records meta.normalization fait
   )
 })
 
+test('accepts the API enum aggInterval vocabulary (FIFTEEN_MINUTES, ONE_HOUR, ONE_DAY, ONE_WEEK)', () => {
+  // Run #9 (2026-11-26) failed all 32 timeseries cells because the API
+  // reports FIFTEEN_MINUTES where the validator expected '15m'. The
+  // validator must accept the API's enum in the requested short vocabulary.
+  const window = { dateStart: '2026-11-26T02:45:00.000Z', dateEnd: '2026-11-26T03:45:00.000Z' }
+  const base = {
+    dateRange: [{ startTime: '2026-11-26T02:45:00Z', endTime: '2026-11-26T03:45:00Z' }],
+    lastUpdated: '2026-11-26T03:45:00Z',
+    normalization: 'MIN0_MAX',
+    units: [{ name: 'requests', value: 'count' }],
+  }
+  assert.equal(normalizeCloudflareTimeseriesAggInterval('FIFTEEN_MINUTES'), '15m')
+  assert.equal(normalizeCloudflareTimeseriesAggInterval('ONE_HOUR'), '1h')
+  assert.equal(normalizeCloudflareTimeseriesAggInterval('ONE_DAY'), '1d')
+  assert.equal(normalizeCloudflareTimeseriesAggInterval('ONE_WEEK'), '1w')
+  assert.equal(normalizeCloudflareTimeseriesAggInterval('15m'), '15m')
+  assert.equal(validateCloudflareTimeseriesMeta({ ...base, aggInterval: 'FIFTEEN_MINUTES' }, window, '15m'), null)
+  assert.equal(validateCloudflareTimeseriesMeta({ ...base, aggInterval: 'ONE_HOUR' }, window, '1h'), null)
+  assert.equal(validateCloudflareTimeseriesMeta({ ...base, aggInterval: 'ONE_DAY' }, window, '1d'), null)
+  assert.equal(validateCloudflareTimeseriesMeta({ ...base, aggInterval: 'ONE_WEEK' }, window, '1w'), null)
+  // A genuinely wrong resolution still fails, naming the API's raw value.
+  assert.match(
+    validateCloudflareTimeseriesMeta({ ...base, aggInterval: 'ONE_HOUR' }, window, '15m'),
+    /returned aggInterval ONE_HOUR instead of the requested 15m/,
+  )
+})
+
 test('validates timeseries meta: aggInterval mismatch names the actual resolution', () => {
   const window = { dateStart: '2026-11-26T02:45:00.000Z', dateEnd: '2026-11-26T03:45:00.000Z' }
   const meta = {
@@ -1018,6 +1046,29 @@ test('marks a timeseries cell stale on aggInterval mismatch and keeps previous p
   assert.match(unavailable.timeseriesError, /returned aggInterval 1h instead of the requested 15m/)
   assert.deepEqual(unavailable.serie, { timestamps: [], values: [] })
   assert.equal(unavailable.meta, null)
+})
+
+test('timeseries cell is live when the API reports its enum aggInterval and a shifted window', async () => {
+  // Regression for run #9: the real API reports meta.aggInterval as
+  // FIFTEEN_MINUTES and returns the latest fully aggregated window
+  // (21:00–22:00Z for a requested 21:30–22:30Z). Both must validate live,
+  // with the shift recorded — not stale with a vocabulary mismatch.
+  const now = () => new Date('2026-11-26T22:34:00.000Z')
+  const result = await collectCloudflareRadarTimeseries('1h', null, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async () => {
+      const fixture = timeseriesFixtureForWindow('2026-11-26T21:00:00Z', '2026-11-26T22:00:00Z', '15m')
+      fixture.result.meta.aggInterval = 'FIFTEEN_MINUTES'
+      return fixture
+    },
+  })
+  assert.equal(result.timeseriesStatus, 'live')
+  assert.equal(result.timeseriesError, null)
+  assert.equal(result.meta.aggInterval, 'FIFTEEN_MINUTES')
+  assert.equal(result.aggInterval, '15m')
+  assert.equal(result.windowShiftMinutes, 30)
+  assert.equal(result.serie.timestamps.length, 4)
 })
 
 test('per-product pairs pass through only the 5 provider fields and carry the product', async () => {
