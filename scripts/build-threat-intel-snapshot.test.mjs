@@ -870,7 +870,9 @@ test('validates timeseries serie: bad timestamps, count mismatch, non-numeric va
   const valid = timeseriesFixtureForWindow(window.dateStart, window.dateEnd, '15m').result.serie_0
   assert.equal(validateCloudflareTimeseriesSerie(valid, window, '15m'), null)
 
-  // Point count within ±1 of duration/aggInterval is accepted.
+  // A serie truncated at the trailing edge is accepted when it still
+  // covers at least half the window (the API's most recent buckets are
+  // not aggregated yet — run #10: 18 of 24 points for 6h).
   const fivePoints = {
     timestamps: ['2026-11-26T02:45:00.000Z', '2026-11-26T03:00:00.000Z', '2026-11-26T03:15:00.000Z', '2026-11-26T03:30:00.000Z', '2026-11-26T03:45:00.000Z'],
     values: ['1', '2', '3', '4', '5'],
@@ -893,11 +895,32 @@ test('validates timeseries serie: bad timestamps, count mismatch, non-numeric va
     validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps, values: ['1', 'two', '3', '4'] }, window, '15m'),
     /value 1 is not numeric/,
   )
+  // A serie covering only a quarter of the window is rejected; half
+  // coverage is accepted (the API truncates the trailing edge).
   assert.match(
-    validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps.slice(0, 2), values: ['1', '2'] }, window, '15m'),
-    /returned 2 points.*expected 4/,
+    validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps.slice(0, 1), values: ['1'] }, window, '15m'),
+    /returned 1 points.*expected at least 2 of 4/,
   )
+  assert.equal(validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps.slice(0, 2), values: ['1', '2'] }, window, '15m'), null)
   assert.match(validateCloudflareTimeseriesSerie(null, window, '15m'), /missing serie_0/)
+})
+
+test('accepts a timeseries serie truncated at the trailing edge, rejects a wrong resolution', () => {
+  const window6h = { dateStart: '2026-11-26T16:30:00.000Z', dateEnd: '2026-11-26T22:30:00.000Z' }
+  // Run #10 (2026-11-26): the API returned 18 of 24 15-minute points for 6h.
+  const eighteen = timeseriesFixtureForWindow('2026-11-26T16:30:00.000Z', '2026-11-26T21:00:00.000Z', '15m').result.serie_0
+  assert.equal(eighteen.timestamps.length, 18)
+  assert.equal(validateCloudflareTimeseriesSerie(eighteen, window6h, '15m'), null)
+  // A wrong resolution (1h bins where 15m was requested) yields far too few points.
+  const hourly = timeseriesFixtureForWindow('2026-11-26T16:30:00.000Z', '2026-11-26T22:30:00.000Z', '1h').result.serie_0
+  assert.equal(hourly.timestamps.length, 6)
+  assert.match(validateCloudflareTimeseriesSerie(hourly, window6h, '15m'), /returned 6 points.*expected at least 12 of 24/)
+  // A gap that is not a multiple of the requested resolution is malformed
+  // (the serie must still clear the coverage floor first, or the count
+  // error reports instead of the gap error).
+  const uneven = timeseriesFixtureForWindow('2026-11-26T16:30:00.000Z', '2026-11-26T21:00:00.000Z', '15m').result.serie_0
+  uneven.timestamps[2] = '2026-11-26T17:10:00.000Z'
+  assert.match(validateCloudflareTimeseriesSerie(uneven, window6h, '15m'), /gap at index 2 is 25 minutes/)
 })
 
 test('collects a live timeseries cell with the prescribed query and snapshot shape', async () => {
@@ -1069,6 +1092,28 @@ test('timeseries cell is live when the API reports its enum aggInterval and a sh
   assert.equal(result.aggInterval, '15m')
   assert.equal(result.windowShiftMinutes, 30)
   assert.equal(result.serie.timestamps.length, 4)
+})
+
+test('timeseries cell is live when the API truncates the trailing edge (18 of 24 points for 6h)', async () => {
+  // Regression for run #10: 6h returned 18 of 24 points and was rejected.
+  const result = await collectCloudflareRadarTimeseries('6h', null, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T22:34:00.000Z'),
+    request: async (url) => {
+      const requested = new URL(url)
+      const fixture = timeseriesFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+        '15m',
+      )
+      fixture.result.serie_0.timestamps = fixture.result.serie_0.timestamps.slice(0, 18)
+      fixture.result.serie_0.values = fixture.result.serie_0.values.slice(0, 18)
+      return fixture
+    },
+  })
+  assert.equal(result.timeseriesStatus, 'live')
+  assert.equal(result.timeseriesError, null)
+  assert.equal(result.serie.timestamps.length, 18)
 })
 
 test('per-product pairs pass through only the 5 provider fields and carry the product', async () => {
