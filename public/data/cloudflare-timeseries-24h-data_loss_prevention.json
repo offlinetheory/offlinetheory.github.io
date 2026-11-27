@@ -1,34 +1,99 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:23:50.782Z",
+  "generatedAt": "2026-11-27T01:37:24.554Z",
   "interval": "24h",
   "product": "DATA_LOSS_PREVENTION",
   "window": {
-    "dateStart": "2026-11-26T01:15:00.000Z",
-    "dateEnd": "2026-11-27T01:15:00.000Z"
+    "dateStart": "2026-11-26T01:30:00.000Z",
+    "dateEnd": "2026-11-27T01:30:00.000Z"
   },
-  "returnedWindow": null,
-  "windowShiftMinutes": null,
+  "returnedWindow": {
+    "startTime": "2026-11-26T01:00:00Z",
+    "endTime": "2026-11-27T01:00:00Z"
+  },
+  "windowShiftMinutes": 30,
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
-    "status": "offline",
-    "fetchedAt": null,
-    "lastUpdated": null,
-    "error": "Cloudflare Radar timeseries returned 22 points for a 24h window at 1h (expected 24 ± 1)",
+    "status": "live",
+    "fetchedAt": "2026-11-27T01:37:24.554Z",
+    "lastUpdated": "2026-11-26T23:30:00Z",
+    "error": null,
     "cacheIntervalMinutes": 15,
     "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
-    "pairCount": 0,
-    "pointCount": 0
+    "pairCount": 22,
+    "pointCount": 22
   },
-  "meta": null,
+  "meta": {
+    "aggInterval": "ONE_HOUR",
+    "dateRange": [
+      {
+        "startTime": "2026-11-26T01:00:00Z",
+        "endTime": "2026-11-27T01:00:00Z"
+      }
+    ],
+    "lastUpdated": "2026-11-26T23:30:00Z",
+    "normalization": "MIN0_MAX",
+    "units": [
+      {
+        "name": "*",
+        "value": "requests"
+      }
+    ]
+  },
   "aggInterval": "1h",
-  "timeseriesStatus": "unavailable",
-  "timeseriesError": "Cloudflare Radar timeseries returned 22 points for a 24h window at 1h (expected 24 ± 1)",
+  "timeseriesStatus": "live",
+  "timeseriesError": null,
   "serie": {
-    "timestamps": [],
-    "values": []
+    "timestamps": [
+      "2026-11-26T01:00:00Z",
+      "2026-11-26T02:00:00Z",
+      "2026-11-26T03:00:00Z",
+      "2026-11-26T04:00:00Z",
+      "2026-11-26T05:00:00Z",
+      "2026-11-26T06:00:00Z",
+      "2026-11-26T07:00:00Z",
+      "2026-11-26T08:00:00Z",
+      "2026-11-26T09:00:00Z",
+      "2026-11-26T10:00:00Z",
+      "2026-11-26T11:00:00Z",
+      "2026-11-26T12:00:00Z",
+      "2026-11-26T13:00:00Z",
+      "2026-11-26T14:00:00Z",
+      "2026-11-26T15:00:00Z",
+      "2026-11-26T16:00:00Z",
+      "2026-11-26T17:00:00Z",
+      "2026-11-26T18:00:00Z",
+      "2026-11-26T19:00:00Z",
+      "2026-11-26T20:00:00Z",
+      "2026-11-26T21:00:00Z",
+      "2026-11-26T22:00:00Z"
+    ],
+    "values": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ]
   }
 }

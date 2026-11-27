@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:23:52.789Z",
+  "generatedAt": "2026-11-27T01:37:26.077Z",
   "refreshIntervalMinutes": 15,
   "providers": {
     "dshield": {
@@ -9,37 +9,37 @@
       "attribution": "SANS Technology Institute / Internet Storm Center (DShield)",
       "license": "Commercial use is permitted with attribution; do not resell. See the provider’s published license terms.",
       "status": "live",
-      "fetchedAt": "2026-11-27T01:23:51.568Z",
+      "fetchedAt": "2026-11-27T01:37:25.800Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "Best effort; on HTTP 429 the job pauses for 5 minutes before retrying.",
       "subfeeds": {
         "source_locations": {
           "status": "live",
-          "fetchedAt": "2026-11-27T01:23:33.214Z",
+          "fetchedAt": "2026-11-27T01:37:06.896Z",
           "dataDate": null,
           "error": null
         },
         "top_ports": {
           "status": "live",
-          "fetchedAt": "2026-11-27T01:23:47.688Z",
+          "fetchedAt": "2026-11-27T01:37:21.290Z",
           "dataDate": "2026-11-26",
           "error": null
         },
         "infocon": {
           "status": "live",
-          "fetchedAt": "2026-11-27T01:23:47.883Z",
+          "fetchedAt": "2026-11-27T01:37:21.430Z",
           "dataDate": null,
           "error": null
         },
         "daily_summary": {
           "status": "live",
-          "fetchedAt": "2026-11-27T01:23:51.568Z",
+          "fetchedAt": "2026-11-27T01:37:25.800Z",
           "dataDate": "2026-11-27",
           "error": null
         }
       },
-      "sourceDataLastSuccessfulAt": "2026-11-27T01:23:33.214Z",
+      "sourceDataLastSuccessfulAt": "2026-11-27T01:37:06.896Z",
       "sourceDataDate": null
     },
     "threatfox": {
@@ -59,7 +59,7 @@
       "attribution": "NIST National Vulnerability Database (NVD)",
       "license": "Public NVD data; NIST does not endorse products or services.",
       "status": "live",
-      "fetchedAt": "2026-11-27T01:23:49.637Z",
+      "fetchedAt": "2026-11-27T01:37:23.429Z",
       "error": null,
       "cacheIntervalMinutes": 15,
       "rateLimit": "One unauthenticated request per refresh; NVD unauthenticated limit is 5 requests per 30 seconds."
@@ -70,7 +70,7 @@
       "attribution": "CISA Known Exploited Vulnerabilities catalog",
       "license": "U.S. government work; source attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-27T01:23:32.744Z",
+      "fetchedAt": "2026-11-27T01:37:06.402Z",
       "error": null,
       "cacheIntervalMinutes": 15
     },
@@ -80,7 +80,7 @@
       "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
       "license": "Cloudflare Radar aggregated attack data; attribution provided.",
       "status": "live",
-      "fetchedAt": "2026-11-27T01:23:50.092Z",
+      "fetchedAt": "2026-11-27T01:37:23.598Z",
       "error": null,
       "lastUpdated": "2026-11-26T23:30:00Z",
       "dateRange": [
@@ -115,7 +115,7 @@
       "url": "https://ipwho.is/",
       "attribution": "ipwho.is",
       "status": "live",
-      "fetchedAt": "2026-11-27T01:23:47.137Z",
+      "fetchedAt": "2026-11-27T01:37:20.698Z",
       "cacheIntervalMinutes": 60,
       "license": "Public IP geolocation lookups; only routable public IPs are sent.",
       "successfulLookups": 12,

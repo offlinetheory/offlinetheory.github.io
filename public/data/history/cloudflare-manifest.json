@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-27T01:23:52.741Z",
+  "generatedAt": "2026-11-27T01:37:26.051Z",
   "intervals": {
     "1h": [
       {
@@ -12,6 +12,12 @@
       {
         "generatedAt": "2026-11-27T01:23:47.721Z",
         "path": "data/history/cloudflare/1h/all/20261127T012347721Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T23:30:00Z"
+      },
+      {
+        "generatedAt": "2026-11-27T01:37:21.312Z",
+        "path": "data/history/cloudflare/1h/all/20261127T013721312Z.json",
         "pairCount": 50,
         "lastUpdated": "2026-11-26T23:30:00Z"
       }
@@ -28,6 +34,12 @@
         "path": "data/history/cloudflare/6h/all/20261127T012348918Z.json",
         "pairCount": 50,
         "lastUpdated": "2026-11-26T23:30:00Z"
+      },
+      {
+        "generatedAt": "2026-11-27T01:37:22.472Z",
+        "path": "data/history/cloudflare/6h/all/20261127T013722472Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T23:30:00Z"
       }
     ],
     "24h": [
@@ -42,6 +54,12 @@
         "path": "data/history/cloudflare/24h/all/20261127T012350092Z.json",
         "pairCount": 50,
         "lastUpdated": "2026-11-26T23:30:00Z"
+      },
+      {
+        "generatedAt": "2026-11-27T01:37:23.598Z",
+        "path": "data/history/cloudflare/24h/all/20261127T013723598Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T23:30:00Z"
       }
     ],
     "7d": [
@@ -54,6 +72,12 @@
       {
         "generatedAt": "2026-11-27T01:23:51.233Z",
         "path": "data/history/cloudflare/7d/all/20261127T012351233Z.json",
+        "pairCount": 50,
+        "lastUpdated": "2026-11-26T23:30:00Z"
+      },
+      {
+        "generatedAt": "2026-11-27T01:37:24.610Z",
+        "path": "data/history/cloudflare/7d/all/20261127T013724610Z.json",
         "pairCount": 50,
         "lastUpdated": "2026-11-26T23:30:00Z"
       }
@@ -73,12 +97,24 @@
           "path": "data/history/cloudflare/1h/all/20261127T012347721Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:21.312Z",
+          "path": "data/history/cloudflare/1h/all/20261127T013721312Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DDOS": [
         {
           "generatedAt": "2026-11-27T01:23:47.876Z",
           "path": "data/history/cloudflare/1h/ddos/20261127T012347876Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:21.220Z",
+          "path": "data/history/cloudflare/1h/ddos/20261127T013721220Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -89,12 +125,24 @@
           "path": "data/history/cloudflare/1h/waf/20261127T012347812Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:21.221Z",
+          "path": "data/history/cloudflare/1h/waf/20261127T013721221Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "BOT_MANAGEMENT": [
         {
           "generatedAt": "2026-11-27T01:23:48.136Z",
           "path": "data/history/cloudflare/1h/bot_management/20261127T012348136Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:21.658Z",
+          "path": "data/history/cloudflare/1h/bot_management/20261127T013721658Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -105,12 +153,24 @@
           "path": "data/history/cloudflare/1h/access_rules/20261127T012348265Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.360Z",
+          "path": "data/history/cloudflare/1h/access_rules/20261127T013722360Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "IP_REPUTATION": [
         {
           "generatedAt": "2026-11-27T01:23:48.312Z",
           "path": "data/history/cloudflare/1h/ip_reputation/20261127T012348312Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:21.804Z",
+          "path": "data/history/cloudflare/1h/ip_reputation/20261127T013721804Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -121,12 +181,24 @@
           "path": "data/history/cloudflare/1h/api_shield/20261127T012348506Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.008Z",
+          "path": "data/history/cloudflare/1h/api_shield/20261127T013722008Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DATA_LOSS_PREVENTION": [
         {
           "generatedAt": "2026-11-27T01:23:48.755Z",
           "path": "data/history/cloudflare/1h/data_loss_prevention/20261127T012348755Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.181Z",
+          "path": "data/history/cloudflare/1h/data_loss_prevention/20261127T013722181Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -145,12 +217,24 @@
           "path": "data/history/cloudflare/6h/all/20261127T012348918Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.472Z",
+          "path": "data/history/cloudflare/6h/all/20261127T013722472Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DDOS": [
         {
           "generatedAt": "2026-11-27T01:23:49.143Z",
           "path": "data/history/cloudflare/6h/ddos/20261127T012349143Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.633Z",
+          "path": "data/history/cloudflare/6h/ddos/20261127T013722633Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -161,12 +245,24 @@
           "path": "data/history/cloudflare/6h/waf/20261127T012349231Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.666Z",
+          "path": "data/history/cloudflare/6h/waf/20261127T013722666Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "BOT_MANAGEMENT": [
         {
           "generatedAt": "2026-11-27T01:23:49.458Z",
           "path": "data/history/cloudflare/6h/bot_management/20261127T012349458Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.834Z",
+          "path": "data/history/cloudflare/6h/bot_management/20261127T013722834Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -177,12 +273,24 @@
           "path": "data/history/cloudflare/6h/access_rules/20261127T012349639Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:22.955Z",
+          "path": "data/history/cloudflare/6h/access_rules/20261127T013722955Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "IP_REPUTATION": [
         {
           "generatedAt": "2026-11-27T01:23:49.758Z",
           "path": "data/history/cloudflare/6h/ip_reputation/20261127T012349758Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.207Z",
+          "path": "data/history/cloudflare/6h/ip_reputation/20261127T013723207Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -193,12 +301,24 @@
           "path": "data/history/cloudflare/6h/api_shield/20261127T012349833Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.259Z",
+          "path": "data/history/cloudflare/6h/api_shield/20261127T013723259Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DATA_LOSS_PREVENTION": [
         {
           "generatedAt": "2026-11-27T01:23:49.975Z",
           "path": "data/history/cloudflare/6h/data_loss_prevention/20261127T012349975Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.440Z",
+          "path": "data/history/cloudflare/6h/data_loss_prevention/20261127T013723440Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -217,12 +337,24 @@
           "path": "data/history/cloudflare/24h/all/20261127T012350092Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.598Z",
+          "path": "data/history/cloudflare/24h/all/20261127T013723598Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DDOS": [
         {
           "generatedAt": "2026-11-27T01:23:50.408Z",
           "path": "data/history/cloudflare/24h/ddos/20261127T012350408Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.657Z",
+          "path": "data/history/cloudflare/24h/ddos/20261127T013723657Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -233,12 +365,24 @@
           "path": "data/history/cloudflare/24h/waf/20261127T012350403Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:23.794Z",
+          "path": "data/history/cloudflare/24h/waf/20261127T013723794Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "BOT_MANAGEMENT": [
         {
           "generatedAt": "2026-11-27T01:23:50.497Z",
           "path": "data/history/cloudflare/24h/bot_management/20261127T012350497Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.041Z",
+          "path": "data/history/cloudflare/24h/bot_management/20261127T013724041Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -249,12 +393,24 @@
           "path": "data/history/cloudflare/24h/access_rules/20261127T012350777Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.076Z",
+          "path": "data/history/cloudflare/24h/access_rules/20261127T013724076Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "IP_REPUTATION": [
         {
           "generatedAt": "2026-11-27T01:23:50.780Z",
           "path": "data/history/cloudflare/24h/ip_reputation/20261127T012350780Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.310Z",
+          "path": "data/history/cloudflare/24h/ip_reputation/20261127T013724310Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -265,12 +421,24 @@
           "path": "data/history/cloudflare/24h/api_shield/20261127T012350985Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.365Z",
+          "path": "data/history/cloudflare/24h/api_shield/20261127T013724365Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DATA_LOSS_PREVENTION": [
         {
           "generatedAt": "2026-11-27T01:23:51.122Z",
           "path": "data/history/cloudflare/24h/data_loss_prevention/20261127T012351122Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.537Z",
+          "path": "data/history/cloudflare/24h/data_loss_prevention/20261127T013724537Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -289,12 +457,24 @@
           "path": "data/history/cloudflare/7d/all/20261127T012351233Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.610Z",
+          "path": "data/history/cloudflare/7d/all/20261127T013724610Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DDOS": [
         {
           "generatedAt": "2026-11-27T01:23:51.919Z",
           "path": "data/history/cloudflare/7d/ddos/20261127T012351919Z.json",
+          "pairCount": 50,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.770Z",
+          "path": "data/history/cloudflare/7d/ddos/20261127T013724770Z.json",
           "pairCount": 50,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -305,12 +485,24 @@
           "path": "data/history/cloudflare/7d/waf/20261127T012351579Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.975Z",
+          "path": "data/history/cloudflare/7d/waf/20261127T013724975Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "BOT_MANAGEMENT": [
         {
           "generatedAt": "2026-11-27T01:23:51.706Z",
           "path": "data/history/cloudflare/7d/bot_management/20261127T012351706Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.978Z",
+          "path": "data/history/cloudflare/7d/bot_management/20261127T013724978Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -321,12 +513,24 @@
           "path": "data/history/cloudflare/7d/access_rules/20261127T012351903Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.160Z",
+          "path": "data/history/cloudflare/7d/access_rules/20261127T013725160Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "IP_REPUTATION": [
         {
           "generatedAt": "2026-11-27T01:23:52.130Z",
           "path": "data/history/cloudflare/7d/ip_reputation/20261127T012352130Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.235Z",
+          "path": "data/history/cloudflare/7d/ip_reputation/20261127T013725235Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -337,12 +541,24 @@
           "path": "data/history/cloudflare/7d/api_shield/20261127T012352389Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.361Z",
+          "path": "data/history/cloudflare/7d/api_shield/20261127T013725361Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
         }
       ],
       "DATA_LOSS_PREVENTION": [
         {
           "generatedAt": "2026-11-27T01:23:52.561Z",
           "path": "data/history/cloudflare/7d/data_loss_prevention/20261127T012352561Z.json",
+          "pairCount": 0,
+          "lastUpdated": "2026-11-26T23:30:00Z"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.579Z",
+          "path": "data/history/cloudflare/7d/data_loss_prevention/20261127T013725579Z.json",
           "pairCount": 0,
           "lastUpdated": "2026-11-26T23:30:00Z"
         }
@@ -361,30 +577,165 @@
       "DATA_LOSS_PREVENTION": []
     },
     "6h": {
-      "all": [],
-      "DDOS": [],
-      "WAF": [],
-      "BOT_MANAGEMENT": [],
-      "ACCESS_RULES": [],
-      "IP_REPUTATION": [],
-      "API_SHIELD": [],
-      "DATA_LOSS_PREVENTION": []
+      "all": [
+        {
+          "generatedAt": "2026-11-27T01:37:22.549Z",
+          "path": "data/history/cloudflare-timeseries/6h/all/20261127T013722549Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "DDOS": [
+        {
+          "generatedAt": "2026-11-27T01:37:22.816Z",
+          "path": "data/history/cloudflare-timeseries/6h/ddos/20261127T013722816Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "WAF": [
+        {
+          "generatedAt": "2026-11-27T01:37:22.943Z",
+          "path": "data/history/cloudflare-timeseries/6h/waf/20261127T013722943Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "BOT_MANAGEMENT": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.074Z",
+          "path": "data/history/cloudflare-timeseries/6h/bot_management/20261127T013723074Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "ACCESS_RULES": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.306Z",
+          "path": "data/history/cloudflare-timeseries/6h/access_rules/20261127T013723306Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "IP_REPUTATION": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.219Z",
+          "path": "data/history/cloudflare-timeseries/6h/ip_reputation/20261127T013723219Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "API_SHIELD": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.431Z",
+          "path": "data/history/cloudflare-timeseries/6h/api_shield/20261127T013723431Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ],
+      "DATA_LOSS_PREVENTION": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.779Z",
+          "path": "data/history/cloudflare-timeseries/6h/data_loss_prevention/20261127T013723779Z.json",
+          "pointCount": 17,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "15m"
+        }
+      ]
     },
     "24h": {
-      "all": [],
-      "DDOS": [],
-      "WAF": [],
-      "BOT_MANAGEMENT": [],
-      "ACCESS_RULES": [],
-      "IP_REPUTATION": [],
-      "API_SHIELD": [],
-      "DATA_LOSS_PREVENTION": []
+      "all": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.712Z",
+          "path": "data/history/cloudflare-timeseries/24h/all/20261127T013723712Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "DDOS": [
+        {
+          "generatedAt": "2026-11-27T01:37:23.853Z",
+          "path": "data/history/cloudflare-timeseries/24h/ddos/20261127T013723853Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "WAF": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.033Z",
+          "path": "data/history/cloudflare-timeseries/24h/waf/20261127T013724033Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "BOT_MANAGEMENT": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.187Z",
+          "path": "data/history/cloudflare-timeseries/24h/bot_management/20261127T013724187Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "ACCESS_RULES": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.199Z",
+          "path": "data/history/cloudflare-timeseries/24h/access_rules/20261127T013724199Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "IP_REPUTATION": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.565Z",
+          "path": "data/history/cloudflare-timeseries/24h/ip_reputation/20261127T013724565Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "API_SHIELD": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.471Z",
+          "path": "data/history/cloudflare-timeseries/24h/api_shield/20261127T013724471Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ],
+      "DATA_LOSS_PREVENTION": [
+        {
+          "generatedAt": "2026-11-27T01:37:24.554Z",
+          "path": "data/history/cloudflare-timeseries/24h/data_loss_prevention/20261127T013724554Z.json",
+          "pointCount": 22,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1h"
+        }
+      ]
     },
     "7d": {
       "all": [
         {
           "generatedAt": "2026-11-27T01:23:51.317Z",
           "path": "data/history/cloudflare-timeseries/7d/all/20261127T012351317Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.758Z",
+          "path": "data/history/cloudflare-timeseries/7d/all/20261127T013724758Z.json",
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
@@ -397,12 +748,26 @@
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.909Z",
+          "path": "data/history/cloudflare-timeseries/7d/ddos/20261127T013724909Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
         }
       ],
       "WAF": [
         {
           "generatedAt": "2026-11-27T01:23:51.625Z",
           "path": "data/history/cloudflare-timeseries/7d/waf/20261127T012351625Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:24.946Z",
+          "path": "data/history/cloudflare-timeseries/7d/waf/20261127T013724946Z.json",
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
@@ -415,12 +780,26 @@
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.748Z",
+          "path": "data/history/cloudflare-timeseries/7d/bot_management/20261127T013725748Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
         }
       ],
       "ACCESS_RULES": [
         {
           "generatedAt": "2026-11-27T01:23:52.080Z",
           "path": "data/history/cloudflare-timeseries/7d/access_rules/20261127T012352080Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.912Z",
+          "path": "data/history/cloudflare-timeseries/7d/access_rules/20261127T013725912Z.json",
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
@@ -433,6 +812,13 @@
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.426Z",
+          "path": "data/history/cloudflare-timeseries/7d/ip_reputation/20261127T013725426Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
         }
       ],
       "API_SHIELD": [
@@ -442,12 +828,26 @@
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:26.044Z",
+          "path": "data/history/cloudflare-timeseries/7d/api_shield/20261127T013726044Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
         }
       ],
       "DATA_LOSS_PREVENTION": [
         {
           "generatedAt": "2026-11-27T01:23:52.483Z",
           "path": "data/history/cloudflare-timeseries/7d/data_loss_prevention/20261127T012352483Z.json",
+          "pointCount": 6,
+          "lastUpdated": "2026-11-26T23:30:00Z",
+          "aggInterval": "1d"
+        },
+        {
+          "generatedAt": "2026-11-27T01:37:25.813Z",
+          "path": "data/history/cloudflare-timeseries/7d/data_loss_prevention/20261127T013725813Z.json",
           "pointCount": 6,
           "lastUpdated": "2026-11-26T23:30:00Z",
           "aggInterval": "1d"

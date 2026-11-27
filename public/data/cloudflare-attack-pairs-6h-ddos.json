@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:23:49.143Z",
+  "generatedAt": "2026-11-27T01:37:22.633Z",
   "interval": "6h",
   "product": "DDOS",
   "window": {
-    "dateStart": "2026-11-26T19:15:00.000Z",
-    "dateEnd": "2026-11-27T01:15:00.000Z"
+    "dateStart": "2026-11-26T19:30:00.000Z",
+    "dateEnd": "2026-11-27T01:30:00.000Z"
   },
   "returnedWindow": {
     "startTime": "2026-11-26T19:00:00Z",
     "endTime": "2026-11-27T01:00:00Z"
   },
-  "windowShiftMinutes": 15,
+  "windowShiftMinutes": 30,
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
     "status": "live",
-    "fetchedAt": "2026-11-27T01:23:49.143Z",
+    "fetchedAt": "2026-11-27T01:37:22.633Z",
     "lastUpdated": "2026-11-26T23:30:00Z",
     "error": null,
     "cacheIntervalMinutes": 15,
@@ -49,350 +49,350 @@
       "originCountryName": "United States",
       "targetCountryAlpha2": "MY",
       "targetCountryName": "Malaysia",
-      "value": 6.69051
+      "value": 7.192694
+    },
+    {
+      "originCountryAlpha2": "US",
+      "originCountryName": "United States",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 5.678311
     },
     {
       "originCountryAlpha2": "NL",
       "originCountryName": "Netherlands",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 5.5457
-    },
-    {
-      "originCountryAlpha2": "US",
-      "originCountryName": "United States",
-      "targetCountryAlpha2": "US",
-      "targetCountryName": "United States",
-      "value": 5.507101
-    },
-    {
-      "originCountryAlpha2": "BE",
-      "originCountryName": "Belgium",
-      "targetCountryAlpha2": "US",
-      "targetCountryName": "United States",
-      "value": 3.688474
+      "value": 5.555915
     },
     {
       "originCountryAlpha2": "DE",
       "originCountryName": "Germany",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 3.579786
+      "value": 3.733321
     },
     {
       "originCountryAlpha2": "US",
       "originCountryName": "United States",
       "targetCountryAlpha2": "CA",
       "targetCountryName": "Canada",
-      "value": 3.346309
-    },
-    {
-      "originCountryAlpha2": "US",
-      "originCountryName": "United States",
-      "targetCountryAlpha2": "IT",
-      "targetCountryName": "Italy",
-      "value": 3.067312
+      "value": 3.46374
     },
     {
       "originCountryAlpha2": "BR",
       "originCountryName": "Brazil",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 2.917929
+      "value": 2.971898
+    },
+    {
+      "originCountryAlpha2": "US",
+      "originCountryName": "United States",
+      "targetCountryAlpha2": "IT",
+      "targetCountryName": "Italy",
+      "value": 2.96482
+    },
+    {
+      "originCountryAlpha2": "BE",
+      "originCountryName": "Belgium",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 2.932698
     },
     {
       "originCountryAlpha2": "SG",
       "originCountryName": "Singapore",
       "targetCountryAlpha2": "IL",
       "targetCountryName": "Israel",
-      "value": 2.722607
+      "value": 2.881168
     },
     {
       "originCountryAlpha2": "ID",
       "originCountryName": "Indonesia",
       "targetCountryAlpha2": "IT",
       "targetCountryName": "Italy",
-      "value": 2.662778
-    },
-    {
-      "originCountryAlpha2": "SG",
-      "originCountryName": "Singapore",
-      "targetCountryAlpha2": "CA",
-      "targetCountryName": "Canada",
-      "value": 1.833774
+      "value": 2.713177
     },
     {
       "originCountryAlpha2": "CN",
       "originCountryName": "China",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 1.758327
+      "value": 1.816686
     },
     {
       "originCountryAlpha2": "FR",
       "originCountryName": "France",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 1.678805
-    },
-    {
-      "originCountryAlpha2": "FR",
-      "originCountryName": "France",
-      "targetCountryAlpha2": "IT",
-      "targetCountryName": "Italy",
-      "value": 1.587702
+      "value": 1.756051
     },
     {
       "originCountryAlpha2": "CN",
       "originCountryName": "China",
       "targetCountryAlpha2": "ES",
       "targetCountryName": "Spain",
-      "value": 1.520356
+      "value": 1.708716
+    },
+    {
+      "originCountryAlpha2": "SG",
+      "originCountryName": "Singapore",
+      "targetCountryAlpha2": "CA",
+      "targetCountryName": "Canada",
+      "value": 1.638406
+    },
+    {
+      "originCountryAlpha2": "FR",
+      "originCountryName": "France",
+      "targetCountryAlpha2": "IT",
+      "targetCountryName": "Italy",
+      "value": 1.568924
     },
     {
       "originCountryAlpha2": "PL",
       "originCountryName": "Poland",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 1.442077
-    },
-    {
-      "originCountryAlpha2": "US",
-      "originCountryName": "United States",
-      "targetCountryAlpha2": "IL",
-      "targetCountryName": "Israel",
-      "value": 1.275781
+      "value": 1.510359
     },
     {
       "originCountryAlpha2": "HK",
       "originCountryName": "Hong Kong",
       "targetCountryAlpha2": "MY",
       "targetCountryName": "Malaysia",
-      "value": 1.264265
+      "value": 1.355169
+    },
+    {
+      "originCountryAlpha2": "US",
+      "originCountryName": "United States",
+      "targetCountryAlpha2": "IL",
+      "targetCountryName": "Israel",
+      "value": 1.337902
     },
     {
       "originCountryAlpha2": "GB",
       "originCountryName": "United Kingdom",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 1.117497
-    },
-    {
-      "originCountryAlpha2": "US",
-      "originCountryName": "United States",
-      "targetCountryAlpha2": "RO",
-      "targetCountryName": "Romania",
-      "value": 1.114894
+      "value": 1.168584
     },
     {
       "originCountryAlpha2": "ID",
       "originCountryName": "Indonesia",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 1.098172
+      "value": 1.048599
     },
     {
       "originCountryAlpha2": "NL",
       "originCountryName": "Netherlands",
       "targetCountryAlpha2": "IT",
       "targetCountryName": "Italy",
-      "value": 1.009495
+      "value": 1.001079
     },
     {
       "originCountryAlpha2": "CA",
       "originCountryName": "Canada",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.979986
+      "value": 0.981528
     },
     {
       "originCountryAlpha2": "RU",
       "originCountryName": "Russian Federation",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.844913
+      "value": 0.884633
     },
     {
       "originCountryAlpha2": "SG",
       "originCountryName": "Singapore",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.802123
-    },
-    {
-      "originCountryAlpha2": "ES",
-      "originCountryName": "Spain",
-      "targetCountryAlpha2": "US",
-      "targetCountryName": "United States",
-      "value": 0.771485
+      "value": 0.842164
     },
     {
       "originCountryAlpha2": "FI",
       "originCountryName": "Finland",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.765238
+      "value": 0.813623
     },
     {
-      "originCountryAlpha2": "AU",
-      "originCountryName": "Australia",
-      "targetCountryAlpha2": "CA",
-      "targetCountryName": "Canada",
-      "value": 0.741392
+      "originCountryAlpha2": "ES",
+      "originCountryName": "Spain",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 0.797198
     },
     {
       "originCountryAlpha2": "SE",
       "originCountryName": "Sweden",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.739526
+      "value": 0.776164
+    },
+    {
+      "originCountryAlpha2": "CN",
+      "originCountryName": "China",
+      "targetCountryAlpha2": "CA",
+      "targetCountryName": "Canada",
+      "value": 0.733667
     },
     {
       "originCountryAlpha2": "AU",
       "originCountryName": "Australia",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.714499
+      "value": 0.7296
     },
     {
       "originCountryAlpha2": "SG",
       "originCountryName": "Singapore",
       "targetCountryAlpha2": "HK",
       "targetCountryName": "Hong Kong",
-      "value": 0.712709
+      "value": 0.725076
     },
     {
-      "originCountryAlpha2": "BE",
-      "originCountryName": "Belgium",
+      "originCountryAlpha2": "AU",
+      "originCountryName": "Australia",
       "targetCountryAlpha2": "CA",
       "targetCountryName": "Canada",
-      "value": 0.692229
-    },
-    {
-      "originCountryAlpha2": "DE",
-      "originCountryName": "Germany",
-      "targetCountryAlpha2": "IT",
-      "targetCountryName": "Italy",
-      "value": 0.679544
-    },
-    {
-      "originCountryAlpha2": "CN",
-      "originCountryName": "China",
-      "targetCountryAlpha2": "CA",
-      "targetCountryName": "Canada",
-      "value": 0.677665
+      "value": 0.7029
     },
     {
       "originCountryAlpha2": "MX",
       "originCountryName": "Mexico",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.662453
+      "value": 0.687488
     },
     {
-      "originCountryAlpha2": "IN",
-      "originCountryName": "India",
-      "targetCountryAlpha2": "US",
-      "targetCountryName": "United States",
-      "value": 0.551454
+      "originCountryAlpha2": "DE",
+      "originCountryName": "Germany",
+      "targetCountryAlpha2": "IT",
+      "targetCountryName": "Italy",
+      "value": 0.659347
+    },
+    {
+      "originCountryAlpha2": "BE",
+      "originCountryName": "Belgium",
+      "targetCountryAlpha2": "CA",
+      "targetCountryName": "Canada",
+      "value": 0.612497
     },
     {
       "originCountryAlpha2": "US",
       "originCountryName": "United States",
       "targetCountryAlpha2": "FR",
       "targetCountryName": "France",
-      "value": 0.546515
+      "value": 0.612212
+    },
+    {
+      "originCountryAlpha2": "SG",
+      "originCountryName": "Singapore",
+      "targetCountryAlpha2": "MY",
+      "targetCountryName": "Malaysia",
+      "value": 0.562822
+    },
+    {
+      "originCountryAlpha2": "IN",
+      "originCountryName": "India",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 0.561709
     },
     {
       "originCountryAlpha2": "US",
       "originCountryName": "United States",
       "targetCountryAlpha2": "CY",
       "targetCountryName": "Cyprus",
-      "value": 0.526402
+      "value": 0.555188
     },
     {
-      "originCountryAlpha2": "SG",
-      "originCountryName": "Singapore",
+      "originCountryAlpha2": "JP",
+      "originCountryName": "Japan",
       "targetCountryAlpha2": "MY",
       "targetCountryName": "Malaysia",
-      "value": 0.516918
+      "value": 0.522066
     },
     {
       "originCountryAlpha2": "JP",
       "originCountryName": "Japan",
       "targetCountryAlpha2": "US",
       "targetCountryName": "United States",
-      "value": 0.501046
-    },
-    {
-      "originCountryAlpha2": "JP",
-      "originCountryName": "Japan",
-      "targetCountryAlpha2": "MY",
-      "targetCountryName": "Malaysia",
-      "value": 0.488196
+      "value": 0.513675
     },
     {
       "originCountryAlpha2": "CA",
       "originCountryName": "Canada",
       "targetCountryAlpha2": "CA",
       "targetCountryName": "Canada",
-      "value": 0.486978
-    },
-    {
-      "originCountryAlpha2": "EE",
-      "originCountryName": "Estonia",
-      "targetCountryAlpha2": "US",
-      "targetCountryName": "United States",
-      "value": 0.482952
+      "value": 0.512862
     },
     {
       "originCountryAlpha2": "US",
       "originCountryName": "United States",
       "targetCountryAlpha2": "DE",
       "targetCountryName": "Germany",
-      "value": 0.45625
+      "value": 0.512748
+    },
+    {
+      "originCountryAlpha2": "EE",
+      "originCountryName": "Estonia",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 0.511577
     },
     {
       "originCountryAlpha2": "US",
       "originCountryName": "United States",
       "targetCountryAlpha2": "AE",
       "targetCountryName": "United Arab Emirates",
-      "value": 0.444404
+      "value": 0.499462
     },
     {
       "originCountryAlpha2": "PT",
       "originCountryName": "Portugal",
       "targetCountryAlpha2": "PT",
       "targetCountryName": "Portugal",
-      "value": 0.42857
-    },
-    {
-      "originCountryAlpha2": "ID",
-      "originCountryName": "Indonesia",
-      "targetCountryAlpha2": "SG",
-      "targetCountryName": "Singapore",
-      "value": 0.427161
+      "value": 0.442609
     },
     {
       "originCountryAlpha2": "SG",
       "originCountryName": "Singapore",
       "targetCountryAlpha2": "IT",
       "targetCountryName": "Italy",
-      "value": 0.41506
+      "value": 0.422031
     },
     {
       "originCountryAlpha2": "CN",
       "originCountryName": "China",
       "targetCountryAlpha2": "GB",
       "targetCountryName": "United Kingdom",
-      "value": 0.413905
+      "value": 0.414882
     },
     {
-      "originCountryAlpha2": "PL",
-      "originCountryName": "Poland",
+      "originCountryAlpha2": "CM",
+      "originCountryName": "Cameroon",
       "targetCountryAlpha2": "IT",
       "targetCountryName": "Italy",
-      "value": 0.405537
+      "value": 0.403437
+    },
+    {
+      "originCountryAlpha2": "TR",
+      "originCountryName": "Turkey",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 0.402538
+    },
+    {
+      "originCountryAlpha2": "PT",
+      "originCountryName": "Portugal",
+      "targetCountryAlpha2": "US",
+      "targetCountryName": "United States",
+      "value": 0.400911
     }
   ]
 }

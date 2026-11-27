@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:23:52.561Z",
+  "generatedAt": "2026-11-27T01:37:25.579Z",
   "interval": "7d",
   "product": "DATA_LOSS_PREVENTION",
   "window": {
-    "dateStart": "2026-11-20T01:15:00.000Z",
-    "dateEnd": "2026-11-27T01:15:00.000Z"
+    "dateStart": "2026-11-20T01:30:00.000Z",
+    "dateEnd": "2026-11-27T01:30:00.000Z"
   },
   "returnedWindow": {
     "startTime": "2026-11-20T01:00:00Z",
     "endTime": "2026-11-27T01:00:00Z"
   },
-  "windowShiftMinutes": 15,
+  "windowShiftMinutes": 30,
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
     "status": "live",
-    "fetchedAt": "2026-11-27T01:23:52.561Z",
+    "fetchedAt": "2026-11-27T01:37:25.579Z",
     "lastUpdated": "2026-11-26T23:30:00Z",
     "error": null,
     "cacheIntervalMinutes": 15,

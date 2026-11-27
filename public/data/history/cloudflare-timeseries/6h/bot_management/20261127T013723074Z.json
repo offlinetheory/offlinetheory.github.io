@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-27T01:37:23.074Z",
+  "interval": "6h",
+  "product": "BOT_MANAGEMENT",
+  "window": {
+    "dateStart": "2026-11-26T19:30:00.000Z",
+    "dateEnd": "2026-11-27T01:30:00.000Z"
+  },
+  "returnedWindow": {
+    "startTime": "2026-11-26T19:30:00Z",
+    "endTime": "2026-11-27T01:30:00Z"
+  },
+  "windowShiftMinutes": 0,
+  "provider": {
+    "name": "Cloudflare Radar",
+    "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
+    "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
+    "license": "Cloudflare Radar aggregated attack data; attribution provided.",
+    "status": "live",
+    "fetchedAt": "2026-11-27T01:37:23.074Z",
+    "lastUpdated": "2026-11-26T23:30:00Z",
+    "error": null,
+    "cacheIntervalMinutes": 15,
+    "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
+    "pairCount": 17,
+    "pointCount": 17
+  },
+  "meta": {
+    "aggInterval": "FIFTEEN_MINUTES",
+    "dateRange": [
+      {
+        "startTime": "2026-11-26T19:30:00Z",
+        "endTime": "2026-11-27T01:30:00Z"
+      }
+    ],
+    "lastUpdated": "2026-11-26T23:30:00Z",
+    "normalization": "MIN0_MAX",
+    "units": [
+      {
+        "name": "*",
+        "value": "requests"
+      }
+    ]
+  },
+  "aggInterval": "15m",
+  "timeseriesStatus": "live",
+  "timeseriesError": null,
+  "serie": {
+    "timestamps": [
+      "2026-11-26T19:30:00Z",
+      "2026-11-26T19:45:00Z",
+      "2026-11-26T20:00:00Z",
+      "2026-11-26T20:15:00Z",
+      "2026-11-26T20:30:00Z",
+      "2026-11-26T20:45:00Z",
+      "2026-11-26T21:00:00Z",
+      "2026-11-26T21:15:00Z",
+      "2026-11-26T21:30:00Z",
+      "2026-11-26T21:45:00Z",
+      "2026-11-26T22:00:00Z",
+      "2026-11-26T22:15:00Z",
+      "2026-11-26T22:30:00Z",
+      "2026-11-26T22:45:00Z",
+      "2026-11-26T23:00:00Z",
+      "2026-11-26T23:15:00Z",
+      "2026-11-26T23:30:00Z"
+    ],
+    "values": [
+      "0.860735",
+      "0.866538",
+      "0.882656",
+      "0.8343",
+      "0.934881",
+      "0.869117",
+      "0.914249",
+      "0.872985",
+      "0.916183",
+      "1.0",
+      "0.944552",
+      "0.914249",
+      "0.914249",
+      "0.940039",
+      "0.947131",
+      "0.920696",
+      "0.971631"
+    ]
+  }
+}
