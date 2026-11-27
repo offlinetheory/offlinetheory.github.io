@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import {
   buildCountryActivity,
   buildThreatAlerts,
+  cloudflareLayerVisibility,
   countryFillStyle,
   layerVisibility,
   panMapTransform,
@@ -10,6 +12,8 @@ import {
   sourceObservedAt,
   sourcesInTimeWindow,
   timelineTrackVisible,
+  timeseriesTrackVisible,
+  verifiedPortProtocol,
   zoomMapTransform,
 } from '../src/pages/threatMapCountryActivity.js'
 
@@ -104,38 +108,140 @@ test('zoom preserves the focal point and pan translates the synchronized map tra
 })
 
 test('filter state maps to exactly the layers each filter controls', () => {
-  const allOn = layerVisibility({ scanning: true, cloudflare: true, exploited: true, ransomware: true, breaches: true })
+  const allOn = layerVisibility({ scanning: true, web: true, ddos: true, intruders: true, anonymizers: true })
   assert.deepEqual(allOn, {
     dshieldSources: true, dshieldShading: true, dshieldMarkers: true, dshieldPorts: true,
-    cloudflareArcs: true, cloudflareHighlights: true, cloudflarePairs: true, cloudflareTimeline: true,
-    exploitedPanels: true, exploitedTimeline: true, ransomwareNotice: true, breachesNotice: true,
+    webArcs: true, webHighlights: true, webPairs: true, webTimeline: true,
+    ddosArcs: true, ddosHighlights: true, ddosPairs: true, ddosTimeline: true,
+    intrudersNotice: true, anonymizersNotice: true,
   })
-  const scanningOff = layerVisibility({ scanning: false, cloudflare: true, exploited: true, ransomware: false, breaches: false })
+  const scanningOff = layerVisibility({ scanning: false, web: true, ddos: true, intruders: false, anonymizers: false })
   assert.equal(scanningOff.dshieldSources, false)
   assert.equal(scanningOff.dshieldMarkers, false)
   assert.equal(scanningOff.dshieldPorts, false)
-  assert.equal(scanningOff.cloudflareArcs, true)
-  assert.equal(scanningOff.ransomwareNotice, false)
-  const cloudflareOff = layerVisibility({ scanning: true, cloudflare: false, exploited: false, ransomware: true, breaches: true })
-  assert.equal(cloudflareOff.cloudflareArcs, false)
-  assert.equal(cloudflareOff.cloudflareHighlights, false)
-  assert.equal(cloudflareOff.cloudflareTimeline, false)
-  assert.equal(cloudflareOff.exploitedPanels, false)
-  assert.equal(cloudflareOff.exploitedTimeline, false)
-  assert.equal(cloudflareOff.dshieldSources, true)
-  // Ransomware/breaches never gate a map layer: they only control their notice.
-  const noSource = layerVisibility({ scanning: true, cloudflare: true, exploited: true, ransomware: false, breaches: false })
+  assert.equal(scanningOff.webArcs, true)
+  assert.equal(scanningOff.ddosArcs, true)
+  assert.equal(scanningOff.intrudersNotice, false)
+  // The two Cloudflare layers gate independently: one dataset is never
+  // duplicated as two layers.
+  const webOff = layerVisibility({ scanning: true, web: false, ddos: true, intruders: true, anonymizers: true })
+  assert.equal(webOff.webArcs, false)
+  assert.equal(webOff.webHighlights, false)
+  assert.equal(webOff.webTimeline, false)
+  assert.equal(webOff.ddosArcs, true)
+  assert.equal(webOff.ddosPairs, true)
+  assert.equal(webOff.dshieldSources, true)
+  // Intruders/anonymizers never gate a map layer: they only control
+  // their disabled notice.
+  const noSource = layerVisibility({ scanning: true, web: true, ddos: true, intruders: false, anonymizers: false })
   assert.equal(noSource.dshieldSources, true)
-  assert.equal(noSource.cloudflareArcs, true)
+  assert.equal(noSource.webArcs, true)
 })
 
-test('timeline tracks hide only under their own filter', () => {
-  assert.equal(timelineTrackVisible('cloudflare', { cloudflare: false, exploited: true }), false)
-  assert.equal(timelineTrackVisible('cloudflare', { cloudflare: true, exploited: false }), true)
-  assert.equal(timelineTrackVisible('nvd', { cloudflare: true, exploited: false }), false)
-  assert.equal(timelineTrackVisible('kev', { cloudflare: false, exploited: false }), false)
-  assert.equal(timelineTrackVisible('dshield', { cloudflare: false, exploited: false }), true)
-  assert.equal(timelineTrackVisible('threatfox', { cloudflare: false, exploited: false }), true)
+test('timeline tracks hide only under their own layer', () => {
+  assert.equal(timelineTrackVisible('web', { web: false, ddos: true }), false)
+  assert.equal(timelineTrackVisible('web', { web: true, ddos: false }), true)
+  assert.equal(timelineTrackVisible('ddos', { web: true, ddos: false }), false)
+  assert.equal(timelineTrackVisible('ddos', { web: false, ddos: true }), true)
+  assert.equal(timelineTrackVisible('scanners', { scanning: false, web: true }), false)
+  assert.equal(timelineTrackVisible('scanners', { scanning: true, web: false }), true)
+  assert.equal(timelineTrackVisible('intruders', { intruders: false }), false)
+  assert.equal(timelineTrackVisible('intruders', { intruders: true }), true)
+  assert.equal(timelineTrackVisible('anonymizers', { anonymizers: false }), false)
+  assert.equal(timelineTrackVisible('anonymizers', { anonymizers: true }), true)
+})
+
+test('one Cloudflare layer maps to exactly the map layers it controls', () => {
+  const on = { scanning: true, web: true, ddos: true, intruders: true, anonymizers: true }
+  assert.deepEqual(cloudflareLayerVisibility(on, 'web', true), {
+    layer: 'web', available: true,
+    arcs: true, highlights: true, pairs: true, timeline: true, timeseriesTrack: true,
+  })
+  assert.deepEqual(cloudflareLayerVisibility(on, 'ddos', true), {
+    layer: 'ddos', available: true,
+    arcs: true, highlights: true, pairs: true, timeline: true, timeseriesTrack: true,
+  })
+  // A layer whose file is missing/erroring gates every one of its
+  // layers off — never another layer's data — while the timeseries
+  // track stays visible so it can report UNAVAILABLE honestly.
+  const unavailable = cloudflareLayerVisibility(on, 'ddos', false)
+  assert.equal(unavailable.layer, 'ddos')
+  assert.equal(unavailable.available, false)
+  assert.equal(unavailable.arcs, false)
+  assert.equal(unavailable.highlights, false)
+  assert.equal(unavailable.pairs, false)
+  assert.equal(unavailable.timeline, false)
+  assert.equal(unavailable.timeseriesTrack, true)
+  // The layer toggle gates that layer only, never the other dataset.
+  const webOff = cloudflareLayerVisibility({ ...on, web: false }, 'web', true)
+  assert.equal(webOff.arcs, false)
+  assert.equal(webOff.timeseriesTrack, false)
+  assert.equal(cloudflareLayerVisibility({ ...on, web: false }, 'ddos', true).arcs, true)
+  // Other filters never affect a Cloudflare layer.
+  const scanningOff = cloudflareLayerVisibility({ ...on, scanning: false }, 'web', true)
+  assert.equal(scanningOff.arcs, true)
+  assert.equal(scanningOff.layer, 'web')
+})
+
+test('timeseries tracks hide only with their own layer toggle', () => {
+  assert.equal(timeseriesTrackVisible('web', { web: true, ddos: false }), true)
+  assert.equal(timeseriesTrackVisible('web', { web: false, ddos: true }), false)
+  assert.equal(timeseriesTrackVisible('ddos', { web: true, ddos: false }), false)
+  assert.equal(timeseriesTrackVisible('ddos', { web: false, ddos: true }), true)
+  assert.equal(timeseriesTrackVisible('scanners', { scanning: true }), false)
+  assert.equal(timelineTrackVisible('web', { web: false, ddos: true }), false)
+  assert.equal(timelineTrackVisible('ddos', { web: true, ddos: false }), false)
+})
+
+test('DShield top-port records carry no protocol field, so none is inferred', () => {
+  const snapshot = JSON.parse(readFileSync(
+    new URL('../public/data/threat-intel-snapshot.json', import.meta.url),
+    'utf8',
+  ))
+  const records = snapshot.dashboard.ports.topports
+  assert.ok(Array.isArray(records) && records.length > 0)
+  // Verified against the real published snapshot: the records carry
+  // rank, targetport, records, targets, sources and date — no protocol.
+  assert.ok(records.every((record) => !('protocol' in record)))
+  assert.deepEqual(
+    Object.keys(records[0]).sort(),
+    ['date', 'rank', 'records', 'sources', 'targetport', 'targets'],
+  )
+  assert.equal(verifiedPortProtocol(records[0]), null)
+  assert.equal(verifiedPortProtocol({ port: 22, protocol: 'TCP' }), 'TCP')
+  assert.equal(verifiedPortProtocol({ port: 53, protocol: 'UDP' }), 'UDP')
+  assert.equal(verifiedPortProtocol({ port: 443, protocol: '' }), null)
+  assert.equal(verifiedPortProtocol(null), null)
+})
+
+test('Cloudflare pair-change alerts are labelled per layer and never collide', () => {
+  const previous = [
+    { originCountryAlpha2: 'US', originCountryName: 'United States', targetCountryAlpha2: 'DE', targetCountryName: 'Germany', value: 10 },
+  ]
+  const current = [
+    { originCountryAlpha2: 'US', originCountryName: 'United States', targetCountryAlpha2: 'DE', targetCountryName: 'Germany', value: 12 },
+  ]
+  const webAlerts = buildThreatAlerts({
+    cloudflareCurrentPairs: current,
+    cloudflarePreviousPairs: previous,
+    cloudflareAsOf: '2026-11-26T15:30:00Z',
+    cloudflareLayer: 'web',
+    cloudflareLayerLabel: 'Web Attackers (WAF)',
+  })
+  const ddosAlerts = buildThreatAlerts({
+    cloudflareCurrentPairs: current,
+    cloudflarePreviousPairs: previous,
+    cloudflareAsOf: '2026-11-26T15:30:00Z',
+    cloudflareLayer: 'ddos',
+    cloudflareLayerLabel: 'DDoS Attackers (DDOS)',
+  })
+  assert.equal(webAlerts.length, 1)
+  assert.equal(ddosAlerts.length, 1)
+  assert.notEqual(webAlerts[0].id, ddosAlerts[0].id)
+  assert.match(webAlerts[0].id, /cloudflare-change:web:/)
+  assert.match(ddosAlerts[0].id, /cloudflare-change:ddos:/)
+  assert.match(webAlerts[0].title, /Web Attackers \(WAF\)/)
+  assert.match(ddosAlerts[0].title, /DDoS Attackers \(DDOS\)/)
 })
 
 test('threat alerts use only provider data, real timestamps and reference links', () => {

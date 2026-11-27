@@ -4,18 +4,27 @@ import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import {
+  CLOUDFLARE_PRODUCTS,
+  CLOUDFLARE_TIMESERIES_AGG_INTERVAL,
   buildCloudflareHistoryManifest,
   cloudflareIntervalWindow,
+  cloudflareWindowShiftMinutes,
   collectCloudflareRadar,
   collectCloudflareRadarInterval,
   collectCloudflareRadarIntervals,
+  collectCloudflareRadarMatrix,
+  collectCloudflareRadarTimeseries,
   dshieldPortEvent,
   dshieldSourceEvent,
   normalizeCloudflareRadarResponse,
+  normalizeCloudflareRadarTimeseriesResponse,
   normalizeDshieldPorts,
   normalizeEvent,
   validateCloudflareIntervalMeta,
+  validateCloudflareTimeseriesMeta,
+  validateCloudflareTimeseriesSerie,
   writeCloudflareIntervalOutputs,
+  writeCloudflareOutputs,
 } from './build-threat-intel-snapshot.mjs'
 
 test('normalizes DShield date-qualified topports rows from the provider response shape', () => {
@@ -644,12 +653,13 @@ test('writes per-interval files, legacy 24h copy, history snapshots and manifest
       fs.readFileSync(path.join(root, 'public/data/cloudflare-attack-pairs-24h.json'), 'utf8'),
     )
 
-    const historyDir = path.join(root, 'public/data/history/cloudflare/24h')
+    const historyDir = path.join(root, 'public/data/history/cloudflare/24h/all')
     const historyFiles = fs.readdirSync(historyDir).sort()
     assert.deepEqual(historyFiles, ['20261126T040100000Z.json', '20261126T041600000Z.json'])
     assert.equal(fs.existsSync(path.join(historyDir, '20261126T034600000Z.json')), false)
 
     const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public/data/history/cloudflare-manifest.json'), 'utf8'))
+    assert.equal(manifest.schemaVersion, 2)
     assert.equal(manifest.intervals['24h'].length, 2)
     assert.deepEqual(manifest.intervals['24h'].map((entry) => entry.generatedAt), [
       '2026-11-26T04:01:00.000Z',
@@ -657,7 +667,7 @@ test('writes per-interval files, legacy 24h copy, history snapshots and manifest
     ])
     assert.deepEqual(manifest.intervals['24h'][1], {
       generatedAt: '2026-11-26T04:16:00.000Z',
-      path: 'data/history/cloudflare/24h/20261126T041600000Z.json',
+      path: 'data/history/cloudflare/24h/all/20261126T041600000Z.json',
       pairCount: 1,
       lastUpdated: '2026-11-26T04:15:00.000Z',
     })
@@ -677,6 +687,591 @@ test('writes per-interval files, legacy 24h copy, history snapshots and manifest
     for (const file of writtenFiles) {
       assert.equal(fs.readFileSync(file, 'utf8').includes(FIXTURE_TOKEN), false, `${file} leaks the fixture token`)
     }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
+// --- Round 2: per-product matrix, timeseries, manifest v2 ---
+
+const TIMESERIES_AGG_MS = {
+  '15m': 15 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '1d': 24 * 60 * 60 * 1000,
+}
+
+function timeseriesFixtureForWindow(dateStart, dateEnd, aggInterval, { normalization, lastUpdated = null } = {}) {
+  const aggMs = TIMESERIES_AGG_MS[aggInterval]
+  const count = Math.round((Date.parse(dateEnd) - Date.parse(dateStart)) / aggMs)
+  const timestamps = Array.from(
+    { length: count },
+    (_, index) => new Date(Date.parse(dateStart) + index * aggMs).toISOString(),
+  )
+  const values = timestamps.map((_, index) => `${100 + index * 7}.5`)
+  const meta = {
+    aggInterval,
+    dateRange: [{ startTime: dateStart, endTime: dateEnd }],
+    lastUpdated: lastUpdated || dateEnd,
+    units: [{ name: 'requests', value: 'count' }],
+  }
+  // normalization is included only when the caller supplies it, so the
+  // absent case is a genuinely absent key, not a null or a default.
+  if (normalization !== undefined) meta.normalization = normalization
+  return { success: true, result: { meta, serie_0: { timestamps, values } } }
+}
+
+// Mock request answering every matrix cell: pairs with the matching
+// window, timeseries with points at the requested aggInterval. `failCell`
+// ({ product, kind }) makes that one product/kind throw on every
+// interval, to prove failure isolation.
+function matrixMockRequest({ failCell = null, delayMs = 0 } = {}) {
+  let calls = 0
+  let inFlight = 0
+  let maxInFlight = 0
+  const request = async (url) => {
+    calls += 1
+    inFlight += 1
+    maxInFlight = Math.max(maxInFlight, inFlight)
+    try {
+      if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs))
+      const requested = new URL(url)
+      const product = requested.searchParams.get('mitigationProduct') || 'all'
+      const isTimeseries = requested.pathname.endsWith('/timeseries')
+      const kind = isTimeseries ? 'timeseries' : 'pairs'
+      if (failCell && failCell.product === product && failCell.kind === kind) {
+        throw new Error(`HTTP 500: ${product} ${kind} endpoint down`)
+      }
+      const dateStart = requested.searchParams.get('dateStart')
+      const dateEnd = requested.searchParams.get('dateEnd')
+      if (isTimeseries) {
+        return timeseriesFixtureForWindow(dateStart, dateEnd, requested.searchParams.get('aggInterval'), { normalization: 'MIN0_MAX' })
+      }
+      return cloudflareFixtureForWindow(dateStart, dateEnd)
+    } finally {
+      inFlight -= 1
+    }
+  }
+  return { request, stats: () => ({ calls, maxInFlight }) }
+}
+
+test('normalizes Cloudflare Radar timeseries and records meta.normalization faithfully', () => {
+  const withNormalization = timeseriesFixtureForWindow(
+    '2026-11-25T03:45:00.000Z', '2026-11-26T03:45:00.000Z', '1h', { normalization: 'MIN0_MAX' },
+  )
+  const normalized = normalizeCloudflareRadarTimeseriesResponse(withNormalization)
+  assert.equal(normalized.meta.normalization, 'MIN0_MAX')
+  assert.equal(normalized.meta.aggInterval, '1h')
+  assert.equal(normalized.serie.timestamps.length, 24)
+  assert.deepEqual(normalized.serie.values.slice(0, 2), ['100.5', '107.5'])
+  assert.deepEqual(normalized.meta.dateRange, [{ startTime: '2026-11-25T03:45:00.000Z', endTime: '2026-11-26T03:45:00.000Z' }])
+
+  // (a) Normalization absent from the API response is recorded as
+  // absent (null), not invented or defaulted.
+  const absent = timeseriesFixtureForWindow(
+    '2026-11-25T03:45:00.000Z', '2026-11-26T03:45:00.000Z', '1h', { normalization: undefined },
+  )
+  assert.equal('normalization' in absent.result.meta, false)
+  assert.equal(normalizeCloudflareRadarTimeseriesResponse(absent).meta.normalization, null)
+
+  // (b) Normalization present is recorded verbatim.
+  const percentageChange = timeseriesFixtureForWindow(
+    '2026-11-25T03:45:00.000Z', '2026-11-26T03:45:00.000Z', '1h', { normalization: 'PERCENTAGE_CHANGE' },
+  )
+  assert.equal(
+    normalizeCloudflareRadarTimeseriesResponse(percentageChange).meta.normalization,
+    'PERCENTAGE_CHANGE',
+  )
+
+  assert.throws(
+    () => normalizeCloudflareRadarTimeseriesResponse({ success: true, result: { meta: null, serie_0: { timestamps: [], values: [] } } }),
+    /missing valid upstream metadata/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarTimeseriesResponse({
+      success: true,
+      result: { meta: withNormalization.result.meta },
+    }),
+    /missing the expected serie_0/,
+  )
+  assert.throws(
+    () => normalizeCloudflareRadarTimeseriesResponse({
+      success: true,
+      result: {
+        meta: { ...withNormalization.result.meta, aggInterval: '' },
+        serie_0: withNormalization.result.serie_0,
+      },
+    }),
+    /missing valid upstream metadata/,
+  )
+})
+
+test('validates timeseries meta: aggInterval mismatch names the actual resolution', () => {
+  const window = { dateStart: '2026-11-26T02:45:00.000Z', dateEnd: '2026-11-26T03:45:00.000Z' }
+  const meta = {
+    aggInterval: '15m',
+    dateRange: [{ startTime: '2026-11-26T02:45:00Z', endTime: '2026-11-26T03:45:00Z' }],
+    lastUpdated: '2026-11-26T03:45:00Z',
+    normalization: 'MIN0_MAX',
+    units: [{ name: 'requests', value: 'count' }],
+  }
+  assert.equal(validateCloudflareTimeseriesMeta(meta, window, '15m'), null)
+  assert.match(
+    validateCloudflareTimeseriesMeta({ ...meta, aggInterval: '1h' }, window, '15m'),
+    /returned aggInterval 1h instead of the requested 15m/,
+  )
+  assert.match(
+    validateCloudflareTimeseriesMeta({ ...meta, dateRange: [{ startTime: '2026-11-25T03:45:00Z', endTime: '2026-11-26T03:45:00Z' }] }, window, '15m'),
+    /instead of the requested/,
+  )
+
+  // Window shift is requested end minus returned end, in minutes.
+  assert.equal(cloudflareWindowShiftMinutes(window, meta), 0)
+  assert.equal(cloudflareWindowShiftMinutes(
+    { dateStart: '2026-11-26T21:30:00.000Z', dateEnd: '2026-11-26T22:30:00.000Z' },
+    { dateRange: [{ startTime: '2026-11-26T21:00:00Z', endTime: '2026-11-26T22:00:00Z' }] },
+  ), 30)
+  assert.equal(cloudflareWindowShiftMinutes(
+    { dateStart: '2026-11-26T21:30:00.000Z', dateEnd: '2026-11-26T22:30:00.000Z' },
+    { dateRange: [{ startTime: '2026-11-26T21:45:00Z', endTime: '2026-11-26T22:45:00Z' }] },
+  ), -15)
+  assert.equal(cloudflareWindowShiftMinutes(window, null), null)
+})
+
+test('validates timeseries serie: bad timestamps, count mismatch, non-numeric values', () => {
+  const window = { dateStart: '2026-11-26T02:45:00.000Z', dateEnd: '2026-11-26T03:45:00.000Z' }
+  const valid = timeseriesFixtureForWindow(window.dateStart, window.dateEnd, '15m').result.serie_0
+  assert.equal(validateCloudflareTimeseriesSerie(valid, window, '15m'), null)
+
+  // Point count within ±1 of duration/aggInterval is accepted.
+  const fivePoints = {
+    timestamps: ['2026-11-26T02:45:00.000Z', '2026-11-26T03:00:00.000Z', '2026-11-26T03:15:00.000Z', '2026-11-26T03:30:00.000Z', '2026-11-26T03:45:00.000Z'],
+    values: ['1', '2', '3', '4', '5'],
+  }
+  assert.equal(validateCloudflareTimeseriesSerie(fivePoints, window, '15m'), null)
+
+  assert.match(
+    validateCloudflareTimeseriesSerie({ timestamps: ['not-a-timestamp', '2026-11-26T03:00:00.000Z'], values: ['1', '2'] }, window, '15m'),
+    /not a valid ISO string/,
+  )
+  assert.match(
+    validateCloudflareTimeseriesSerie({ timestamps: ['2026-11-26T03:00:00.000Z', '2026-11-26T03:00:00.000Z'], values: ['1', '2'] }, window, '15m'),
+    /not strictly increasing/,
+  )
+  assert.match(
+    validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps, values: valid.values.slice(0, 3) }, window, '15m'),
+    /timestamps but 3 values/,
+  )
+  assert.match(
+    validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps, values: ['1', 'two', '3', '4'] }, window, '15m'),
+    /value 1 is not numeric/,
+  )
+  assert.match(
+    validateCloudflareTimeseriesSerie({ timestamps: valid.timestamps.slice(0, 2), values: ['1', '2'] }, window, '15m'),
+    /returned 2 points.*expected 4/,
+  )
+  assert.match(validateCloudflareTimeseriesSerie(null, window, '15m'), /missing serie_0/)
+})
+
+test('collects a live timeseries cell with the prescribed query and snapshot shape', async () => {
+  let requestUrl
+  const result = await collectCloudflareRadarTimeseries('24h', null, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:47:12.000Z'),
+    request: async (url, options) => {
+      requestUrl = new URL(url)
+      assert.deepEqual(options.headers, { Authorization: `Bearer ${FIXTURE_TOKEN}` })
+      return timeseriesFixtureForWindow(
+        requestUrl.searchParams.get('dateStart'),
+        requestUrl.searchParams.get('dateEnd'),
+        requestUrl.searchParams.get('aggInterval'),
+        { normalization: 'MIN0_MAX' },
+      )
+    },
+  })
+
+  assert.equal(requestUrl.pathname, '/client/v4/radar/attacks/layer7/timeseries')
+  assert.deepEqual(Object.fromEntries(requestUrl.searchParams), {
+    dateStart: '2026-11-25T03:45:00.000Z',
+    dateEnd: '2026-11-26T03:45:00.000Z',
+    aggInterval: '1h',
+    format: 'JSON',
+  })
+  assert.equal(requestUrl.searchParams.has('normalization'), false)
+  assert.equal(requestUrl.searchParams.has('limit'), false)
+  assert.equal(requestUrl.searchParams.has('mitigationProduct'), false)
+  assert.equal(result.timeseriesStatus, 'live')
+  assert.equal(result.timeseriesError, null)
+  assert.equal(result.product, 'all')
+  assert.equal(result.aggInterval, '1h')
+  assert.equal(result.interval, '24h')
+  assert.equal(result.windowShiftMinutes, 0)
+  assert.deepEqual(result.returnedWindow, { startTime: '2026-11-25T03:45:00.000Z', endTime: '2026-11-26T03:45:00.000Z' })
+  assert.equal(result.serie.timestamps.length, 24)
+  assert.equal(result.provider.status, 'live')
+  assert.equal(result.provider.pointCount, 24)
+  assert.equal(result.meta.normalization, 'MIN0_MAX')
+  assert.equal(result.meta.aggInterval, '1h')
+})
+
+test('requests the interval aggInterval and point count for every interval', async () => {
+  const expected = {
+    '1h': { aggInterval: '15m', points: 4 },
+    '6h': { aggInterval: '15m', points: 24 },
+    '24h': { aggInterval: '1h', points: 24 },
+    '7d': { aggInterval: '1d', points: 7 },
+  }
+  for (const interval of ['1h', '6h', '24h', '7d']) {
+    let seenAgg
+    const result = await collectCloudflareRadarTimeseries(interval, null, {
+      token: FIXTURE_TOKEN,
+      now: () => new Date('2026-11-26T03:47:12.000Z'),
+      request: async (url) => {
+        const requested = new URL(url)
+        seenAgg = requested.searchParams.get('aggInterval')
+        return timeseriesFixtureForWindow(
+          requested.searchParams.get('dateStart'),
+          requested.searchParams.get('dateEnd'),
+          seenAgg,
+        )
+      },
+    })
+    assert.equal(seenAgg, expected[interval].aggInterval)
+    assert.equal(result.aggInterval, expected[interval].aggInterval)
+    assert.equal(result.timeseriesStatus, 'live')
+    assert.equal(result.serie.timestamps.length, expected[interval].points)
+    assert.equal(result.provider.pointCount, expected[interval].points)
+  }
+})
+
+test('records the returned window and its shift when Cloudflare lags the requested window', async () => {
+  const now = () => new Date('2026-11-26T22:31:00.000Z')
+  const shiftedPairs = await collectCloudflareRadarInterval('1h', null, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async () => cloudflareFixtureForWindow('2026-11-26T21:00:00Z', '2026-11-26T22:00:00Z'),
+  })
+  assert.equal(shiftedPairs.intervalStatus, 'live')
+  assert.equal(shiftedPairs.windowShiftMinutes, 30)
+  assert.deepEqual(shiftedPairs.returnedWindow, { startTime: '2026-11-26T21:00:00Z', endTime: '2026-11-26T22:00:00Z' })
+  assert.deepEqual(shiftedPairs.window, { dateStart: '2026-11-26T21:30:00.000Z', dateEnd: '2026-11-26T22:30:00.000Z' })
+
+  const shiftedSeries = await collectCloudflareRadarTimeseries('1h', null, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async () => timeseriesFixtureForWindow('2026-11-26T21:00:00Z', '2026-11-26T22:00:00Z', '15m'),
+  })
+  assert.equal(shiftedSeries.timeseriesStatus, 'live')
+  assert.equal(shiftedSeries.windowShiftMinutes, 30)
+  assert.deepEqual(shiftedSeries.returnedWindow, { startTime: '2026-11-26T21:00:00Z', endTime: '2026-11-26T22:00:00Z' })
+})
+
+test('marks a timeseries cell stale on aggInterval mismatch and keeps previous points', async () => {
+  const now = () => new Date('2026-11-26T03:46:00.000Z')
+  const live = await collectCloudflareRadarTimeseries('1h', null, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async (url) => {
+      const requested = new URL(url)
+      return timeseriesFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+        requested.searchParams.get('aggInterval'),
+      )
+    },
+  })
+  assert.equal(live.timeseriesStatus, 'live')
+
+  const stale = await collectCloudflareRadarTimeseries('1h', live, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async (url) => {
+      const requested = new URL(url)
+      // API auto-selected 1h instead of the requested 15m.
+      return timeseriesFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+        '1h',
+      )
+    },
+  })
+  assert.equal(stale.timeseriesStatus, 'stale')
+  assert.equal(stale.provider.status, 'stale')
+  assert.match(stale.timeseriesError, /returned aggInterval 1h instead of the requested 15m/)
+  assert.deepEqual(stale.serie, live.serie)
+  assert.deepEqual(stale.meta, live.meta)
+  assert.equal(stale.aggInterval, '15m')
+
+  const unavailable = await collectCloudflareRadarTimeseries('1h', null, {
+    token: FIXTURE_TOKEN,
+    now,
+    request: async (url) => {
+      const requested = new URL(url)
+      return timeseriesFixtureForWindow(
+        requested.searchParams.get('dateStart'),
+        requested.searchParams.get('dateEnd'),
+        '1h',
+      )
+    },
+  })
+  assert.equal(unavailable.timeseriesStatus, 'unavailable')
+  assert.equal(unavailable.provider.status, 'offline')
+  assert.match(unavailable.timeseriesError, /returned aggInterval 1h instead of the requested 15m/)
+  assert.deepEqual(unavailable.serie, { timestamps: [], values: [] })
+  assert.equal(unavailable.meta, null)
+})
+
+test('per-product pairs pass through only the 5 provider fields and carry the product', async () => {
+  let requestUrl
+  const result = await collectCloudflareRadarInterval('24h', null, {
+    token: FIXTURE_TOKEN,
+    product: 'DDOS',
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async (url) => {
+      requestUrl = new URL(url)
+      return cloudflareFixtureForWindow(
+        requestUrl.searchParams.get('dateStart'),
+        requestUrl.searchParams.get('dateEnd'),
+        { latitude: 52.52, inventedField: 'must-not-appear' },
+      )
+    },
+  })
+
+  assert.equal(requestUrl.searchParams.get('mitigationProduct'), 'DDOS')
+  assert.equal(requestUrl.searchParams.get('normalization'), 'PERCENTAGE')
+  assert.equal(result.product, 'DDOS')
+  assert.equal(result.intervalStatus, 'live')
+  assert.deepEqual(Object.keys(result.pairs[0]).sort(), [
+    'originCountryAlpha2',
+    'originCountryName',
+    'targetCountryAlpha2',
+    'targetCountryName',
+    'value',
+  ])
+})
+
+test('matrix collects all 64 cells with batched concurrency and one product failing leaves others live', async () => {
+  const { request, stats } = matrixMockRequest({
+    failCell: { product: 'DDOS', kind: 'pairs' },
+    delayMs: 5,
+  })
+  const matrix = await collectCloudflareRadarMatrix({}, {
+    token: FIXTURE_TOKEN,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request,
+  })
+
+  assert.equal(stats().calls, 64)
+  assert.ok(stats().maxInFlight > 1, `expected batched concurrency, saw max ${stats().maxInFlight} in flight`)
+  assert.ok(stats().maxInFlight <= 6, `expected at most 6 in flight, saw ${stats().maxInFlight}`)
+  for (const interval of ['1h', '6h', '24h', '7d']) {
+    assert.deepEqual(Object.keys(matrix.pairs[interval]).sort(), [...CLOUDFLARE_PRODUCTS].sort())
+    assert.deepEqual(Object.keys(matrix.timeseries[interval]).sort(), [...CLOUDFLARE_PRODUCTS].sort())
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      if (product === 'DDOS') {
+        assert.equal(matrix.pairs[interval][product].intervalStatus, 'unavailable')
+        assert.match(matrix.pairs[interval][product].intervalError, /DDOS pairs endpoint down/)
+        assert.equal(matrix.timeseries[interval][product].timeseriesStatus, 'live')
+      } else {
+        assert.equal(matrix.pairs[interval][product].intervalStatus, 'live', `${interval}/${product} pairs`)
+        assert.equal(matrix.timeseries[interval][product].timeseriesStatus, 'live', `${interval}/${product} timeseries`)
+      }
+      assert.equal(matrix.pairs[interval][product].product, product)
+      assert.equal(matrix.timeseries[interval][product].product, product)
+    }
+  }
+})
+
+test('token absent leaves every Cloudflare file untouched and never requests', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'threatmap-cf-notoken-'))
+  try {
+    const seed = {
+      'public/data/cloudflare-attack-pairs-24h.json': JSON.stringify({ interval: '24h', product: 'all', pairs: [] }),
+      'public/data/cloudflare-timeseries-24h.json': JSON.stringify({ interval: '24h', product: 'all', serie: { timestamps: [], values: [] } }),
+      'public/data/history/cloudflare/24h/all/20261126T034600000Z.json': JSON.stringify({ interval: '24h' }),
+      'public/data/history/cloudflare-manifest.json': JSON.stringify({ schemaVersion: 2, intervals: {} }),
+    }
+    for (const [file, contents] of Object.entries(seed)) {
+      fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true })
+      fs.writeFileSync(path.join(root, file), contents)
+    }
+    const snapshotTree = () => {
+      const out = {}
+      const walk = (dir) => {
+        for (const name of fs.readdirSync(dir)) {
+          const full = path.join(dir, name)
+          if (fs.statSync(full).isDirectory()) walk(full)
+          else out[path.relative(root, full)] = fs.readFileSync(full, 'utf8')
+        }
+      }
+      walk(path.join(root, 'public'))
+      return out
+    }
+    const before = snapshotTree()
+
+    const matrix = await collectCloudflareRadarMatrix({}, {
+      token: '',
+      now: () => new Date('2026-11-26T03:46:00.000Z'),
+      request: async () => assert.fail('must not request Cloudflare without a token'),
+    })
+    for (const interval of ['1h', '6h', '24h', '7d']) {
+      for (const product of CLOUDFLARE_PRODUCTS) {
+        assert.equal(matrix.pairs[interval][product].provider.status, 'not_configured')
+        assert.equal(matrix.pairs[interval][product].intervalStatus, 'unavailable')
+        assert.equal(matrix.timeseries[interval][product].provider.status, 'not_configured')
+        assert.equal(matrix.timeseries[interval][product].timeseriesStatus, 'unavailable')
+      }
+    }
+    assert.deepEqual(snapshotTree(), before)
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('run budget exceeded marks unstarted cells without requesting them', async () => {
+  let calls = 0
+  const matrix = await collectCloudflareRadarMatrix({}, {
+    token: FIXTURE_TOKEN,
+    runBudgetMs: 0,
+    now: () => new Date('2026-11-26T03:46:00.000Z'),
+    request: async () => { calls += 1; return cloudflareFixtureForWindow('2026-11-26T02:45:00.000Z', '2026-11-26T03:45:00.000Z') },
+  })
+  assert.equal(calls, 0)
+  assert.match(matrix.pairs['1h']['all'].intervalError, /run budget/)
+  assert.match(matrix.timeseries['7d']['WAF'].timeseriesError, /run budget/)
+  assert.equal(matrix.pairs['1h']['all'].intervalStatus, 'unavailable')
+})
+
+test('writes the full matrix, prunes per-product caps, and builds the v2 manifest', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'threatmap-cf-matrix-'))
+  try {
+    const times = ['2026-11-26T03:46:00.000Z', '2026-11-26T04:01:00.000Z', '2026-11-26T04:16:00.000Z']
+    const caps = {
+      retentionPerInterval: 2,
+      retentionPairsProduct: 2,
+      retentionTimeseriesAll: 2,
+      retentionTimeseriesProduct: 2,
+    }
+    let lastOutcome
+    for (const time of times) {
+      const now = new Date(time)
+      const { request } = matrixMockRequest()
+      const matrix = await collectCloudflareRadarMatrix({}, {
+        token: FIXTURE_TOKEN,
+        now: () => now,
+        request,
+      })
+      lastOutcome = writeCloudflareOutputs(matrix, { root, now: () => now, ...caps })
+    }
+
+    // 32 pairs + 32 timeseries files + the legacy 24h pairs copy.
+    assert.equal(lastOutcome.written.length, 65)
+    assert.ok(lastOutcome.written.includes('public/data/cloudflare-attack-pairs-7d-data_loss_prevention.json'))
+    assert.ok(lastOutcome.written.includes('public/data/cloudflare-timeseries-24h-waf.json'))
+    assert.ok(lastOutcome.written.includes('public/data/cloudflare-attack-pairs.json'))
+    const timeseries24h = JSON.parse(fs.readFileSync(path.join(root, 'public/data/cloudflare-timeseries-24h.json'), 'utf8'))
+    assert.equal(timeseries24h.product, 'all')
+    assert.equal(timeseries24h.timeseriesStatus, 'live')
+    assert.equal(timeseries24h.aggInterval, '1h')
+    // Normalization is recorded as returned, verbatim.
+    assert.equal(timeseries24h.meta.normalization, 'MIN0_MAX')
+    const pairs24hWaf = JSON.parse(fs.readFileSync(path.join(root, 'public/data/cloudflare-attack-pairs-24h-waf.json'), 'utf8'))
+    assert.equal(pairs24hWaf.product, 'WAF')
+    assert.equal(pairs24hWaf.intervalStatus, 'live')
+
+    // Per-(interval × product) history dirs pruned to the cap of 2.
+    for (const [dir, expected] of [
+      ['public/data/history/cloudflare/24h/all', ['20261126T040100000Z.json', '20261126T041600000Z.json']],
+      ['public/data/history/cloudflare/24h/ddos', ['20261126T040100000Z.json', '20261126T041600000Z.json']],
+      ['public/data/history/cloudflare-timeseries/24h/all', ['20261126T040100000Z.json', '20261126T041600000Z.json']],
+      ['public/data/history/cloudflare-timeseries/7d/api_shield', ['20261126T040100000Z.json', '20261126T041600000Z.json']],
+    ]) {
+      assert.deepEqual(fs.readdirSync(path.join(root, dir)).sort(), expected, dir)
+    }
+    // One prune per history dir (64 dirs) on the third run.
+    assert.equal(lastOutcome.pruned.length, 64)
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public/data/history/cloudflare-manifest.json'), 'utf8'))
+    assert.equal(manifest.schemaVersion, 2)
+    assert.equal(manifest.pairs['24h']['DDOS'].length, 2)
+    assert.deepEqual(Object.keys(manifest.pairs['24h']['DDOS'][0]).sort(), [
+      'generatedAt',
+      'lastUpdated',
+      'pairCount',
+      'path',
+    ])
+    assert.equal(manifest.pairs['24h']['DDOS'][1].path, 'data/history/cloudflare/24h/ddos/20261126T041600000Z.json')
+    assert.equal(manifest.timeseries['24h']['all'].length, 2)
+    assert.deepEqual(Object.keys(manifest.timeseries['24h']['all'][0]).sort(), [
+      'aggInterval',
+      'generatedAt',
+      'lastUpdated',
+      'path',
+      'pointCount',
+    ])
+    assert.equal(manifest.timeseries['24h']['all'][1].aggInterval, '1h')
+    assert.equal(manifest.timeseries['24h']['all'][1].pointCount, 24)
+    // v1 compat key is the pairs "all" section.
+    assert.deepEqual(manifest.intervals['24h'], manifest.pairs['24h']['all'])
+    assert.deepEqual(manifest.intervals['1h'], manifest.pairs['1h']['all'])
+
+    // No credential anywhere in anything the builder wrote.
+    const writtenFiles = []
+    const walk = (dir) => {
+      for (const name of fs.readdirSync(dir)) {
+        const full = path.join(dir, name)
+        if (fs.statSync(full).isDirectory()) walk(full)
+        else writtenFiles.push(full)
+      }
+    }
+    walk(path.join(root, 'public'))
+    assert.ok(writtenFiles.length > 0)
+    for (const file of writtenFiles) {
+      assert.equal(fs.readFileSync(file, 'utf8').includes(FIXTURE_TOKEN), false, `${file} leaks the fixture token`)
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('a stale matrix cell adds no history snapshot', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'threatmap-cf-stale-'))
+  try {
+    const caps = {
+      retentionPerInterval: 96,
+      retentionPairsProduct: 24,
+      retentionTimeseriesAll: 96,
+      retentionTimeseriesProduct: 24,
+    }
+    const runAt = async (time, failCell, previous = {}) => {
+      const now = new Date(time)
+      const { request } = matrixMockRequest({ failCell })
+      const matrix = await collectCloudflareRadarMatrix(previous, {
+        token: FIXTURE_TOKEN,
+        now: () => now,
+        request,
+      })
+      writeCloudflareOutputs(matrix, { root, now: () => now, ...caps })
+      return matrix
+    }
+    const first = await runAt('2026-11-26T03:46:00.000Z', null)
+    const previousTimeseries = JSON.parse(fs.readFileSync(path.join(root, 'public/data/cloudflare-timeseries-24h-waf.json'), 'utf8'))
+    await runAt('2026-11-26T04:01:00.000Z', { product: 'WAF', kind: 'timeseries' }, first)
+
+    const currentTimeseries = JSON.parse(fs.readFileSync(path.join(root, 'public/data/cloudflare-timeseries-24h-waf.json'), 'utf8'))
+    assert.equal(currentTimeseries.timeseriesStatus, 'stale')
+    assert.deepEqual(currentTimeseries.serie, previousTimeseries.serie)
+    // No second history snapshot for the stale cell; the live pair cell
+    // next to it got one.
+    assert.deepEqual(fs.readdirSync(path.join(root, 'public/data/history/cloudflare-timeseries/24h/waf')).sort(), [
+      '20261126T034600000Z.json',
+    ])
+    assert.deepEqual(fs.readdirSync(path.join(root, 'public/data/history/cloudflare/24h/waf')).sort(), [
+      '20261126T034600000Z.json',
+      '20261126T040100000Z.json',
+    ])
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public/data/history/cloudflare-manifest.json'), 'utf8'))
+    assert.equal(manifest.timeseries['24h']['WAF'].length, 1)
+    assert.equal(manifest.pairs['24h']['WAF'].length, 2)
   } finally {
     fs.rmSync(root, { recursive: true, force: true })
   }

@@ -7,8 +7,8 @@ const OUT = 'public/data/threat-intel-snapshot.json'
 const SOURCES_FILE = 'public/data/sources-snapshot.json'
 const KEV_FILE = 'public/data/kev-snapshot.json'
 const CLOUDFLARE_FILE = 'public/data/cloudflare-attack-pairs.json'
-const CLOUDFLARE_INTERVAL_FILE = (interval) => `public/data/cloudflare-attack-pairs-${interval}.json`
 const CLOUDFLARE_HISTORY_DIR = 'public/data/history/cloudflare'
+const CLOUDFLARE_TIMESERIES_HISTORY_DIR = 'public/data/history/cloudflare-timeseries'
 const CLOUDFLARE_HISTORY_MANIFEST_FILE = 'public/data/history/cloudflare-manifest.json'
 export const CLOUDFLARE_INTERVALS = ['1h', '6h', '24h', '7d']
 const CLOUDFLARE_INTERVAL_DURATION_MS = {
@@ -18,10 +18,74 @@ const CLOUDFLARE_INTERVAL_DURATION_MS = {
   '7d': 7 * 24 * 60 * 60 * 1000,
 }
 export const CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL = 96
+// Per-(interval × product) history caps: the unfiltered "all" aggregate is
+// the primary timeline (96 snapshots/interval, ~24h at the 15-min cadence);
+// per-product slices keep 24/interval (~6h).
+export const CLOUDFLARE_HISTORY_RETENTION = {
+  pairsAll: 96,
+  pairsProduct: 24,
+  timeseriesAll: 96,
+  timeseriesProduct: 24,
+}
+// Cloudflare Radar mitigationProduct values. 'all' is the unfiltered
+// aggregate (no mitigationProduct parameter is sent). The product token in
+// file names and history paths is the lowercase enum suffix; the `product`
+// field inside published files and the manifest keys use the uppercase
+// enum value, matching the frontend's CLOUDFLARE_PRODUCTS.
+export const CLOUDFLARE_PRODUCTS = [
+  'all',
+  'DDOS',
+  'WAF',
+  'BOT_MANAGEMENT',
+  'ACCESS_RULES',
+  'IP_REPUTATION',
+  'API_SHIELD',
+  'DATA_LOSS_PREVENTION',
+]
+const CLOUDFLARE_PRODUCT_SUFFIXES = {
+  DDOS: 'ddos',
+  WAF: 'waf',
+  BOT_MANAGEMENT: 'bot_management',
+  ACCESS_RULES: 'access_rules',
+  IP_REPUTATION: 'ip_reputation',
+  API_SHIELD: 'api_shield',
+  DATA_LOSS_PREVENTION: 'data_loss_prevention',
+}
+export function normalizeCloudflareProduct(product) {
+  return CLOUDFLARE_PRODUCTS.includes(product) ? product : 'all'
+}
+export function cloudflareProductSuffix(product) {
+  const safeProduct = normalizeCloudflareProduct(product)
+  return safeProduct === 'all' ? '' : `-${CLOUDFLARE_PRODUCT_SUFFIXES[safeProduct]}`
+}
+const CLOUDFLARE_INTERVAL_FILE = (interval, product = 'all') =>
+  `public/data/cloudflare-attack-pairs-${interval}${cloudflareProductSuffix(product)}.json`
+const CLOUDFLARE_TIMESERIES_FILE = (interval, product = 'all') =>
+  `public/data/cloudflare-timeseries-${interval}${cloudflareProductSuffix(product)}.json`
+// Aggregation resolution the timeseries endpoint is asked for, per
+// interval: 1h→15m, 6h→15m, 24h→1h, 7d→1d.
+export const CLOUDFLARE_TIMESERIES_AGG_INTERVAL = {
+  '1h': '15m',
+  '6h': '15m',
+  '24h': '1h',
+  '7d': '1d',
+}
+const CLOUDFLARE_TIMESERIES_AGG_INTERVAL_MS = {
+  '15m': 15 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '1d': 24 * 60 * 60 * 1000,
+}
+// The matrix runs 64 cells per run (4 intervals × 8 products × 2 kinds)
+// with at most 6 requests in flight and a 10-minute total budget, so a
+// run stays well inside the 15-minute workflow cadence even if requests
+// are slow (each individual request still has its own 20s timeout).
+export const CLOUDFLARE_MAX_IN_FLIGHT = 6
+export const CLOUDFLARE_RUN_BUDGET_MS = 10 * 60 * 1000
 const FIFTEEN_MINUTES_MS = 15 * 60 * 1000
 const THREATFOX_FILE = 'public/data/threatfox-snapshot.json'
 const NVD_URL = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
 const CLOUDFLARE_RADAR_URL = 'https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks'
+const CLOUDFLARE_RADAR_TIMESERIES_URL = 'https://api.cloudflare.com/client/v4/radar/attacks/layer7/timeseries'
 const ISC_API = 'https://isc.sans.edu/api'
 const NVD_API_KEY = process.env.NVD_API_KEY || ''
 const CLOUDFLARE_RADAR_API_TOKEN = process.env.CLOUDFLARE_RADAR_API_TOKEN || ''
@@ -214,6 +278,17 @@ async function fetchCloudflareRadar(url, { headers = {}, timeout = FETCH_TIMEOUT
   }
 }
 
+function validCloudflareDateRange(meta) {
+  return Array.isArray(meta?.dateRange) &&
+    meta.dateRange.length > 0 &&
+    meta.dateRange.every((range) => {
+      if (!range || typeof range !== 'object') return false
+      const startTime = parseTimestamp(range.startTime)
+      const endTime = parseTimestamp(range.endTime)
+      return startTime !== null && endTime !== null && startTime <= endTime
+    })
+}
+
 export function normalizeCloudflareRadarResponse(response) {
   if (response?.success !== true || !response.result || typeof response.result !== 'object') {
     const errors = Array.isArray(response?.errors)
@@ -224,14 +299,7 @@ export function normalizeCloudflareRadarResponse(response) {
     )
   }
   const meta = response.result.meta
-  const validDateRange = Array.isArray(meta?.dateRange) &&
-    meta.dateRange.length > 0 &&
-    meta.dateRange.every((range) => {
-      if (!range || typeof range !== 'object') return false
-      const startTime = parseTimestamp(range.startTime)
-      const endTime = parseTimestamp(range.endTime)
-      return startTime !== null && endTime !== null && startTime <= endTime
-    })
+  const validDateRange = validCloudflareDateRange(meta)
   const validUnits = Array.isArray(meta?.units) &&
     meta.units.every((unit) =>
       unit &&
@@ -291,6 +359,61 @@ export function normalizeCloudflareRadarResponse(response) {
   }
 }
 
+// Structural validation for the timeseries endpoint
+// (GET /radar/attacks/layer7/timeseries): result.meta carries the
+// aggregation resolution, window and freshness, and result.serie_0
+// carries the points. No normalization is requested, so meta.normalization
+// is passed through as returned (or null when absent) rather than checked
+// against a value. Semantic checks (window match, aggInterval match,
+// timestamp/value shape, point count) live in the validate functions
+// below; this function only establishes the structure they run on.
+export function normalizeCloudflareRadarTimeseriesResponse(response) {
+  if (response?.success !== true || !response.result || typeof response.result !== 'object') {
+    const errors = Array.isArray(response?.errors)
+      ? response.errors.map((error) => [error?.code, error?.message].filter(Boolean).join(': ')).filter(Boolean)
+      : []
+    throw new Error(
+      `Cloudflare Radar returned success=${String(response?.success)}${errors.length ? `; errors: ${errors.join('; ')}` : '; unexpected response structure'}`,
+    )
+  }
+  const meta = response.result.meta
+  if (
+    !meta ||
+    typeof meta !== 'object' ||
+    typeof meta.lastUpdated !== 'string' ||
+    !parseTimestamp(meta.lastUpdated) ||
+    !validCloudflareDateRange(meta) ||
+    typeof meta.aggInterval !== 'string' ||
+    meta.aggInterval.trim() === '' ||
+    (meta.normalization !== undefined && typeof meta.normalization !== 'string') ||
+    (meta.units !== undefined && !Array.isArray(meta.units))
+  ) {
+    throw new Error('Cloudflare Radar timeseries response is missing valid upstream metadata')
+  }
+  const serie = response.result.serie_0
+  if (
+    !serie ||
+    typeof serie !== 'object' ||
+    !Array.isArray(serie.timestamps) ||
+    !Array.isArray(serie.values)
+  ) {
+    throw new Error('Cloudflare Radar timeseries response is missing the expected serie_0 timestamps/values')
+  }
+  return {
+    meta: {
+      aggInterval: meta.aggInterval,
+      dateRange: meta.dateRange,
+      lastUpdated: meta.lastUpdated,
+      normalization: typeof meta.normalization === 'string' ? meta.normalization : null,
+      units: Array.isArray(meta.units) ? meta.units : null,
+    },
+    serie: {
+      timestamps: serie.timestamps,
+      values: serie.values,
+    },
+  }
+}
+
 function cloudflareResponseDescription(httpStatus, response) {
   const errors = Array.isArray(response?.errors)
     ? response.errors
@@ -315,10 +438,17 @@ function preserveCloudflareSnapshotIfUnchanged(current, previous) {
     },
     meta: snapshot.meta,
     pairs: snapshot.pairs,
+    serie: snapshot.serie,
     interval: snapshot.interval,
+    product: snapshot.product,
     window: snapshot.window,
+    aggInterval: snapshot.aggInterval,
     intervalStatus: snapshot.intervalStatus,
     intervalError: snapshot.intervalError,
+    timeseriesStatus: snapshot.timeseriesStatus,
+    timeseriesError: snapshot.timeseriesError,
+    returnedWindow: snapshot.returnedWindow,
+    windowShiftMinutes: snapshot.windowShiftMinutes,
   })
   if (comparable(current) !== comparable(previous)) return current
   return {
@@ -401,8 +531,175 @@ export function validateCloudflareIntervalMeta(meta, window) {
   return null
 }
 
-export async function collectCloudflareRadarInterval(
+// Requested end minus the end the API actually returned, in minutes.
+// Cloudflare returns the latest fully aggregated window, which can lag
+// the requested window (round 1: 1h requested 21:30–22:30Z, returned
+// 21:00–22:00Z = 30 min). The shift is recorded honestly on every file;
+// it may be negative when the returned end is after the requested end.
+export function cloudflareWindowShiftMinutes(window, meta) {
+  const range = Array.isArray(meta?.dateRange) ? meta.dateRange[0] : null
+  const endTime = parseTimestamp(range?.endTime)
+  const requestedEnd = Date.parse(window?.dateEnd || '')
+  if (endTime === null || !Number.isFinite(requestedEnd)) return null
+  return Math.round((requestedEnd - Date.parse(endTime)) / 60000)
+}
+
+// Window fields carried forward when a cell goes stale/unavailable: the
+// shift recorded at fetch time, not recomputed against a later request.
+function previousCloudflareWindowFields(previous) {
+  const returnedWindow = previous?.returnedWindow ?? previous?.meta?.dateRange?.[0] ?? null
+  let windowShiftMinutes = Number.isFinite(previous?.windowShiftMinutes)
+    ? previous.windowShiftMinutes
+    : null
+  if (windowShiftMinutes === null && previous?.meta && previous?.window) {
+    windowShiftMinutes = cloudflareWindowShiftMinutes(previous.window, previous.meta)
+  }
+  return { returnedWindow, windowShiftMinutes }
+}
+
+// Validates a timeseries response's meta against the requested window and
+// resolution. Returns null when it matches, otherwise a human-readable
+// reason. Reuses the pairs window checks (duration within 15 min, bounded
+// end lag, lastUpdated parseable and not in the future), then requires
+// the API's aggInterval to match the requested one: when the API
+// auto-selects a different resolution the actual value is named in the
+// reason and the cell is marked stale/unavailable — a different
+// resolution is never silently accepted as the requested one.
+export function validateCloudflareTimeseriesMeta(meta, window, aggInterval) {
+  const windowError = validateCloudflareIntervalMeta(meta, window)
+  if (windowError) return windowError
+  if (typeof meta?.aggInterval !== 'string' || meta.aggInterval.trim() === '') {
+    return 'Cloudflare Radar timeseries response meta.aggInterval is missing or unparseable'
+  }
+  if (meta.aggInterval !== aggInterval) {
+    return `Cloudflare Radar timeseries returned aggInterval ${meta.aggInterval} instead of the requested ${aggInterval}`
+  }
+  return null
+}
+
+// Validates a timeseries serie against the requested window and
+// resolution. Returns null when it matches, otherwise a human-readable
+// reason. Timestamps must be strictly increasing valid ISO strings,
+// values must be numeric (the API returns them as strings) with exactly
+// one value per timestamp, and the point count must be within ±1 of
+// duration/aggInterval.
+export function validateCloudflareTimeseriesSerie(serie, window, aggInterval) {
+  if (!serie || typeof serie !== 'object') {
+    return 'Cloudflare Radar timeseries response is missing serie_0'
+  }
+  const timestamps = serie.timestamps
+  const values = serie.values
+  if (!Array.isArray(timestamps) || !Array.isArray(values)) {
+    return 'Cloudflare Radar timeseries serie timestamps/values are missing or not arrays'
+  }
+  if (timestamps.length !== values.length) {
+    return `Cloudflare Radar timeseries has ${timestamps.length} timestamps but ${values.length} values`
+  }
+  let previousTime = null
+  for (let index = 0; index < timestamps.length; index += 1) {
+    const time = typeof timestamps[index] === 'string' ? Date.parse(timestamps[index]) : NaN
+    if (!Number.isFinite(time)) {
+      return `Cloudflare Radar timeseries timestamp ${index} is not a valid ISO string: ${String(timestamps[index]).slice(0, 100)}`
+    }
+    if (previousTime !== null && time <= previousTime) {
+      return `Cloudflare Radar timeseries timestamps are not strictly increasing at index ${index}`
+    }
+    previousTime = time
+    if (suppliedNumber(values[index]) === null) {
+      return `Cloudflare Radar timeseries value ${index} is not numeric: ${String(values[index]).slice(0, 100)}`
+    }
+  }
+  const aggMs = CLOUDFLARE_TIMESERIES_AGG_INTERVAL_MS[aggInterval]
+  if (!aggMs) {
+    return `Unknown Cloudflare timeseries aggInterval: ${aggInterval}`
+  }
+  const durationMs = Date.parse(window.dateEnd) - Date.parse(window.dateStart)
+  const expected = durationMs / aggMs
+  if (Math.abs(timestamps.length - expected) > 1) {
+    return `Cloudflare Radar timeseries returned ${timestamps.length} points for a ${durationMs / 3600000}h window at ${aggInterval} (expected ${expected} ± 1)`
+  }
+  return null
+}
+
+function cloudflareRadarRequestUrl(kind, window, product, aggInterval) {
+  const url = new URL(kind === 'timeseries' ? CLOUDFLARE_RADAR_TIMESERIES_URL : CLOUDFLARE_RADAR_URL)
+  url.searchParams.set('dateStart', window.dateStart)
+  url.searchParams.set('dateEnd', window.dateEnd)
+  if (kind === 'pairs') {
+    url.searchParams.set('limit', '50')
+    url.searchParams.set('normalization', 'PERCENTAGE')
+  } else {
+    // No normalization is requested for timeseries: the values are used
+    // exactly as returned, and meta.normalization is recorded faithfully
+    // in the file (see normalizeCloudflareRadarTimeseriesResponse).
+    url.searchParams.set('aggInterval', aggInterval)
+  }
+  url.searchParams.set('format', 'JSON')
+  if (product !== 'all') url.searchParams.set('mitigationProduct', product)
+  return url
+}
+
+// Stale/unavailable snapshot for one matrix cell. Preserves the previous
+// file's data, meta and recorded window shift when there is cached data;
+// otherwise reports empty data. Token-absent cells report
+// not_configured but are never written to disk by main().
+function cloudflareCellErrorSnapshot({ kind, interval, product, window, previous, error, token, checkedAt }) {
+  const hasCachedData = kind === 'pairs'
+    ? Boolean(previous?.meta && Array.isArray(previous.pairs))
+    : Boolean(previous?.meta && previous?.serie && Array.isArray(previous.serie.timestamps))
+  const providerStatus = !token ? 'not_configured' : hasCachedData ? 'stale' : 'offline'
+  const { returnedWindow, windowShiftMinutes } = previousCloudflareWindowFields(previous)
+  const base = {
+    schemaVersion: 1,
+    generatedAt: checkedAt,
+    interval,
+    product,
+    window: { dateStart: window.dateStart, dateEnd: window.dateEnd },
+    returnedWindow,
+    windowShiftMinutes,
+    provider: {
+      ...SOURCES.cloudflare_radar,
+      status: providerStatus,
+      fetchedAt: previous?.provider?.fetchedAt || null,
+      lastUpdated: previous?.meta?.lastUpdated || null,
+      error: error.message,
+      cacheIntervalMinutes: 15,
+      rateLimit: 'Cloudflare Radar API access and limits depend on the token and account plan.',
+    },
+    meta: hasCachedData ? previous.meta : null,
+  }
+  if (kind === 'pairs') {
+    return preserveCloudflareSnapshotIfUnchanged({
+      ...base,
+      intervalStatus: hasCachedData ? 'stale' : 'unavailable',
+      intervalError: error.message,
+      provider: { ...base.provider, pairCount: hasCachedData ? previous.pairs.length : 0 },
+      pairs: hasCachedData ? previous.pairs : [],
+    }, previous)
+  }
+  const pointCount = hasCachedData ? previous.serie.timestamps.length : 0
+  return preserveCloudflareSnapshotIfUnchanged({
+    ...base,
+    aggInterval: CLOUDFLARE_TIMESERIES_AGG_INTERVAL[interval],
+    timeseriesStatus: hasCachedData ? 'stale' : 'unavailable',
+    timeseriesError: error.message,
+    // The timeseries provider mirrors the pairs provider shape; the count
+    // slot holds the number of points (also exposed as pointCount).
+    provider: { ...base.provider, pairCount: pointCount, pointCount },
+    serie: hasCachedData ? previous.serie : { timestamps: [], values: [] },
+  }, previous)
+}
+
+// Fetches one matrix cell: one (interval × product × kind). `kind` is
+// 'pairs' (top origin→target pairs, PERCENTAGE) or 'timeseries'
+// (serie_0 points at the interval's aggInterval, no normalization
+// requested). Any failure — fetch error, invalid response, window or
+// resolution mismatch — returns a stale/unavailable snapshot for this
+// cell only and never throws, so one bad cell cannot poison the run.
+export async function collectCloudflareRadarCell(
   interval,
+  product,
+  kind,
   previous,
   {
     token = CLOUDFLARE_RADAR_API_TOKEN,
@@ -410,14 +707,11 @@ export async function collectCloudflareRadarInterval(
     now = () => new Date(),
   } = {},
 ) {
+  const safeProduct = normalizeCloudflareProduct(product)
   const window = cloudflareIntervalWindow(interval, now())
   const checkedAt = now().toISOString()
-  const url = new URL(CLOUDFLARE_RADAR_URL)
-  url.searchParams.set('dateStart', window.dateStart)
-  url.searchParams.set('dateEnd', window.dateEnd)
-  url.searchParams.set('limit', '50')
-  url.searchParams.set('normalization', 'PERCENTAGE')
-  url.searchParams.set('format', 'JSON')
+  const aggInterval = kind === 'timeseries' ? CLOUDFLARE_TIMESERIES_AGG_INTERVAL[interval] : null
+  const url = cloudflareRadarRequestUrl(kind, window, safeProduct, aggInterval)
   try {
     if (!token) throw new Error('CLOUDFLARE_RADAR_API_TOKEN is not configured')
     const response = await request(url, {
@@ -430,68 +724,102 @@ export async function collectCloudflareRadarInterval(
     }
     let normalized
     try {
-      normalized = normalizeCloudflareRadarResponse(payload)
+      normalized = kind === 'timeseries'
+        ? normalizeCloudflareRadarTimeseriesResponse(payload)
+        : normalizeCloudflareRadarResponse(payload)
     } catch (error) {
       throw new Error(`${cloudflareResponseDescription(httpStatus, payload)}; ${error.message}`)
     }
-    const windowError = validateCloudflareIntervalMeta(normalized.meta, window)
-    if (windowError) {
+    const metaError = kind === 'timeseries'
+      ? validateCloudflareTimeseriesMeta(normalized.meta, window, aggInterval)
+      : validateCloudflareIntervalMeta(normalized.meta, window)
+    if (metaError) {
       throw new Error(
-        `${windowError}; requested ${window.dateStart}..${window.dateEnd}; ` +
+        `${metaError}; requested ${window.dateStart}..${window.dateEnd}; ` +
         `returned dateRange ${JSON.stringify(normalized.meta.dateRange)} lastUpdated ${normalized.meta.lastUpdated}`,
       )
     }
+    if (kind === 'timeseries') {
+      const serieError = validateCloudflareTimeseriesSerie(normalized.serie, window, aggInterval)
+      if (serieError) throw new Error(serieError)
+    }
     const fetchedAt = now().toISOString()
-    return preserveCloudflareSnapshotIfUnchanged({
+    const base = {
       schemaVersion: 1,
       generatedAt: fetchedAt,
       interval,
+      product: safeProduct,
       window: { dateStart: window.dateStart, dateEnd: window.dateEnd },
-      intervalStatus: 'live',
-      intervalError: null,
+      returnedWindow: normalized.meta.dateRange[0],
+      windowShiftMinutes: cloudflareWindowShiftMinutes(window, normalized.meta),
       provider: {
         ...SOURCES.cloudflare_radar,
         status: 'live',
         fetchedAt,
         lastUpdated: normalized.meta.lastUpdated,
-        pairCount: normalized.pairs.length,
         error: null,
         cacheIntervalMinutes: 15,
         rateLimit: 'Cloudflare Radar API access and limits depend on the token and account plan.',
       },
       meta: normalized.meta,
-      pairs: normalized.pairs,
+    }
+    if (kind === 'pairs') {
+      return preserveCloudflareSnapshotIfUnchanged({
+        ...base,
+        intervalStatus: 'live',
+        intervalError: null,
+        provider: { ...base.provider, pairCount: normalized.pairs.length },
+        pairs: normalized.pairs,
+      }, previous)
+    }
+    const pointCount = normalized.serie.timestamps.length
+    return preserveCloudflareSnapshotIfUnchanged({
+      ...base,
+      aggInterval,
+      timeseriesStatus: 'live',
+      timeseriesError: null,
+      // The timeseries provider mirrors the pairs provider shape; the
+      // count slot holds the number of points (also exposed as pointCount).
+      provider: { ...base.provider, pairCount: pointCount, pointCount },
+      serie: normalized.serie,
     }, previous)
   } catch (error) {
-    const hasCachedData = Boolean(previous?.meta && Array.isArray(previous.pairs))
-    const providerStatus = !token ? 'not_configured' : hasCachedData ? 'stale' : 'offline'
-    return preserveCloudflareSnapshotIfUnchanged({
-      schemaVersion: 1,
-      generatedAt: checkedAt,
-      interval,
-      window: { dateStart: window.dateStart, dateEnd: window.dateEnd },
-      intervalStatus: hasCachedData ? 'stale' : 'unavailable',
-      intervalError: error.message,
-      provider: {
-        ...SOURCES.cloudflare_radar,
-        status: providerStatus,
-        fetchedAt: previous?.provider?.fetchedAt || null,
-        lastUpdated: previous?.meta?.lastUpdated || null,
-        pairCount: hasCachedData ? previous.pairs.length : 0,
-        error: error.message,
-        cacheIntervalMinutes: 15,
-        rateLimit: 'Cloudflare Radar API access and limits depend on the token and account plan.',
-      },
-      meta: hasCachedData ? previous.meta : null,
-      pairs: hasCachedData ? previous.pairs : [],
-    }, previous)
+    return cloudflareCellErrorSnapshot({
+      kind, interval, product: safeProduct, window, previous, error, token, checkedAt,
+    })
   }
+}
+
+export async function collectCloudflareRadarInterval(
+  interval,
+  previous,
+  {
+    token = CLOUDFLARE_RADAR_API_TOKEN,
+    request = fetchCloudflareRadar,
+    now = () => new Date(),
+    product = 'all',
+  } = {},
+) {
+  return collectCloudflareRadarCell(interval, product, 'pairs', previous, { token, request, now })
+}
+
+export async function collectCloudflareRadarTimeseries(
+  interval,
+  previous,
+  {
+    token = CLOUDFLARE_RADAR_API_TOKEN,
+    request = fetchCloudflareRadar,
+    now = () => new Date(),
+    product = 'all',
+  } = {},
+) {
+  return collectCloudflareRadarCell(interval, product, 'timeseries', previous, { token, request, now })
 }
 
 // Fetches every statistics interval independently: one interval failing
 // (fetch error, invalid response, or window mismatch) never poisons the
 // others. Returns { '1h': snapshot, '6h': snapshot, '24h': snapshot,
-// '7d': snapshot }.
+// '7d': snapshot } of the unfiltered ("all") pairs.
 export async function collectCloudflareRadarIntervals(previousByInterval = {}, options = {}) {
   const results = {}
   for (const interval of CLOUDFLARE_INTERVALS) {
@@ -510,112 +838,344 @@ export async function collectCloudflareRadar(previous, options = {}) {
   return collectCloudflareRadarInterval('24h', previous, options)
 }
 
+// Fetches the full matrix: 4 intervals × 8 products ('all' + 7
+// mitigationProduct values) × 2 kinds (pairs + timeseries) = 64 cells
+// per run. Cells run with at most CLOUDFLARE_MAX_IN_FLIGHT requests in
+// flight; one cell failing marks only that cell stale/unavailable and
+// keeps its previous file. Once the per-run budget
+// (CLOUDFLARE_RUN_BUDGET_MS) is spent, cells not yet started are
+// reported as budget-exceeded (preserving previous data) instead of
+// starting new requests, so the run stays inside the 15-minute cadence.
+// Returns { pairs: { interval: { product: snapshot } },
+//           timeseries: { interval: { product: snapshot } } }.
+// `previous` uses the same shape; `options` takes the usual
+// { token, request, now } plus runBudgetMs to override the budget.
+export async function collectCloudflareRadarMatrix(previous = {}, options = {}) {
+  const pairs = {}
+  const timeseries = {}
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    pairs[interval] = {}
+    timeseries[interval] = {}
+  }
+  const prevPairs = previous?.pairs || {}
+  const prevTimeseries = previous?.timeseries || {}
+  const tasks = []
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      tasks.push({ kind: 'pairs', interval, product })
+      tasks.push({ kind: 'timeseries', interval, product })
+    }
+  }
+  const runBudgetMs = options.runBudgetMs ?? CLOUDFLARE_RUN_BUDGET_MS
+  const deadline = Date.now() + runBudgetMs
+  const nowFn = options.now || (() => new Date())
+  let next = 0
+  const budgetSnapshot = (task, previousCell) => {
+    const window = cloudflareIntervalWindow(task.interval, nowFn())
+    return cloudflareCellErrorSnapshot({
+      kind: task.kind,
+      interval: task.interval,
+      product: task.product,
+      window,
+      previous: previousCell,
+      error: new Error(`Cloudflare Radar run budget of ${Math.round(runBudgetMs / 60000)} minutes exceeded before this cell was requested`),
+      token: options.token ?? CLOUDFLARE_RADAR_API_TOKEN,
+      checkedAt: new Date().toISOString(),
+    })
+  }
+  const worker = async () => {
+    while (next < tasks.length) {
+      const task = tasks[next++]
+      const store = task.kind === 'pairs' ? pairs : timeseries
+      const previousCell = task.kind === 'pairs'
+        ? prevPairs[task.interval]?.[task.product] ?? null
+        : prevTimeseries[task.interval]?.[task.product] ?? null
+      if (Date.now() >= deadline) {
+        store[task.interval][task.product] = budgetSnapshot(task, previousCell)
+        continue
+      }
+      try {
+        store[task.interval][task.product] = await collectCloudflareRadarCell(
+          task.interval, task.product, task.kind, previousCell, options,
+        )
+      } catch (error) {
+        // Defensive: the cell collector already isolates per-cell
+        // failures; this guards against an unexpected throw killing the
+        // run or leaving a cell unfilled.
+        store[task.interval][task.product] = cloudflareCellErrorSnapshot({
+          kind: task.kind,
+          interval: task.interval,
+          product: task.product,
+          window: cloudflareIntervalWindow(task.interval, nowFn()),
+          previous: previousCell,
+          error,
+          token: options.token ?? CLOUDFLARE_RADAR_API_TOKEN,
+          checkedAt: new Date().toISOString(),
+        })
+      }
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(CLOUDFLARE_MAX_IN_FLIGHT, tasks.length) }, () => worker()),
+  )
+  return { pairs, timeseries }
+}
+
 export function cloudflareHistoryFilename(generatedAt) {
   return `${String(generatedAt).replace(/[-:.]/g, '')}.json`
 }
 
-export function cloudflareHistoryPath(interval, generatedAt) {
-  return `${CLOUDFLARE_HISTORY_DIR}/${interval}/${cloudflareHistoryFilename(generatedAt)}`
+// History path segment for a product: the lowercase file suffix
+// ('ddos', 'waf', ...), or 'all' for the unfiltered aggregate.
+function cloudflareHistoryProductSegment(product) {
+  const safeProduct = normalizeCloudflareProduct(product)
+  return safeProduct === 'all' ? 'all' : CLOUDFLARE_PRODUCT_SUFFIXES[safeProduct]
 }
 
-// Pure manifest merge: combines the previous manifest with new entries,
-// dedupes by path, sorts oldest→newest per interval, and keeps only the
-// newest `retentionPerInterval` entries per interval. Manifest entries are
-// { generatedAt, path, pairCount, lastUpdated }; `path` is site-relative
-// (fetchable as `${BASE_URL}${path}`).
+export function cloudflareHistoryPath(interval, product, generatedAt) {
+  return `${CLOUDFLARE_HISTORY_DIR}/${interval}/${cloudflareHistoryProductSegment(product)}/${cloudflareHistoryFilename(generatedAt)}`
+}
+
+export function cloudflareTimeseriesHistoryPath(interval, product, generatedAt) {
+  return `${CLOUDFLARE_TIMESERIES_HISTORY_DIR}/${interval}/${cloudflareHistoryProductSegment(product)}/${cloudflareHistoryFilename(generatedAt)}`
+}
+
+// Pure manifest merge (v2): combines the previous manifest with new
+// entries, dedupes by path, sorts oldest→newest per (kind, interval,
+// product), and keeps only the newest entries per cap — pairs "all"
+// `retentionPerInterval` (96), pairs per-product `retentionPairsProduct`
+// (24), timeseries "all" `retentionTimeseriesAll` (96), timeseries
+// per-product `retentionTimeseriesProduct` (24).
+// Returns { schemaVersion: 2, generatedAt,
+//   intervals: { interval: [pairs "all" entries] },   // v1 compat key
+//   pairs: { interval: { product: [entries] } },
+//   timeseries: { interval: { product: [entries] } } }.
+// Pairs entries are { generatedAt, path, pairCount, lastUpdated };
+// timeseries entries are { generatedAt, path, pointCount, lastUpdated,
+// aggInterval }; `path` is site-relative (fetchable as
+// `${BASE_URL}${path}`). Entries without a kind are treated as pairs and
+// without a product as 'all', so v1 callers keep working. V1 manifests
+// (intervals only) seed pairs "all". History written before products
+// existed lives directly under history/cloudflare/<interval>/ (no product
+// segment); those files are never deleted by the builder and their
+// manifest entries survive as long as they exist on disk and fit the cap.
 export function buildCloudflareHistoryManifest(
   previousManifest,
   entries,
-  { retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL, generatedAt = new Date().toISOString() } = {},
+  {
+    retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION.pairsAll,
+    retentionPairsProduct = CLOUDFLARE_HISTORY_RETENTION.pairsProduct,
+    retentionTimeseriesAll = CLOUDFLARE_HISTORY_RETENTION.timeseriesAll,
+    retentionTimeseriesProduct = CLOUDFLARE_HISTORY_RETENTION.timeseriesProduct,
+    generatedAt = new Date().toISOString(),
+  } = {},
 ) {
-  const intervals = {}
-  for (const interval of CLOUDFLARE_INTERVALS) {
-    const existing = Array.isArray(previousManifest?.intervals?.[interval])
-      ? previousManifest.intervals[interval]
-      : []
-    const byPath = new Map()
-    for (const entry of [...existing, ...entries.filter((item) => item.interval === interval)]) {
-      byPath.set(entry.path, {
-        generatedAt: entry.generatedAt,
-        path: entry.path,
-        pairCount: entry.pairCount,
-        lastUpdated: entry.lastUpdated ?? null,
-      })
+  const capFor = (kind, product) => kind === 'pairs'
+    ? (product === 'all' ? retentionPerInterval : retentionPairsProduct)
+    : (product === 'all' ? retentionTimeseriesAll : retentionTimeseriesProduct)
+  const kindOf = (entry) => entry.kind
+    || (entry.pointCount !== undefined || entry.aggInterval !== undefined ? 'timeseries' : 'pairs')
+  const productOf = (entry) => normalizeCloudflareProduct(entry.product || 'all')
+  const previousEntriesFor = (kind, interval, product) => {
+    const out = []
+    if (kind === 'pairs') {
+      const nested = previousManifest?.pairs?.[interval]?.[product]
+      if (Array.isArray(nested)) out.push(...nested)
+      if (product === 'all') {
+        const v1 = previousManifest?.intervals?.[interval]
+        if (Array.isArray(v1)) out.push(...v1)
+      }
+    } else {
+      const nested = previousManifest?.timeseries?.[interval]?.[product]
+      if (Array.isArray(nested)) out.push(...nested)
     }
-    intervals[interval] = [...byPath.values()]
-      .sort((a, b) => Date.parse(a.generatedAt) - Date.parse(b.generatedAt))
-      .slice(-retentionPerInterval)
+    return out
   }
-  return { generatedAt, intervals }
+  const buildSection = (kind) => {
+    const section = {}
+    for (const interval of CLOUDFLARE_INTERVALS) {
+      section[interval] = {}
+      for (const product of CLOUDFLARE_PRODUCTS) {
+        const byPath = new Map()
+        const addEntry = (entry) => {
+          if (kind === 'pairs') {
+            byPath.set(entry.path, {
+              generatedAt: entry.generatedAt,
+              path: entry.path,
+              pairCount: entry.pairCount,
+              lastUpdated: entry.lastUpdated ?? null,
+            })
+          } else {
+            byPath.set(entry.path, {
+              generatedAt: entry.generatedAt,
+              path: entry.path,
+              pointCount: entry.pointCount,
+              lastUpdated: entry.lastUpdated ?? null,
+              aggInterval: entry.aggInterval,
+            })
+          }
+        }
+        for (const entry of previousEntriesFor(kind, interval, product)) addEntry(entry)
+        for (const entry of entries.filter(
+          (item) => kindOf(item) === kind && item.interval === interval && productOf(item) === product,
+        )) addEntry(entry)
+        section[interval][product] = [...byPath.values()]
+          .sort((a, b) => Date.parse(a.generatedAt) - Date.parse(b.generatedAt))
+          .slice(-capFor(kind, product))
+      }
+    }
+    return section
+  }
+  const pairs = buildSection('pairs')
+  const timeseries = buildSection('timeseries')
+  const intervals = {}
+  for (const interval of CLOUDFLARE_INTERVALS) intervals[interval] = pairs[interval]['all']
+  return { schemaVersion: 2, generatedAt, intervals, pairs, timeseries }
 }
 
-// Writes per-interval files, the legacy 24h copy, history snapshots and the
-// manifest. Only the history snapshots of intervals that are live in this
-// run are added (a stale interval re-uses previous data, so re-stamping it
-// as new history would misrepresent when that data was fetched). Pruning
-// deletes only files under public/data/history/cloudflare/<interval>/.
+function pruneHistoryDir(root, dirRel, cap, pruned) {
+  const dir = path.join(root, dirRel)
+  let files = []
+  try {
+    files = fs.readdirSync(dir).filter((name) => name.endsWith('.json')).sort()
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+  // Filenames are compact ISO timestamps, so they sort chronologically;
+  // the oldest files beyond the cap are deleted.
+  const excess = files.slice(0, Math.max(0, files.length - cap))
+  for (const name of excess) {
+    fs.unlinkSync(path.join(dir, name))
+    pruned.push(`${dirRel}/${name}`)
+  }
+}
+
+// Writes per-(interval × product) pairs and timeseries files, the legacy
+// 24h pairs copy, history snapshots and the v2 manifest. Only the history
+// snapshots of cells that are live in this run are added (a stale cell
+// re-uses previous data, so re-stamping it as new history would
+// misrepresent when that data was fetched). Pruning deletes only files
+// under public/data/history/cloudflare*/<interval>/<product>/ — never the
+// pre-product legacy history files and never anything outside history.
 // Callers must NOT call this when the Cloudflare token is absent: a
-// token-less run must leave all interval files untouched instead of
-// overwriting them with not_configured data.
-export function writeCloudflareIntervalOutputs(
-  results,
-  { root = ROOT, now = () => new Date(), retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION_PER_INTERVAL } = {},
+// token-less run must leave all pairs, timeseries, history and manifest
+// files untouched instead of overwriting them with not_configured data.
+// `matrix` is { pairs: { interval: { product: snapshot } },
+//               timeseries: { interval: { product: snapshot } } }.
+export function writeCloudflareOutputs(
+  matrix,
+  {
+    root = ROOT,
+    now = () => new Date(),
+    retentionPerInterval = CLOUDFLARE_HISTORY_RETENTION.pairsAll,
+    retentionPairsProduct = CLOUDFLARE_HISTORY_RETENTION.pairsProduct,
+    retentionTimeseriesAll = CLOUDFLARE_HISTORY_RETENTION.timeseriesAll,
+    retentionTimeseriesProduct = CLOUDFLARE_HISTORY_RETENTION.timeseriesProduct,
+  } = {},
 ) {
   const written = []
   const historyEntries = []
+  const timeseriesHistoryEntries = []
   const pruned = []
+  const pairs = matrix?.pairs || {}
+  const timeseries = matrix?.timeseries || {}
   for (const interval of CLOUDFLARE_INTERVALS) {
-    const snapshot = results[interval]
-    if (!snapshot) continue
-    writeJsonAt(root, CLOUDFLARE_INTERVAL_FILE(interval), snapshot)
-    written.push(CLOUDFLARE_INTERVAL_FILE(interval))
-    if (interval === '24h') {
-      writeJsonAt(root, CLOUDFLARE_FILE, snapshot)
-      written.push(CLOUDFLARE_FILE)
-    }
-    if (snapshot.intervalStatus === 'live') {
-      const historyFile = cloudflareHistoryPath(interval, snapshot.generatedAt)
-      writeJsonAt(root, historyFile, snapshot)
-      historyEntries.push({
-        interval,
-        generatedAt: snapshot.generatedAt,
-        path: `data/history/cloudflare/${interval}/${cloudflareHistoryFilename(snapshot.generatedAt)}`,
-        pairCount: snapshot.pairs.length,
-        lastUpdated: snapshot.meta?.lastUpdated ?? null,
-      })
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      const snapshot = pairs[interval]?.[product]
+      if (!snapshot) continue
+      const file = CLOUDFLARE_INTERVAL_FILE(interval, product)
+      writeJsonAt(root, file, snapshot)
+      written.push(file)
+      if (interval === '24h' && product === 'all') {
+        writeJsonAt(root, CLOUDFLARE_FILE, snapshot)
+        written.push(CLOUDFLARE_FILE)
+      }
+      if (snapshot.intervalStatus === 'live') {
+        const historyFile = cloudflareHistoryPath(interval, product, snapshot.generatedAt)
+        writeJsonAt(root, historyFile, snapshot)
+        historyEntries.push({
+          kind: 'pairs',
+          interval,
+          product,
+          generatedAt: snapshot.generatedAt,
+          path: historyFile.replace(/^public\//, ''),
+          pairCount: snapshot.pairs.length,
+          lastUpdated: snapshot.meta?.lastUpdated ?? null,
+        })
+      }
     }
   }
-  // Prune each interval directory to the retention cap, newest first by
-  // filename (compact ISO timestamps sort chronologically).
-  const keptPaths = new Set(historyEntries.map((entry) => entry.path))
   for (const interval of CLOUDFLARE_INTERVALS) {
-    const dir = path.join(root, CLOUDFLARE_HISTORY_DIR, interval)
-    let files = []
-    try {
-      files = fs.readdirSync(dir).filter((name) => name.endsWith('.json')).sort()
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      const snapshot = timeseries[interval]?.[product]
+      if (!snapshot) continue
+      const file = CLOUDFLARE_TIMESERIES_FILE(interval, product)
+      writeJsonAt(root, file, snapshot)
+      written.push(file)
+      if (snapshot.timeseriesStatus === 'live') {
+        const historyFile = cloudflareTimeseriesHistoryPath(interval, product, snapshot.generatedAt)
+        writeJsonAt(root, historyFile, snapshot)
+        timeseriesHistoryEntries.push({
+          kind: 'timeseries',
+          interval,
+          product,
+          generatedAt: snapshot.generatedAt,
+          path: historyFile.replace(/^public\//, ''),
+          pointCount: snapshot.serie.timestamps.length,
+          lastUpdated: snapshot.meta?.lastUpdated ?? null,
+          aggInterval: snapshot.aggInterval,
+        })
+      }
     }
-    const excess = files.slice(0, Math.max(0, files.length - retentionPerInterval))
-    for (const name of excess) {
-      fs.unlinkSync(path.join(dir, name))
-      pruned.push(`${CLOUDFLARE_HISTORY_DIR}/${interval}/${name}`)
+  }
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      const cap = product === 'all' ? retentionPerInterval : retentionPairsProduct
+      pruneHistoryDir(root, `${CLOUDFLARE_HISTORY_DIR}/${interval}/${cloudflareHistoryProductSegment(product)}`, cap, pruned)
     }
-    for (const name of files.slice(Math.max(0, files.length - retentionPerInterval))) {
-      keptPaths.add(`data/history/cloudflare/${interval}/${name}`)
+  }
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      const cap = product === 'all' ? retentionTimeseriesAll : retentionTimeseriesProduct
+      pruneHistoryDir(root, `${CLOUDFLARE_TIMESERIES_HISTORY_DIR}/${interval}/${cloudflareHistoryProductSegment(product)}`, cap, pruned)
     }
   }
   const previousManifest = readJsonAt(root, CLOUDFLARE_HISTORY_MANIFEST_FILE)
-  const manifest = buildCloudflareHistoryManifest(previousManifest, historyEntries, {
-    retentionPerInterval,
-    generatedAt: now().toISOString(),
-  })
+  const manifest = buildCloudflareHistoryManifest(
+    previousManifest,
+    [...historyEntries, ...timeseriesHistoryEntries],
+    {
+      retentionPerInterval,
+      retentionPairsProduct,
+      retentionTimeseriesAll,
+      retentionTimeseriesProduct,
+      generatedAt: now().toISOString(),
+    },
+  )
   // Drop manifest entries whose file no longer exists (e.g. just pruned).
+  const fileExists = (entry) => fs.existsSync(path.join(root, 'public', entry.path))
   for (const interval of CLOUDFLARE_INTERVALS) {
-    manifest.intervals[interval] = manifest.intervals[interval].filter((entry) => keptPaths.has(entry.path))
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      manifest.pairs[interval][product] = manifest.pairs[interval][product].filter(fileExists)
+      manifest.timeseries[interval][product] = manifest.timeseries[interval][product].filter(fileExists)
+    }
+    manifest.intervals[interval] = manifest.pairs[interval]['all']
   }
   writeJsonAt(root, CLOUDFLARE_HISTORY_MANIFEST_FILE, manifest)
-  return { written, historyEntries, manifest, pruned }
+  return { written, historyEntries, timeseriesHistoryEntries, manifest, pruned }
+}
+
+// Legacy wrapper: accepts the old { interval: pairsSnapshot } shape
+// (unfiltered "all" pairs only) and writes it through the matrix writer.
+export function writeCloudflareIntervalOutputs(results, options = {}) {
+  if (results && (results.pairs || results.timeseries)) {
+    return writeCloudflareOutputs(results, options)
+  }
+  const pairs = {}
+  for (const interval of CLOUDFLARE_INTERVALS) {
+    if (results?.[interval]) pairs[interval] = { all: results[interval] }
+  }
+  return writeCloudflareOutputs({ pairs, timeseries: {} }, options)
 }
 
 async function fetchDshieldJson(url) {
@@ -1078,30 +1638,40 @@ function buildEvents(dashboard) {
 async function main() {
   const previous = readJson(OUT)
   const sourcesSnapshot = readJson(SOURCES_FILE)
-  const previousCloudflareByInterval = {}
+  const previousCloudflare = { pairs: {}, timeseries: {} }
   for (const interval of CLOUDFLARE_INTERVALS) {
-    // Fall back to the legacy file for 24h on the first run after this
-    // change, when per-interval files do not exist yet.
-    previousCloudflareByInterval[interval] = readJson(CLOUDFLARE_INTERVAL_FILE(interval))
-      || (interval === '24h' ? readJson(CLOUDFLARE_FILE) : null)
+    previousCloudflare.pairs[interval] = {}
+    previousCloudflare.timeseries[interval] = {}
+    for (const product of CLOUDFLARE_PRODUCTS) {
+      // Fall back to the legacy file for 24h "all" pairs on the first run
+      // after this change, when per-interval files do not exist yet.
+      previousCloudflare.pairs[interval][product] = readJson(CLOUDFLARE_INTERVAL_FILE(interval, product))
+        || (interval === '24h' && product === 'all' ? readJson(CLOUDFLARE_FILE) : null)
+      previousCloudflare.timeseries[interval][product] = readJson(CLOUDFLARE_TIMESERIES_FILE(interval, product))
+    }
   }
-  const [dshield, nvd, cloudflareResults] = await Promise.all([
+  const [dshield, nvd, cloudflareMatrix] = await Promise.all([
     collectDshield(previous),
     collectNvd(previous),
-    collectCloudflareRadarIntervals(previousCloudflareByInterval),
+    collectCloudflareRadarMatrix(previousCloudflare),
   ])
-  const cloudflare = cloudflareResults['24h']
+  const cloudflare = cloudflareMatrix.pairs['24h']['all']
   if (CLOUDFLARE_RADAR_API_TOKEN) {
-    const history = writeCloudflareIntervalOutputs(cloudflareResults)
+    const history = writeCloudflareOutputs(cloudflareMatrix)
+    const liveCount = (section, statusField) => CLOUDFLARE_INTERVALS
+      .flatMap((interval) => CLOUDFLARE_PRODUCTS.map((product) => section[interval][product]))
+      .filter((snapshot) => snapshot && snapshot[statusField] === 'live').length
     console.log(
-      `Cloudflare Radar intervals: ${CLOUDFLARE_INTERVALS.map((interval) => `${interval}=${cloudflareResults[interval].intervalStatus}`).join(', ')}; ` +
-      `history snapshots added: ${history.historyEntries.length}; pruned: ${history.pruned.length}.`,
+      `Cloudflare Radar pairs live ${liveCount(cloudflareMatrix.pairs, 'intervalStatus')}/32; ` +
+      `timeseries live ${liveCount(cloudflareMatrix.timeseries, 'timeseriesStatus')}/32; ` +
+      `history snapshots added: ${history.historyEntries.length + history.timeseriesHistoryEntries.length}; pruned: ${history.pruned.length}.`,
     )
   } else {
-    // Token absent (e.g. a local run): leave every per-interval and legacy
-    // Cloudflare file untouched instead of overwriting them with
-    // not_configured data. The in-memory 24h result still reports
-    // not_configured in the threat-intel snapshot below.
+    // Token absent (e.g. a local run): leave every per-interval,
+    // per-product, timeseries, history and manifest Cloudflare file
+    // untouched instead of overwriting them with not_configured data.
+    // The in-memory 24h "all" result still reports not_configured in the
+    // threat-intel snapshot below.
     console.log('Cloudflare Radar token not configured; leaving per-interval files unchanged.')
   }
   const cachedKev = readJson(KEV_FILE)

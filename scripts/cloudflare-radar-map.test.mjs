@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { geoCentroid, geoNaturalEarth1, geoPath } from 'd3-geo'
 import { feature } from 'topojson-client'
@@ -7,11 +8,23 @@ import { normalizeCloudflareRadarResponse } from './build-threat-intel-snapshot.
 import {
   arcPulsePlan,
   buildCloudflareRadarMap,
+  CLOUDFLARE_PRODUCTS,
+  cloudflareAggInterval,
   cloudflareIntervalUrl,
   cloudflarePairChanges,
+  cloudflareProductUrl,
+  cloudflareTimeseriesUrl,
+  combineCloudflareLayerPairs,
+  computeAttackVectorsFromTimeseries,
+  computeWindowShiftMinutes,
+  manifestEntries,
+  mapTimeseriesPoints,
   pairsForCountry,
   rankCloudflareCountries,
+  responseMatchesRequest,
   selectHistoricalSnapshot,
+  selectHistoricalSnapshotForProduct,
+  timeseriesStatusLabel,
 } from '../src/pages/cloudflareRadarMap.js'
 
 const countries = feature(worldTopo, worldTopo.objects.countries).features
@@ -254,4 +267,375 @@ test('map output contains only provider-supplied countries and values', () => {
   assert.ok(result.arcs.every((arc) => suppliedCodes.has(arc.originCountryAlpha2) && suppliedCodes.has(arc.targetCountryAlpha2)))
   assert.ok(result.arcs.every((arc) => SAMPLE_PAIRS.some((p) => p.value === arc.value)))
   assert.deepEqual([...result.roles.keys()].sort(), ['250', '276', '528', '702', '840'])
+})
+
+// --- Round 2: rankings must come from the real published interval files ---
+
+function readRealPairs(interval) {
+  return JSON.parse(readFileSync(
+    new URL(`../public/data/cloudflare-attack-pairs-${interval}.json`, import.meta.url),
+    'utf8',
+  ))
+}
+
+// Independent hand computation: plain summation in file order, not the
+// ranking helper under test.
+function expectedRanking(pairs, side) {
+  const key = side === 'target' ? 'targetCountryAlpha2' : 'originCountryAlpha2'
+  const nameKey = side === 'target' ? 'targetCountryName' : 'originCountryName'
+  const totals = new Map()
+  for (const pair of pairs) {
+    const entry = totals.get(pair[key]) || { code: pair[key], name: pair[nameKey], total: 0 }
+    entry.total += pair.value
+    totals.set(pair[key], entry)
+  }
+  return [...totals.values()].sort((a, b) => b.total - a.total)
+}
+
+test('rankings match hand-computed totals from the real 1h and 24h files, and differ by interval', () => {
+  const file1h = readRealPairs('1h')
+  const file24h = readRealPairs('24h')
+  assert.equal(file1h.pairs.length, 50)
+  assert.equal(file24h.pairs.length, 50)
+
+  assert.deepEqual(rankCloudflareCountries(file1h.pairs, 'origin'), expectedRanking(file1h.pairs, 'origin'))
+  assert.deepEqual(rankCloudflareCountries(file1h.pairs, 'target'), expectedRanking(file1h.pairs, 'target'))
+  assert.deepEqual(rankCloudflareCountries(file24h.pairs, 'origin'), expectedRanking(file24h.pairs, 'origin'))
+  assert.deepEqual(rankCloudflareCountries(file24h.pairs, 'target'), expectedRanking(file24h.pairs, 'target'))
+
+  const topOrigin1h = rankCloudflareCountries(file1h.pairs, 'origin')[0]
+  const topOrigin24h = rankCloudflareCountries(file24h.pairs, 'origin')[0]
+  const topTarget1h = rankCloudflareCountries(file1h.pairs, 'target')[0]
+  const topTarget24h = rankCloudflareCountries(file24h.pairs, 'target')[0]
+  // The top origin code is US in both files; what differs is the ranking
+  // itself — the totals and the rest of the order are interval-specific.
+  assert.equal(topOrigin1h.code, 'US')
+  assert.equal(topOrigin24h.code, 'US')
+  assert.ok(Math.abs(topOrigin1h.total - 24.861583) < 1e-6, `1h top origin total is ${topOrigin1h.total}`)
+  assert.ok(Math.abs(topOrigin24h.total - 17.439526) < 1e-6, `24h top origin total is ${topOrigin24h.total}`)
+  assert.notEqual(topOrigin1h.total, topOrigin24h.total)
+  assert.notEqual(topTarget1h.total, topTarget24h.total)
+  assert.notDeepEqual(
+    rankCloudflareCountries(file1h.pairs, 'origin'),
+    rankCloudflareCountries(file24h.pairs, 'origin'),
+  )
+  assert.notDeepEqual(
+    rankCloudflareCountries(file1h.pairs, 'target'),
+    rankCloudflareCountries(file24h.pairs, 'target'),
+  )
+})
+
+test('stale-response guard: a response for the wrong interval or product is ignored', () => {
+  const doc24hAll = { interval: '24h', pairs: [] }
+  const doc1hAll = { interval: '1h', pairs: [] }
+  const doc24hWaf = { interval: '24h', product: 'WAF', pairs: [] }
+  const doc24hDdos = { interval: '24h', product: 'DDOS', pairs: [] }
+
+  assert.equal(responseMatchesRequest(doc24hAll, '24h', 'all'), true)
+  assert.equal(responseMatchesRequest(doc1hAll, '24h', 'all'), false)
+  assert.equal(responseMatchesRequest(doc24hAll, '1h', 'all'), false)
+  assert.equal(responseMatchesRequest(doc24hWaf, '24h', 'WAF'), true)
+  assert.equal(responseMatchesRequest(doc24hWaf, '24h', 'DDOS'), false)
+  assert.equal(responseMatchesRequest(doc24hDdos, '24h', 'WAF'), false)
+  // Files published before products carry no product field: they are the
+  // 'all' product, selected by their product-specific URL.
+  assert.equal(responseMatchesRequest(doc24hAll, '24h', 'WAF'), true)
+  assert.equal(responseMatchesRequest(null, '24h', 'all'), false)
+  assert.equal(responseMatchesRequest({ pairs: [] }, '24h', 'all'), false)
+})
+
+test('missing 24h file is never substituted with the legacy base file', () => {
+  // The per-interval URL is the only URL the page fetches; there is no
+  // legacy fallback path in the product URL builder.
+  assert.equal(cloudflareProductUrl('/base/', '24h', 'all'), '/base/data/cloudflare-attack-pairs-24h.json')
+  for (const interval of ['1h', '6h', '24h', '7d']) {
+    assert.notEqual(cloudflareProductUrl('/base/', interval, 'all'), '/base/data/cloudflare-attack-pairs.json')
+  }
+})
+
+test('product URL mapping covers all seven products plus all, for pairs and timeseries', () => {
+  assert.deepEqual(CLOUDFLARE_PRODUCTS, [
+    'all', 'DDOS', 'WAF', 'BOT_MANAGEMENT', 'ACCESS_RULES', 'IP_REPUTATION', 'API_SHIELD', 'DATA_LOSS_PREVENTION',
+  ])
+  const expectedSuffixes = {
+    all: '', DDOS: 'ddos', WAF: 'waf', BOT_MANAGEMENT: 'bot_management',
+    ACCESS_RULES: 'access_rules', IP_REPUTATION: 'ip_reputation',
+    API_SHIELD: 'api_shield', DATA_LOSS_PREVENTION: 'data_loss_prevention',
+  }
+  for (const [product, suffix] of Object.entries(expectedSuffixes)) {
+    const suffixPart = suffix ? `-${suffix}` : ''
+    assert.equal(
+      cloudflareProductUrl('/base/', '24h', product),
+      `/base/data/cloudflare-attack-pairs-24h${suffixPart}.json`,
+    )
+    assert.equal(
+      cloudflareTimeseriesUrl('/base/', '6h', product),
+      `/base/data/cloudflare-timeseries-6h${suffixPart}.json`,
+    )
+  }
+  // Unknown products and intervals fall back to the safe defaults.
+  assert.equal(cloudflareProductUrl('/base/', 'bogus', 'BOGUS'), '/base/data/cloudflare-attack-pairs-24h.json')
+  assert.equal(cloudflareTimeseriesUrl('/base/', 'bogus', 'BOGUS'), '/base/data/cloudflare-timeseries-24h.json')
+})
+
+test('timeseries point mapping preserves real timestamps and values, with no interpolation', () => {
+  const doc = {
+    serie: {
+      // Uneven gaps stay uneven: 15m, then 45m, then 15m — never filled in.
+      timestamps: [
+        '2026-11-26T21:00:00Z', '2026-11-26T21:15:00Z', '2026-11-26T22:00:00Z',
+        '2026-11-26T22:15:00Z', 'not-a-date', '2026-11-26T22:30:00Z',
+      ],
+      values: [10, 12, 9, 11, 99, 'not-a-number'],
+    },
+  }
+  assert.deepEqual(mapTimeseriesPoints(doc), [
+    { timestamp: Date.parse('2026-11-26T21:00:00Z'), value: 10 },
+    { timestamp: Date.parse('2026-11-26T21:15:00Z'), value: 12 },
+    { timestamp: Date.parse('2026-11-26T22:00:00Z'), value: 9 },
+    { timestamp: Date.parse('2026-11-26T22:15:00Z'), value: 11 },
+  ])
+  // Numeric epoch timestamps pass through unchanged; a values array
+  // longer than timestamps is truncated, never padded.
+  assert.deepEqual(
+    mapTimeseriesPoints({ serie: { timestamps: [1000, 2000], values: [1, 2, 3] } }),
+    [{ timestamp: 1000, value: 1 }, { timestamp: 2000, value: 2 }],
+  )
+  assert.deepEqual(mapTimeseriesPoints({}), [])
+  assert.deepEqual(mapTimeseriesPoints(null), [])
+  assert.deepEqual(mapTimeseriesPoints({ serie: { timestamps: [], values: [] } }), [])
+})
+
+test('window shift is the requested-vs-returned gap, from the file or the ranges', () => {
+  // Explicit field wins.
+  assert.equal(computeWindowShiftMinutes({ windowShiftMinutes: -15 }), -15)
+  assert.equal(computeWindowShiftMinutes({ windowShiftMinutes: 0 }), 0)
+  // Derived: the real 1h file requested 21:30–22:30Z but Cloudflare
+  // returned the latest fully aggregated window, 21:00–22:00Z.
+  const file1h = readRealPairs('1h')
+  assert.equal(computeWindowShiftMinutes(file1h), 30)
+  // Aligned windows report zero shift.
+  assert.equal(computeWindowShiftMinutes({
+    window: { dateStart: '2026-11-26T21:00:00Z', dateEnd: '2026-11-26T22:00:00Z' },
+    meta: { dateRange: [{ startTime: '2026-11-26T21:00:00Z', endTime: '2026-11-26T22:00:00Z' }] },
+  }), 0)
+  assert.equal(computeWindowShiftMinutes({}), null)
+  assert.equal(computeWindowShiftMinutes({ window: { dateStart: '2026-11-26T21:00:00Z' } }), null)
+})
+
+test('aggregation interval is 15m for 1h/6h, hourly for 24h, daily for 7d', () => {
+  assert.equal(cloudflareAggInterval('1h'), '15m')
+  assert.equal(cloudflareAggInterval('6h'), '15m')
+  assert.equal(cloudflareAggInterval('24h'), '1h')
+  assert.equal(cloudflareAggInterval('7d'), '1d')
+  assert.equal(cloudflareAggInterval('bogus'), '1h')
+})
+
+test('manifest entries read v2 per product with v1 fallback for all', () => {
+  const v2 = {
+    schemaVersion: 2,
+    pairs: {
+      '24h': {
+        all: [{ generatedAt: '2026-11-26T00:00:00Z', path: 'data/history/cloudflare/24h/all/a.json', pairCount: 50 }],
+        WAF: [{ generatedAt: '2026-11-26T01:00:00Z', path: 'data/history/cloudflare/24h/waf/a.json', pairCount: 12 }],
+      },
+    },
+    timeseries: {
+      '24h': {
+        all: [{ generatedAt: '2026-11-26T00:00:00Z', path: 'data/history/cloudflare-timeseries/24h/all/a.json', pointCount: 24 }],
+      },
+    },
+    intervals: {
+      '24h': [{ generatedAt: '2026-11-26T00:00:00Z', path: 'data/history/cloudflare/24h/legacy.json', pairCount: 50 }],
+    },
+  }
+  assert.equal(manifestEntries(v2, '24h', 'WAF', 'pairs')[0].path, 'data/history/cloudflare/24h/waf/a.json')
+  assert.equal(manifestEntries(v2, '24h', 'all', 'pairs')[0].path, 'data/history/cloudflare/24h/all/a.json')
+  assert.equal(manifestEntries(v2, '24h', 'DDOS', 'pairs').length, 0)
+  assert.equal(manifestEntries(v2, '24h', 'all', 'timeseries')[0].pointCount, 24)
+  assert.equal(manifestEntries(v2, '24h', 'WAF', 'timeseries').length, 0)
+  // v1 manifest (no pairs/timeseries sections): entries are pairs/"all".
+  const v1 = { intervals: { '24h': [{ generatedAt: '2026-11-26T00:00:00Z', path: 'data/history/cloudflare/24h/legacy.json', pairCount: 50 }] } }
+  assert.equal(manifestEntries(v1, '24h', 'all', 'pairs')[0].path, 'data/history/cloudflare/24h/legacy.json')
+  assert.equal(manifestEntries(v1, '24h', 'WAF', 'pairs').length, 0)
+  assert.equal(manifestEntries(null, '24h', 'all', 'pairs').length, 0)
+})
+
+test('historical snapshot selection is per interval and product', () => {
+  const manifest = {
+    schemaVersion: 2,
+    pairs: {
+      '24h': {
+        all: [
+          { generatedAt: '2026-11-26T00:00:00Z', path: 'data/history/cloudflare/24h/all/a.json' },
+          { generatedAt: '2026-11-26T06:00:00Z', path: 'data/history/cloudflare/24h/all/b.json' },
+        ],
+        WAF: [
+          { generatedAt: '2026-11-26T03:00:00Z', path: 'data/history/cloudflare/24h/waf/a.json' },
+        ],
+      },
+      '1h': {
+        all: [{ generatedAt: '2026-11-26T05:00:00Z', path: 'data/history/cloudflare/1h/all/a.json' }],
+      },
+    },
+  }
+  assert.equal(
+    selectHistoricalSnapshotForProduct(manifest, '24h', 'all', Date.parse('2026-11-26T09:00:00Z')).path,
+    'data/history/cloudflare/24h/all/b.json',
+  )
+  assert.equal(
+    selectHistoricalSnapshotForProduct(manifest, '24h', 'WAF', Date.parse('2026-11-26T09:00:00Z')).path,
+    'data/history/cloudflare/24h/waf/a.json',
+  )
+  // A WAF playhead before the only WAF snapshot has no history — even
+  // though an 'all' snapshot exists at that time.
+  assert.equal(selectHistoricalSnapshotForProduct(manifest, '24h', 'WAF', Date.parse('2026-11-26T02:00:00Z')), null)
+  assert.equal(selectHistoricalSnapshotForProduct(manifest, '1h', 'all', Date.parse('2026-11-26T09:00:00Z')).path, 'data/history/cloudflare/1h/all/a.json')
+  assert.equal(selectHistoricalSnapshotForProduct(manifest, '7d', 'all', Date.parse('2026-11-26T09:00:00Z')), null)
+})
+
+test('timeseries track status derives from the timeseries document only', () => {
+  assert.equal(timeseriesStatusLabel({ timeseriesStatus: 'live' }), 'LIVE')
+  assert.equal(timeseriesStatusLabel({ timeseriesStatus: 'stale' }), 'STALE')
+  assert.equal(timeseriesStatusLabel({ timeseriesStatus: 'unavailable' }), 'UNAVAILABLE')
+  assert.equal(timeseriesStatusLabel({ timeseriesStatus: 'error' }), 'UNAVAILABLE')
+  assert.equal(timeseriesStatusLabel({ points: [{ timestamp: 1, value: 2 }] }), 'LIVE')
+  assert.equal(timeseriesStatusLabel({ timeseriesStatus: 'live', points: [] }), 'LIVE')
+  assert.equal(timeseriesStatusLabel({}), 'NO DATA')
+  assert.equal(timeseriesStatusLabel(null), 'UNAVAILABLE')
+})
+
+// --- New governing spec: five layers, rankings summed across enabled layers ---
+
+const WEB_PAIRS = [
+  { originCountryAlpha2: 'US', originCountryName: 'United States', targetCountryAlpha2: 'DE', targetCountryName: 'Germany', value: 25 },
+  { originCountryAlpha2: 'SG', originCountryName: 'Singapore', targetCountryAlpha2: 'US', targetCountryName: 'United States', value: 10 },
+]
+const DDOS_PAIRS = [
+  { originCountryAlpha2: 'NL', originCountryName: 'Netherlands', targetCountryAlpha2: 'US', targetCountryName: 'United States', value: 20 },
+  { originCountryAlpha2: 'US', originCountryName: 'United States', targetCountryAlpha2: 'FR', targetCountryName: 'France', value: 5 },
+]
+
+test('layer-sum rankings change when a layer is disabled, and are empty when neither is enabled', () => {
+  const both = combineCloudflareLayerPairs({
+    web: { pairs: WEB_PAIRS, enabled: true },
+    ddos: { pairs: DDOS_PAIRS, enabled: true },
+  })
+  assert.equal(both.length, 4)
+  assert.deepEqual(both.map((p) => p.cfLayer), ['web', 'web', 'ddos', 'ddos'])
+  assert.deepEqual(
+    rankCloudflareCountries(both, 'origin').map((c) => [c.code, c.total]),
+    [['US', 30], ['NL', 20], ['SG', 10]],
+  )
+  assert.deepEqual(
+    rankCloudflareCountries(both, 'target').map((c) => [c.code, c.total]),
+    [['US', 30], ['DE', 25], ['FR', 5]],
+  )
+
+  // Disabling the DDoS layer removes its contribution from both rankings.
+  const webOnly = combineCloudflareLayerPairs({
+    web: { pairs: WEB_PAIRS, enabled: true },
+    ddos: { pairs: DDOS_PAIRS, enabled: false },
+  })
+  assert.deepEqual(
+    rankCloudflareCountries(webOnly, 'origin').map((c) => [c.code, c.total]),
+    [['US', 25], ['SG', 10]],
+  )
+  assert.deepEqual(
+    rankCloudflareCountries(webOnly, 'target').map((c) => [c.code, c.total]),
+    [['DE', 25], ['US', 10]],
+  )
+  assert.notDeepEqual(
+    rankCloudflareCountries(both, 'origin'),
+    rankCloudflareCountries(webOnly, 'origin'),
+  )
+
+  // Neither layer enabled -> no ranking at all, never the 'all' aggregate.
+  assert.deepEqual(combineCloudflareLayerPairs({
+    web: { pairs: WEB_PAIRS, enabled: false },
+    ddos: { pairs: DDOS_PAIRS, enabled: false },
+  }), [])
+  assert.deepEqual(rankCloudflareCountries([], 'origin'), [])
+})
+
+test('the two Cloudflare layers build distinct arcs with distinct path ids', () => {
+  const samePair = {
+    originCountryAlpha2: 'US', originCountryName: 'United States',
+    targetCountryAlpha2: 'DE', targetCountryName: 'Germany', value: 12.5,
+  }
+  const web = buildCloudflareRadarMap(
+    [{ ...samePair, cfLayer: 'web' }], countries, projection, path, { US: '840', DE: '276' }, 'web',
+  )
+  const ddos = buildCloudflareRadarMap(
+    [{ ...samePair, cfLayer: 'ddos' }], countries, projection, path, { US: '840', DE: '276' }, 'ddos',
+  )
+  assert.equal(web.arcs.length, 1)
+  assert.equal(ddos.arcs.length, 1)
+  assert.equal(web.arcs[0].layer, 'web')
+  assert.equal(ddos.arcs[0].layer, 'ddos')
+  assert.notEqual(web.arcs[0].key, ddos.arcs[0].key)
+  assert.notEqual(web.arcs[0].pathId, ddos.arcs[0].pathId)
+  assert.equal(web.arcs[0].pathId, 'gtw-cf-arc-web-0')
+  assert.equal(ddos.arcs[0].pathId, 'gtw-cf-arc-ddos-0')
+  // No layer tag preserves the original single-layer ids.
+  const untagged = buildCloudflareRadarMap([samePair], countries, projection, path, { US: '840', DE: '276' })
+  assert.equal(untagged.arcs[0].pathId, 'gtw-cf-arc-0')
+  assert.equal(untagged.arcs[0].layer, null)
+})
+
+function rawTimeseriesEntry(product, total, points = 2) {
+  const perPoint = total / points
+  return {
+    product,
+    label: product,
+    normalization: 'NONE',
+    points: Array.from({ length: points }, (_, i) => ({ timestamp: 1000 + i, value: perPoint })),
+  }
+}
+
+test('attack vectors compute only from raw-count per-product timeseries totals', () => {
+  const all = ['DDOS', 'WAF', 'BOT_MANAGEMENT', 'ACCESS_RULES', 'IP_REPUTATION', 'API_SHIELD', 'DATA_LOSS_PREVENTION']
+  const entries = all.map((product, i) => rawTimeseriesEntry(product, (i + 1) * 100))
+  const result = computeAttackVectorsFromTimeseries(entries)
+  assert.equal(result.available, true)
+  assert.equal(result.reason, null)
+  // Totals 100..700 sum to 2800; the largest product takes 700/2800 = 25%.
+  assert.equal(result.vectors[0].product, 'DATA_LOSS_PREVENTION')
+  assert.equal(result.vectors[0].total, 700)
+  assert.ok(Math.abs(result.vectors[0].share - 0.25) < 1e-9)
+  assert.equal(result.vectors.length, 7)
+  assert.ok(Math.abs(result.vectors.reduce((sum, v) => sum + v.share, 0) - 1) < 1e-9)
+})
+
+test('attack vectors stay disabled when totals cannot be validated', () => {
+  // No timeseries published at all.
+  const none = computeAttackVectorsFromTimeseries([])
+  assert.equal(none.available, false)
+  assert.match(none.reason, /not been published/)
+  assert.deepEqual(none.vectors, [])
+
+  // One product missing -> the total cannot be validated.
+  const all = ['DDOS', 'WAF', 'BOT_MANAGEMENT', 'ACCESS_RULES', 'IP_REPUTATION', 'API_SHIELD', 'DATA_LOSS_PREVENTION']
+  const partial = all.slice(0, 6).map((product) => rawTimeseriesEntry(product, 100))
+  const missing = computeAttackVectorsFromTimeseries(partial)
+  assert.equal(missing.available, false)
+  assert.match(missing.reason, /DATA_LOSS_PREVENTION/)
+  assert.deepEqual(missing.vectors, [])
+
+  // Normalized values (like the pairs files' PERCENTAGE) cannot be
+  // summed into shares of anything real.
+  const normalized = all.map((product) => ({ ...rawTimeseriesEntry(product, 100), normalization: 'PERCENTAGE' }))
+  const normResult = computeAttackVectorsFromTimeseries(normalized)
+  assert.equal(normResult.available, false)
+  assert.match(normResult.reason, /PERCENTAGE/)
+  assert.deepEqual(normResult.vectors, [])
+
+  // A single normalized product disables the whole panel.
+  const oneBad = all.map((product) => rawTimeseriesEntry(product, 100))
+  oneBad[0] = { ...oneBad[0], normalization: 'MIN0_MAX' }
+  assert.equal(computeAttackVectorsFromTimeseries(oneBad).available, false)
+
+  // Zero totals -> no shares.
+  const zeros = all.map((product) => rawTimeseriesEntry(product, 0))
+  assert.equal(computeAttackVectorsFromTimeseries(zeros).available, false)
 })
