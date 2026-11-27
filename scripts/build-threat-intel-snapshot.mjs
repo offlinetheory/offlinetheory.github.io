@@ -604,8 +604,12 @@ export function validateCloudflareTimeseriesMeta(meta, window, aggInterval) {
 // resolution. Returns null when it matches, otherwise a human-readable
 // reason. Timestamps must be strictly increasing valid ISO strings,
 // values must be numeric (the API returns them as strings) with exactly
-// one value per timestamp, and the point count must be within ±1 of
-// duration/aggInterval.
+// one value per timestamp, and the serie must cover at least half the
+// window at the requested resolution (every gap a positive multiple of
+// aggInterval). The API legitimately truncates the trailing edge — the
+// most recent buckets are not aggregated yet — so an exact point count
+// is not required; a wrong resolution is still caught because it yields
+// far too few points.
 export function validateCloudflareTimeseriesSerie(serie, window, aggInterval) {
   if (!serie || typeof serie !== 'object') {
     return 'Cloudflare Radar timeseries response is missing serie_0'
@@ -638,8 +642,30 @@ export function validateCloudflareTimeseriesSerie(serie, window, aggInterval) {
   }
   const durationMs = Date.parse(window.dateEnd) - Date.parse(window.dateStart)
   const expected = durationMs / aggMs
-  if (Math.abs(timestamps.length - expected) > 1) {
-    return `Cloudflare Radar timeseries returned ${timestamps.length} points for a ${durationMs / 3600000}h window at ${aggInterval} (expected ${expected} ± 1)`
+  // The API legitimately returns a serie truncated at the trailing edge:
+  // the most recent buckets are not aggregated yet (run #10, 2026-11-26:
+  // 6h carried 18 of 24 15-minute points, 24h carried 22 of 24 hourly
+  // points, 7d carried 6 of 7 daily points). Require at least half the
+  // window covered and every gap a positive multiple of the requested
+  // resolution — that still rejects a wrong resolution (far too few
+  // points) and malformed series, without discarding real data that
+  // simply ends early. The timestamps in the file show the actual
+  // coverage; the frontend renders only the points that exist.
+  const minimumPoints = Math.ceil(expected / 2)
+  if (timestamps.length < minimumPoints) {
+    return `Cloudflare Radar timeseries returned ${timestamps.length} points for a ${durationMs / 3600000}h window at ${aggInterval} (expected at least ${minimumPoints} of ${expected})`
+  }
+  for (let index = 1; index < timestamps.length; index += 1) {
+    const gap = Date.parse(timestamps[index]) - Date.parse(timestamps[index - 1])
+    if (gap <= 0 || gap % aggMs !== 0) {
+      return `Cloudflare Radar timeseries gap at index ${index} is ${gap / 60000} minutes, not a multiple of the requested ${aggInterval}`
+    }
+  }
+  if (
+    Date.parse(timestamps[0]) < Date.parse(window.dateStart) ||
+    Date.parse(timestamps[timestamps.length - 1]) > Date.parse(window.dateEnd)
+  ) {
+    return 'Cloudflare Radar timeseries points fall outside the returned window'
   }
   return null
 }
