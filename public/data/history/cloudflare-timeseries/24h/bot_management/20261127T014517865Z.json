@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-27T01:45:17.865Z",
+  "interval": "24h",
+  "product": "BOT_MANAGEMENT",
+  "window": {
+    "dateStart": "2026-11-26T01:45:00.000Z",
+    "dateEnd": "2026-11-27T01:45:00.000Z"
+  },
+  "returnedWindow": {
+    "startTime": "2026-11-26T01:00:00Z",
+    "endTime": "2026-11-27T01:00:00Z"
+  },
+  "windowShiftMinutes": 45,
+  "provider": {
+    "name": "Cloudflare Radar",
+    "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
+    "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
+    "license": "Cloudflare Radar aggregated attack data; attribution provided.",
+    "status": "live",
+    "fetchedAt": "2026-11-27T01:45:17.865Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
+    "error": null,
+    "cacheIntervalMinutes": 15,
+    "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
+    "pairCount": 23,
+    "pointCount": 23
+  },
+  "meta": {
+    "aggInterval": "ONE_HOUR",
+    "dateRange": [
+      {
+        "startTime": "2026-11-26T01:00:00Z",
+        "endTime": "2026-11-27T01:00:00Z"
+      }
+    ],
+    "lastUpdated": "2026-11-27T00:30:00Z",
+    "normalization": "MIN0_MAX",
+    "units": [
+      {
+        "name": "*",
+        "value": "requests"
+      }
+    ]
+  },
+  "aggInterval": "1h",
+  "timeseriesStatus": "live",
+  "timeseriesError": null,
+  "serie": {
+    "timestamps": [
+      "2026-11-26T01:00:00Z",
+      "2026-11-26T02:00:00Z",
+      "2026-11-26T03:00:00Z",
+      "2026-11-26T04:00:00Z",
+      "2026-11-26T05:00:00Z",
+      "2026-11-26T06:00:00Z",
+      "2026-11-26T07:00:00Z",
+      "2026-11-26T08:00:00Z",
+      "2026-11-26T09:00:00Z",
+      "2026-11-26T10:00:00Z",
+      "2026-11-26T11:00:00Z",
+      "2026-11-26T12:00:00Z",
+      "2026-11-26T13:00:00Z",
+      "2026-11-26T14:00:00Z",
+      "2026-11-26T15:00:00Z",
+      "2026-11-26T16:00:00Z",
+      "2026-11-26T17:00:00Z",
+      "2026-11-26T18:00:00Z",
+      "2026-11-26T19:00:00Z",
+      "2026-11-26T20:00:00Z",
+      "2026-11-26T21:00:00Z",
+      "2026-11-26T22:00:00Z",
+      "2026-11-26T23:00:00Z"
+    ],
+    "values": [
+      "0.807239",
+      "0.790206",
+      "0.748048",
+      "0.765649",
+      "0.80582",
+      "0.823421",
+      "0.817317",
+      "0.788928",
+      "0.870688",
+      "1.0",
+      "0.975727",
+      "0.910575",
+      "0.845422",
+      "0.79418",
+      "0.763804",
+      "0.681334",
+      "0.667708",
+      "0.740525",
+      "0.741661",
+      "0.77516",
+      "0.81533",
+      "0.817459",
+      "0.625124"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-27T01:45:16.399Z",
+  "interval": "6h",
+  "product": "DDOS",
+  "window": {
+    "dateStart": "2026-11-26T19:45:00.000Z",
+    "dateEnd": "2026-11-27T01:45:00.000Z"
+  },
+  "returnedWindow": {
+    "startTime": "2026-11-26T19:45:00Z",
+    "endTime": "2026-11-27T01:45:00Z"
+  },
+  "windowShiftMinutes": 0,
+  "provider": {
+    "name": "Cloudflare Radar",
+    "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
+    "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
+    "license": "Cloudflare Radar aggregated attack data; attribution provided.",
+    "status": "live",
+    "fetchedAt": "2026-11-27T01:45:16.399Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
+    "error": null,
+    "cacheIntervalMinutes": 15,
+    "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
+    "pairCount": 20,
+    "pointCount": 20
+  },
+  "meta": {
+    "aggInterval": "FIFTEEN_MINUTES",
+    "dateRange": [
+      {
+        "startTime": "2026-11-26T19:45:00Z",
+        "endTime": "2026-11-27T01:45:00Z"
+      }
+    ],
+    "lastUpdated": "2026-11-27T00:30:00Z",
+    "normalization": "MIN0_MAX",
+    "units": [
+      {
+        "name": "*",
+        "value": "requests"
+      }
+    ]
+  },
+  "aggInterval": "15m",
+  "timeseriesStatus": "live",
+  "timeseriesError": null,
+  "serie": {
+    "timestamps": [
+      "2026-11-26T19:45:00Z",
+      "2026-11-26T20:00:00Z",
+      "2026-11-26T20:15:00Z",
+      "2026-11-26T20:30:00Z",
+      "2026-11-26T20:45:00Z",
+      "2026-11-26T21:00:00Z",
+      "2026-11-26T21:15:00Z",
+      "2026-11-26T21:30:00Z",
+      "2026-11-26T21:45:00Z",
+      "2026-11-26T22:00:00Z",
+      "2026-11-26T22:15:00Z",
+      "2026-11-26T22:30:00Z",
+      "2026-11-26T22:45:00Z",
+      "2026-11-26T23:00:00Z",
+      "2026-11-26T23:15:00Z",
+      "2026-11-26T23:30:00Z",
+      "2026-11-26T23:45:00Z",
+      "2026-11-27T00:00:00Z",
+      "2026-11-27T00:15:00Z",
+      "2026-11-27T00:30:00Z"
+    ],
+    "values": [
+      "0.665448",
+      "0.724292",
+      "0.644915",
+      "0.73061",
+      "1.0",
+      "0.856928",
+      "0.797931",
+      "0.855437",
+      "0.801652",
+      "0.826415",
+      "0.745571",
+      "0.760407",
+      "0.691465",
+      "0.643199",
+      "0.642383",
+      "0.753137",
+      "0.72806",
+      "0.730468",
+      "0.732538",
+      "0.59585"
+    ]
+  }
+}

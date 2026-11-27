@@ -1,24 +1,24 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-27T01:37:06.410Z",
+  "generatedAt": "2026-11-27T01:45:00.021Z",
   "dataDate": null,
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-27T01:37:06.896Z",
+      "fetchedAt": "2026-11-27T01:45:00.493Z",
       "dataDate": null,
       "feeds": {
         "topips": "ok",
         "topipsText": "ok",
         "top10": "ok",
         "block": "ok",
-        "dailySources": "cached"
+        "dailySources": "ok"
       }
     },
     "ip_geolocation": {
       "status": "ok",
-      "fetchedAt": "2026-11-27T01:37:20.698Z",
+      "fetchedAt": "2026-11-27T01:45:14.336Z",
       "successfulLookups": 12,
       "requestedLookups": 12,
       "error": null
@@ -475,8 +475,8 @@
     ]
   },
   "dailySources": {
-    "bytes": 149378787,
-    "checkedAt": "2026-11-26T01:41:50.750Z",
+    "bytes": 168540179,
+    "checkedAt": "2026-11-27T01:45:00.021Z",
     "note": "Bulk feed (~149 MB) — availability checked daily; body not downloaded."
   }
 }

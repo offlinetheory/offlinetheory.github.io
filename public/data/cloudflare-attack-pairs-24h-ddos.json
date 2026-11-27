@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:37:23.657Z",
+  "generatedAt": "2026-11-27T01:45:17.368Z",
   "interval": "24h",
   "product": "DDOS",
   "window": {
-    "dateStart": "2026-11-26T01:30:00.000Z",
-    "dateEnd": "2026-11-27T01:30:00.000Z"
+    "dateStart": "2026-11-26T01:45:00.000Z",
+    "dateEnd": "2026-11-27T01:45:00.000Z"
   },
   "returnedWindow": {
     "startTime": "2026-11-26T01:00:00Z",
     "endTime": "2026-11-27T01:00:00Z"
   },
-  "windowShiftMinutes": 30,
+  "windowShiftMinutes": 45,
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
     "status": "live",
-    "fetchedAt": "2026-11-27T01:37:23.657Z",
-    "lastUpdated": "2026-11-26T23:30:00Z",
+    "fetchedAt": "2026-11-27T01:45:17.368Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
     "error": null,
     "cacheIntervalMinutes": 15,
     "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
     "pairCount": 50
   },
   "meta": {
-    "lastUpdated": "2026-11-26T23:30:00Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
     "dateRange": [
       {
         "startTime": "2026-11-26T01:00:00Z",

@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:37:24.471Z",
+  "generatedAt": "2026-11-27T01:45:18.357Z",
   "interval": "24h",
   "product": "API_SHIELD",
   "window": {
-    "dateStart": "2026-11-26T01:30:00.000Z",
-    "dateEnd": "2026-11-27T01:30:00.000Z"
+    "dateStart": "2026-11-26T01:45:00.000Z",
+    "dateEnd": "2026-11-27T01:45:00.000Z"
   },
   "returnedWindow": {
     "startTime": "2026-11-26T01:00:00Z",
     "endTime": "2026-11-27T01:00:00Z"
   },
-  "windowShiftMinutes": 30,
+  "windowShiftMinutes": 45,
   "provider": {
     "name": "Cloudflare Radar",
     "url": "https://api.cloudflare.com/client/v4/radar/attacks/layer7/top/attacks",
     "attribution": "Cloudflare Radar — Aggregated Layer 7 attack intelligence.",
     "license": "Cloudflare Radar aggregated attack data; attribution provided.",
     "status": "live",
-    "fetchedAt": "2026-11-27T01:37:24.471Z",
-    "lastUpdated": "2026-11-26T23:30:00Z",
+    "fetchedAt": "2026-11-27T01:45:18.357Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
     "error": null,
     "cacheIntervalMinutes": 15,
     "rateLimit": "Cloudflare Radar API access and limits depend on the token and account plan.",
-    "pairCount": 22,
-    "pointCount": 22
+    "pairCount": 23,
+    "pointCount": 23
   },
   "meta": {
     "aggInterval": "ONE_HOUR",
@@ -34,7 +34,7 @@
         "endTime": "2026-11-27T01:00:00Z"
       }
     ],
-    "lastUpdated": "2026-11-26T23:30:00Z",
+    "lastUpdated": "2026-11-27T00:30:00Z",
     "normalization": "MIN0_MAX",
     "units": [
       {
@@ -69,7 +69,8 @@
       "2026-11-26T19:00:00Z",
       "2026-11-26T20:00:00Z",
       "2026-11-26T21:00:00Z",
-      "2026-11-26T22:00:00Z"
+      "2026-11-26T22:00:00Z",
+      "2026-11-26T23:00:00Z"
     ],
     "values": [
       "0.287879",
@@ -93,7 +94,8 @@
       "0.530303",
       "0.606061",
       "0.560606",
-      "0.848485"
+      "0.848485",
+      "0.378788"
     ]
   }
 }
