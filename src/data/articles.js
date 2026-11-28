@@ -971,9 +971,6 @@ export const ARTICLES = [
     section: 'news',
     category: 'News',
     placeholder: false,
-    // DRAFT: kept out of section lists and the homepage until Jamiah approves.
-    // The article URL works. Delete this line to list it under News and on the homepage.
-    hideFromSection: true,
     thumb: 'airForceCloudOne',
     caption: 'Illustration / OFFLINE THEORY',
     incident: {
@@ -1591,6 +1588,7 @@ export const homeNewsArticles = (count = HOME_NEWS_COUNT) =>
   articlesInSection('news').filter((a) => a.thumb).slice(0, count)
 // Homepage right column: a hand-picked list, in this order.
 export const FEATURED_SLUGS = [
+  'air-force-cloud-one-breach-november-2026',
   '1password-github-account-breach-customer-data-november-2026',
   'security-briefs-ep-001-phishing-the-hook-that-steals-your-data',
   'bleuprint-the-metro-detroit-tool-for-getting-found-and-chosen',
