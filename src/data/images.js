@@ -24,6 +24,9 @@ import entra1536 from '../assets/images/cover-entra-connect-health-1536.webp'
 import onep480 from '../assets/images/cover-1password-incident-480.webp'
 import onep960 from '../assets/images/cover-1password-incident-960.webp'
 import onep1536 from '../assets/images/cover-1password-incident-1536.webp'
+import afc480 from '../assets/images/cover-air-force-cloud-one-480.webp'
+import afc960 from '../assets/images/cover-air-force-cloud-one-960.webp'
+import afc1536 from '../assets/images/cover-air-force-cloud-one-1536.webp'
 import bleuprint480 from '../assets/images/cover-bleuprint-480.webp'
 import bleuprint960 from '../assets/images/cover-bleuprint-960.webp'
 import bleuprint1536 from '../assets/images/cover-bleuprint-1536.webp'
@@ -60,6 +63,7 @@ export const THUMBS = {
   fbiNcic: { src: fbi960, srcSet: `${fbi480} 480w, ${fbi960} 960w, ${fbi1536} 1536w`, wide: true, width: SEO_COVERS.fbiNcic.width, height: SEO_COVERS.fbiNcic.height, alt: SEO_COVERS.fbiNcic.alt },
   entraHealth: { src: entra960, srcSet: `${entra480} 480w, ${entra960} 960w, ${entra1536} 1536w`, wide: true, objectPosition: 'left center', width: SEO_COVERS.entraHealth.width, height: SEO_COVERS.entraHealth.height, alt: SEO_COVERS.entraHealth.alt },
   onePasswordIncident: { src: onep960, srcSet: `${onep480} 480w, ${onep960} 960w, ${onep1536} 1536w`, wide: true, width: SEO_COVERS.onePasswordIncident.width, height: SEO_COVERS.onePasswordIncident.height, alt: SEO_COVERS.onePasswordIncident.alt },
+  airForceCloudOne: { src: afc960, srcSet: `${afc480} 480w, ${afc960} 960w, ${afc1536} 1536w`, wide: true, width: SEO_COVERS.airForceCloudOne.width, height: SEO_COVERS.airForceCloudOne.height, alt: SEO_COVERS.airForceCloudOne.alt },
   bleuprint: { src: bleuprint960, srcSet: `${bleuprint480} 480w, ${bleuprint960} 960w, ${bleuprint1536} 1536w`, wide: true, width: SEO_COVERS.bleuprint.width, height: SEO_COVERS.bleuprint.height, alt: SEO_COVERS.bleuprint.alt },
   guidePhishing: { src: gph960, srcSet: `${gph480} 480w, ${gph960} 960w, ${gph1536} 1536w`, wide: true, width: SEO_COVERS.guidePhishing.width, height: SEO_COVERS.guidePhishing.height, alt: SEO_COVERS.guidePhishing.alt },
   guideSocialEngineering: { src: gse960, srcSet: `${gse480} 480w, ${gse960} 960w, ${gse1536} 1536w`, wide: true, width: SEO_COVERS.guideSocialEngineering.width, height: SEO_COVERS.guideSocialEngineering.height, alt: SEO_COVERS.guideSocialEngineering.alt },
