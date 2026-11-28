@@ -1,24 +1,24 @@
 {
   "source": "SANS Internet Storm Center (DShield) feeds, geolocated via ipwho.is",
   "sourceUrl": "https://feeds.dshield.org/feeds/topips.txt",
-  "generatedAt": "2026-11-28T01:41:12.760Z",
+  "generatedAt": "2026-11-28T09:30:03.446Z",
   "dataDate": null,
   "providers": {
     "dshield": {
       "status": "ok",
-      "fetchedAt": "2026-11-28T01:41:13.286Z",
+      "fetchedAt": "2026-11-28T09:30:05.628Z",
       "dataDate": null,
       "feeds": {
         "topips": "ok",
         "topipsText": "ok",
         "top10": "ok",
         "block": "ok",
-        "dailySources": "cached"
+        "dailySources": "ok"
       }
     },
     "ip_geolocation": {
       "status": "ok",
-      "fetchedAt": "2026-11-28T01:41:26.901Z",
+      "fetchedAt": "2026-11-28T09:30:19.610Z",
       "successfulLookups": 12,
       "requestedLookups": 12,
       "error": null
@@ -220,10 +220,6 @@
       "hostname": "hosting-by.4cloud.mobi."
     },
     {
-      "source": "204.76.203.212",
-      "hostname": "hosted-by.pfcloud.io."
-    },
-    {
       "source": "79.124.62.134",
       "hostname": "hosting-by.4cloud.mobi."
     },
@@ -242,10 +238,6 @@
     {
       "source": "5.189.160.21",
       "hostname": "m4321.contaboserver.net."
-    },
-    {
-      "source": "176.65.148.243",
-      "hostname": "hosted-by.pfcloud.io."
     },
     {
       "source": "173.249.33.72",
@@ -275,13 +267,11 @@
   "top10Sources": [
     "23.94.68.19",
     "79.124.62.230",
-    "204.76.203.212",
     "79.124.62.134",
     "207.180.192.205",
     "79.124.62.126",
     "207.180.192.206",
     "5.189.160.21",
-    "176.65.148.243",
     "173.249.33.72",
     "193.46.255.51",
     "173.249.4.73",
@@ -293,6 +283,15 @@
     "count": 20,
     "ranges": [
       {
+        "network": "193.47.62.0/24",
+        "startIp": "193.47.62.0",
+        "endIp": "193.47.62.255",
+        "reports": 353,
+        "asn": "ASN-QUADRANET-GLOBAL",
+        "country": "US",
+        "abuse": "support@quadranet.com"
+      },
+      {
         "network": "65.49.1.0/24",
         "startIp": "65.49.1.0",
         "endIp": "65.49.1.255",
@@ -302,19 +301,10 @@
         "abuse": "abuse@he.net"
       },
       {
-        "network": "193.47.62.0/24",
-        "startIp": "193.47.62.0",
-        "endIp": "193.47.62.255",
-        "reports": 350,
-        "asn": "ASN-QUADRANET-GLOBAL",
-        "country": "US",
-        "abuse": "support@quadranet.com"
-      },
-      {
         "network": "193.163.125.0/24",
         "startIp": "193.163.125.0",
         "endIp": "193.163.125.255",
-        "reports": 349,
+        "reports": 352,
         "asn": "INTERNET-MEASUREMENT",
         "country": "GB",
         "abuse": ">>UNKNOWN<<"
@@ -323,10 +313,28 @@
         "network": "198.235.24.0/24",
         "startIp": "198.235.24.0",
         "endIp": "198.235.24.255",
-        "reports": 345,
+        "reports": 348,
         "asn": "GOOGLE-CLOUD-PLATFORM",
         "country": "US",
         "abuse": "None"
+      },
+      {
+        "network": "205.210.31.0/24",
+        "startIp": "205.210.31.0",
+        "endIp": "205.210.31.255",
+        "reports": 342,
+        "asn": "GOOGLE-CLOUD-PLATFORM",
+        "country": "US",
+        "abuse": "None"
+      },
+      {
+        "network": "45.156.128.0/24",
+        "startIp": "45.156.128.0",
+        "endIp": "45.156.128.255",
+        "reports": 341,
+        "asn": "AS-BITSIGHT",
+        "country": "PT",
+        "abuse": ">>UNKNOWN<<"
       },
       {
         "network": "69.5.169.0/24",
@@ -338,28 +346,10 @@
         "abuse": "abuse@omnis.com"
       },
       {
-        "network": "205.210.31.0/24",
-        "startIp": "205.210.31.0",
-        "endIp": "205.210.31.255",
-        "reports": 340,
-        "asn": "GOOGLE-CLOUD-PLATFORM",
-        "country": "US",
-        "abuse": "None"
-      },
-      {
-        "network": "45.156.128.0/24",
-        "startIp": "45.156.128.0",
-        "endIp": "45.156.128.255",
-        "reports": 339,
-        "asn": "AS-BITSIGHT",
-        "country": "PT",
-        "abuse": ">>UNKNOWN<<"
-      },
-      {
         "network": "147.185.132.0/24",
         "startIp": "147.185.132.0",
         "endIp": "147.185.132.255",
-        "reports": 336,
+        "reports": 338,
         "asn": "GOOGLE-CLOUD-PLATFORM",
         "country": "US",
         "abuse": "None"
@@ -368,46 +358,64 @@
         "network": "195.184.76.0/24",
         "startIp": "195.184.76.0",
         "endIp": "195.184.76.255",
-        "reports": 329,
+        "reports": 331,
         "asn": "EAJ-GLOBAL",
         "country": "GB",
+        "abuse": ">>UNKNOWN<<"
+      },
+      {
+        "network": "195.230.103.0/24",
+        "startIp": "195.230.103.0",
+        "endIp": "195.230.103.255",
+        "reports": 330,
+        "asn": "SECURITYTRAILS",
+        "country": "US",
         "abuse": ">>UNKNOWN<<"
       },
       {
         "network": "216.25.90.0/24",
         "startIp": "216.25.90.0",
         "endIp": "216.25.90.255",
-        "reports": 327,
+        "reports": 330,
         "asn": null,
         "country": null,
         "abuse": null
       },
       {
+        "network": "195.182.16.0/24",
+        "startIp": "195.182.16.0",
+        "endIp": "195.182.16.255",
+        "reports": 328,
+        "asn": "OT2-AS",
+        "country": "UA",
+        "abuse": "abuse@omegatelecom.ua"
+      },
+      {
         "network": "78.128.114.0/24",
         "startIp": "78.128.114.0",
         "endIp": "78.128.114.255",
-        "reports": 326,
+        "reports": 327,
         "asn": "TAMATIYA-AS",
         "country": "BG",
         "abuse": "noc@4vendeta.com"
       },
       {
+        "network": "91.196.152.0/24",
+        "startIp": "91.196.152.0",
+        "endIp": "91.196.152.255",
+        "reports": 327,
+        "asn": "ATT-INTERNET4",
+        "country": "US",
+        "abuse": "abuse@att.net"
+      },
+      {
         "network": "195.178.110.0/24",
         "startIp": "195.178.110.0",
         "endIp": "195.178.110.255",
-        "reports": 326,
+        "reports": 327,
         "asn": "DATAFOREST",
         "country": "DE",
         "abuse": "abuse@timeweb.ru"
-      },
-      {
-        "network": "195.230.103.0/24",
-        "startIp": "195.230.103.0",
-        "endIp": "195.230.103.255",
-        "reports": 326,
-        "asn": "SECURITYTRAILS",
-        "country": "US",
-        "abuse": ">>UNKNOWN<<"
       },
       {
         "network": "147.185.133.0/24",
@@ -428,15 +436,6 @@
         "abuse": "None"
       },
       {
-        "network": "195.182.16.0/24",
-        "startIp": "195.182.16.0",
-        "endIp": "195.182.16.255",
-        "reports": 324,
-        "asn": "OT2-AS",
-        "country": "UA",
-        "abuse": "abuse@omegatelecom.ua"
-      },
-      {
         "network": "64.205.72.0/24",
         "startIp": "64.205.72.0",
         "endIp": "64.205.72.255",
@@ -446,37 +445,28 @@
         "abuse": "abuse@gtt.net"
       },
       {
-        "network": "91.196.152.0/24",
-        "startIp": "91.196.152.0",
-        "endIp": "91.196.152.255",
-        "reports": 322,
-        "asn": "ATT-INTERNET4",
-        "country": "US",
-        "abuse": "abuse@att.net"
-      },
-      {
-        "network": "64.62.197.0/24",
-        "startIp": "64.62.197.0",
-        "endIp": "64.62.197.255",
-        "reports": 321,
-        "asn": "HURRICANE",
-        "country": "US",
-        "abuse": "abuse@he.net"
-      },
-      {
-        "network": "199.165.159.0/24",
-        "startIp": "199.165.159.0",
-        "endIp": "199.165.159.255",
-        "reports": 321,
+        "network": "185.226.197.0/24",
+        "startIp": "185.226.197.0",
+        "endIp": "185.226.197.255",
+        "reports": 323,
         "asn": null,
         "country": null,
         "abuse": null
+      },
+      {
+        "network": "77.90.185.0/24",
+        "startIp": "77.90.185.0",
+        "endIp": "77.90.185.255",
+        "reports": 322,
+        "asn": "BTHOSTER",
+        "country": "GB",
+        "abuse": "abuse@inetia.pl"
       }
     ]
   },
   "dailySources": {
-    "bytes": 135582662,
-    "checkedAt": "2026-11-27T08:41:38.619Z",
+    "bytes": 134345612,
+    "checkedAt": "2026-11-28T09:30:03.446Z",
     "note": "Bulk feed (~149 MB) — availability checked daily; body not downloaded."
   }
 }

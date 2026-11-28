@@ -1,7 +1,7 @@
 {
   "source": "CISA Known Exploited Vulnerabilities catalog",
   "sourceUrl": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-  "generatedAt": "2026-11-28T01:41:12.751Z",
+  "generatedAt": "2026-11-28T09:30:03.433Z",
   "catalogDate": "2026-11-27T18:03:12.5733Z",
   "totalKnownExploited": 1808,
   "addedLast7Days": 18,
