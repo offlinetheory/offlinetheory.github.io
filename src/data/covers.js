@@ -55,16 +55,16 @@ export const SEO_COVERS = {
   onePasswordIncident: {
     filePrefix: 'cover-1password-incident-1536',
     width: 1536,
-    height: 1024,
+    height: 865,
     type: 'image/webp',
-    alt: 'Cover collage on aged ivory paper with the headline \u201c1Password\u201d and the line \u201cCustomer records copied. The vaults stayed shut.\u201d on a torn rust-red strip, a heavy round vault door with a spoked handle and a plate reading \u201cVault,\u201d closed, in front of a cobalt circle, a tractor-feed printout labeled \u201cPrivate Repository\u201d whose last lines turn rust red, a black strip with a commit graph and the words \u201cgit push,\u201d a dotted rust trail leading to a ledger titled \u201cAccount Records\u201d with columns for name, email, user ID and last sign-in blacked out and stamped \u201cCopied,\u201d and a halftone keyboard scrap.',
+    alt: 'Cover collage in rust red, black and cream: the headline \u201c1Password Says a Hacked Employee GitHub Account Led to Stolen Customer Account Data,\u201d a padlock in front of an office building, a \u201cCustomer Data\u201d ID card, overlapping screens labeled 1Password and GitHub with a warning triangle, and cards for Account Details, Access Tokens and Customer Info, with a globe and red network lines in the background.',
   },
   airForceCloudOne: {
     filePrefix: 'cover-air-force-cloud-one-1536',
     width: 1536,
-    height: 1024,
+    height: 865,
     type: 'image/webp',
-    alt: 'Cover collage on aged ivory paper: three black server racks stand on a dark runway, their tops disappearing into a halftone cloud bank under a rust-red sun. One rack door hangs open in rust red, a plate on the rack reads \u201cCloud One,\u201d and a cut cable trails across the tarmac to a manila tag reading \u201cHosts, per reports: Personnel & pay, Logistics, Maintenance.\u201d At right, the headline \u201cCloud One\u201d with a rust \u201cReported\u201d stamp, a torn cobalt strip reading \u201cThe Air Force\u2019s cloud platform, reportedly breached,\u201d and the label \u201cU.S. Air Force / Enterprise Cloud.\u201d',
+    alt: 'Cover collage in rust red, black and cream: the headline \u201cHackers Reportedly Breached the Air Force\u2019s Cloud One Platform.\u201d and, on a torn red strip, \u201cThe Pentagon Isn\u2019t Confirming It.\u201d A laptop shows the U.S. Air Force Cloud One logo and a warning triangle, a fighter jet, the Pentagon, a satellite dish, and a tag reading \u201cPentagon / No Confirmation,\u201d with a \u201cSecurity / Government / Cloud\u201d label.',
   },
   bleuprint: {
     filePrefix: 'cover-bleuprint-1536',
